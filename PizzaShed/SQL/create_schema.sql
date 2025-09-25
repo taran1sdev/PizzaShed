@@ -1,0 +1,201 @@
+DROP TABLE Order_Product_Toppings;
+DROP TABLE Product_Allergens;
+DROP TABLE Order_Products;
+DROP TABLE Product_Toppings;
+DROP TABLE Topping_Allergens;
+DROP TABLE Toppings;
+DROP TABLE Allergens;
+DROP TABLE Deal_Items;
+DROP TABLE Meal_Deals;
+DROP TABLE Orders;
+DROP TABLE Order_Statuses;
+DROP TABLE Product_Sizes;
+DROP TABLE Products;
+DROP TABLE Users;
+DROP TABLE Customers;
+DROP TABLE Promotions;
+DROP TABLE Drivers;
+
+CREATE TABLE Users (
+  user_id int IDENTITY(1,1),
+  name varchar(255) NOT NULL,
+  PIN varchar(6) NOT NULL,
+  role varchar(32) NOT NULL,
+  
+  PRIMARY KEY (user_id)
+);
+
+ALTER TABLE Users ADD CONSTRAINT U_PIN UNIQUE(PIN);
+
+CREATE TABLE Customers (
+  customer_id int IDENTITY(1,1),
+  name varchar(64) NOT NULL,
+  phone_no varchar(13) NOT NULL,
+  post_code varchar(8) not NULL,
+  flat_no varchar(8),
+  house_no int NOT NULL,
+  street_address varchar(128) NOT NULL,
+  delivery_notes varchar(255),
+  
+  PRIMARY KEY (customer_id)
+);
+
+ALTER TABLE Customers ADD CONSTRAINT U_PHONE_NO UNIQUE(phone_no);
+
+CREATE TABLE Order_Statuses (
+  order_status_id int IDENTITY(1,1),
+  status_name varchar(16) NOT NULL,
+  
+  PRIMARY KEY(order_status_id)
+);
+
+CREATE TABLE Drivers (
+  driver_id int IDENTITY(1,1),
+  name varchar(16) NOT NULL,
+  current_status varchar NOT NULL,
+  
+  PRIMARY KEY(driver_id)
+);
+
+CREATE TABLE Promotions (
+  promo_id int IDENTITY(1,1),
+  promo_code varchar(16),
+  description varchar(64) NOT NULL,
+  discount_value smallmoney NOT NULL,
+  min_spend smallmoney not NULL,
+  
+  PRIMARY KEY(promo_id)
+);
+
+CREATE TABLE Products (
+  product_id int IDENTITY(1,1),
+  product_name varchar(64) NOT NULL,
+  product_category varchar(16) NOT NULL,
+  
+  PRIMARY KEY(product_id)
+);
+
+CREATE TABLE Product_Sizes (
+  size_id int IDENTITY(1,1),
+  product_id int NOT NULL,
+  size_name varchar(8) NOT NULL,
+  price smallmoney NOT NULL,
+  
+  FOREIGN KEY (product_id) REFERENCES Products (product_id),
+  PRIMARY KEY (size_id)
+);
+
+CREATE TABLE Toppings (
+  topping_id int IDENTITY(1,1),
+  topping_name varchar(32) NOT NULL,
+  price_small smallmoney,
+  price_medium smallmoney,
+  price_large smallmoney,
+  
+  PRIMARY KEY(topping_id)
+);
+
+CREATE TABLE Product_Toppings (
+  product_id int,
+  topping_id int,
+  
+  FOREIGN KEY(product_id) REFERENCES Products (product_id),
+  FOREIGN KEY(topping_id) REFERENCES Toppings (topping_id),
+  PRIMARY KEY(product_id,topping_id)
+);
+
+CREATE TABLE Allergens (
+  allergen_id int IDENTITY(1,1),
+  allergen_description varchar(64) NOT NULL,
+  
+  PRIMARY KEY(allergen_id)
+);
+
+CREATE TABLE Product_Allergens (
+  product_id int,
+  allergen_id int,
+  
+  FOREIGN KEY(product_id) REFERENCES Products (product_id),
+  FOREIGN KEY(allergen_id) REFERENCES Allergens (allergen_id),
+  PRIMARY KEY(product_id,allergen_id)
+);
+
+CREATE TABLE Topping_Allergens (
+  topping_id int,
+  allergen_id int,
+  
+  FOREIGN KEY(topping_id) REFERENCES Toppings (topping_id),
+  FOREIGN KEY(allergen_id) REFERENCES Allergens (allergen_id),
+  PRIMARY KEY(topping_id,allergen_id)
+);
+
+CREATE TABLE Meal_Deals (
+  deal_id int IDENTITY(1,1),
+  deal_name varchar(64) NOT NULL,
+  price smallmoney NOT NULL,
+  
+  PRIMARY KEY(deal_id)
+);
+
+CREATE TABLE Deal_Items (
+  deal_item_id int IDENTITY(1,1),
+  deal_id int,
+  product_category varchar(16) NOT NULL,
+  size_name varchar(8) NOT NULL,
+  quantity int,
+  size_id int,
+  
+  FOREIGN KEY(deal_id) REFERENCES Meal_Deals (deal_id),
+  FOREIGN KEY(size_id) REFERENCES Product_Sizes (size_id),
+  PRIMARY KEY(deal_item_id)
+);
+
+CREATE TABLE Orders (
+  order_id int IDENTITY(1,1),
+  user_id  int NOT NULL,
+  customer_id int,
+  order_status_id int NOT NULL,
+  order_date datetime NOT NULL,
+  collection_time datetime,
+  order_source varchar(8) NOT NULL,
+  order_notes varchar(255),
+  order_type varchar(16) NOT NULL,
+  driver_id int,
+  paid bit NOT NULL,
+  payment_type varchar(32),
+  total_price smallmoney NOT NULL,
+  promo_id int,
+  
+  FOREIGN KEY(user_id) REFERENCES Users (user_id),
+  FOREIGN KEY(customer_id) REFERENCES Customers (customer_id),
+  FOREIGN KEY(order_status_id) REFERENCES Order_Statuses (order_status_id),
+  FOREIGN KEY(driver_id) REFERENCES Drivers (driver_id),
+  FOREIGN KEY(promo_id) REFERENCES Promotions (promo_id),
+  PRIMARY KEY(order_id)
+);
+
+CREATE TABLE Order_Products (
+  order_product_id int IDENTITY(1,1),
+  order_id int NOT NULL,
+  product_id int NOT NULL,
+  size_id int NOT NULL,
+  quantity int,
+  deal_id int,
+  deal_item_id int,
+  
+  FOREIGN KEY(order_id) REFERENCES Orders (order_id),
+  FOREIGN KEY(product_id) REFERENCES Products (product_id),
+  FOREIGN KEY(size_id) REFERENCES Product_Sizes (size_id),
+  FOREIGN KEY(deal_id) REFERENCES Meal_Deals (deal_id),
+  FOREIGN KEY(deal_item_id) REFERENCES Deal_Items (deal_item_id),
+  PRIMARY KEY(order_product_id)
+);
+
+CREATE TABLE Order_Product_Toppings (
+  order_product_id int,
+  topping_id int,
+  
+  FOREIGN KEY(order_product_id) REFERENCES Order_Products (order_product_id),
+  FOREIGN KEY(topping_id) REFERENCES Toppings(topping_id),
+  PRIMARY KEY(order_product_id,topping_id)
+);
