@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 namespace PizzaShed
 {
     /// <summary>
-    /// Interaction logic for Page1.xaml
+    /// Interaction logic for 
     /// </summary>
     public partial class LoginPage : Page
     {

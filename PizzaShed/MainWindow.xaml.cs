@@ -16,10 +16,12 @@ namespace PizzaShed
     /// </summary>
     public partial class MainWindow : Window
     {
+        LoginPage LoginPage { get; set; }
         public MainWindow()
         {            
             InitializeComponent();
-            
+            LoginPage = new LoginPage();
+            WindowDisplay.Content = LoginPage;
         }
     }
 }
