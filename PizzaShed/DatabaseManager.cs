@@ -1,9 +1,5 @@
 ﻿using System;
 using Microsoft.Data.SqlClient;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PizzaShed
 {
@@ -37,7 +33,7 @@ namespace PizzaShed
         {
             if (conn == null)
             {
-                EventLogger.LogError("OpenConnection(): Database connection is null");
+                EventLogger.LogError("DatabaseManager.OpenConnection: Database connection is null");
                 return;
             }
 
@@ -60,7 +56,7 @@ namespace PizzaShed
         {
             if (conn == null)
             {
-                EventLogger.LogError("CloseConnection(): Database connection is null");
+                EventLogger.LogError("DatabaseManager.CloseConnection: Database connection is null");
                 return;
             }
 
