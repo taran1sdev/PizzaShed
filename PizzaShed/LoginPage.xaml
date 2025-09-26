@@ -30,14 +30,27 @@
             </Style>
             
             <!-- Sets default style for the keypad buttons -->
-            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignPaperLightButton}">
+            <Style                
+                TargetType="{x:Type Button}" 
+                BasedOn="{StaticResource MaterialDesignPaperLightButton}"
+                >
                 <Setter Property="Height" Value="70" />
                 <Setter Property="Width" Value="90" />
-                <Setter Property="Margin" Value="108,12" />
+                <Setter Property="Margin" Value="105,9" />
                 <Setter Property="FontSize" Value="24" />
             </Style>
             
-            
+            <!-- Alternate styling for the backspace and clear buttons -->
+            <Style 
+                x:Key="ClearButtonStyle" 
+                TargetType="{x:Type Button}" 
+                BasedOn="{StaticResource MaterialDesignOutlinedLightButton}">
+
+                <Setter Property="Height" Value="70" />
+                <Setter Property="Width" Value="90" />
+                <Setter Property="Margin" Value="105,0" />
+                <Setter Property="FontSize" Value="24" />
+            </Style>
             
         </ResourceDictionary>
     </Page.Resources>
@@ -75,9 +88,8 @@
                 Height="60"
                 Width="240"
                 />
-            
             <!-- Keypad for the user to input the PIN -->
-            <Button 
+            <Button                
                 x:Name="One" 
                 Content="1" 
                 HorizontalAlignment="Left" 
@@ -157,6 +169,24 @@
                 Grid.Row="3"
                 Grid.Column="1"
                 Margin="0"
+                ></Button>
+            <Button
+                x:Name="Clear"
+                Content="CE"
+                Grid.Row="3"
+                Grid.Column="1"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Left"                              
+                Style="{StaticResource ClearButtonStyle}"
+                ></Button>
+            <Button                  
+                x:Name="BackSpace"
+                Content="⌫"
+                Grid.Row="3"
+                Grid.Column="1"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Right"                                              
+                Style="{StaticResource ClearButtonStyle}"
                 ></Button>
         </Grid>
     </Page.Content>
