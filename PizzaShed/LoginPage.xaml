@@ -4,32 +4,45 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:PizzaShed"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
       d:DesignHeight="768" 
       d:DesignWidth="1024"
+      FontFamily="{materialDesign:RobotoFont}"
       Title="LoginPage"
       >
     
     <!-- We create default styles for the items on this page -->
     <Page.Resources>
         <ResourceDictionary>
-            <Style TargetType="{x:Type Button}">
+            <!-- Syling for the headline -->
+            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MaterialDesignHeadline2TextBlock}">
+                <Setter Property="FontSize" Value="40" />
+            </Style>
+
+            <Style TargetType="{x:Type PasswordBox}" BasedOn="{StaticResource MaterialDesignOutlinedPasswordBox}">
+                <Setter Property="FontSize" Value="60" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Padding" Value="0,0" />
+                <Setter Property="BorderBrush" Value="#FFFFC947" />
+                <Setter Property="PasswordChar" Value="*" />
+            </Style>
+            
+            <!-- Sets default style for the keypad buttons -->
+            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignPaperLightButton}">
                 <Setter Property="Height" Value="70" />
                 <Setter Property="Width" Value="90" />
-                <Setter Property="Margin" Value="110,10" />
+                <Setter Property="Margin" Value="108,12" />
                 <Setter Property="FontSize" Value="24" />
-                <Setter Property="FontFamily" Value="Arial" />
-                
-                <Style.Resources>
-                    <Style TargetType="{x:Type Border}">
-                        <Setter Property="CornerRadius" Value="25"/>
-                    </Style>
-                </Style.Resources>
             </Style>
+            
+            
+            
         </ResourceDictionary>
     </Page.Resources>
     <Page.Content>
-        <Grid>
+        <Grid TextElement.Foreground="FloralWhite">
             <!-- Create rows to create page layout -->
             <Grid.RowDefinitions>
                 <RowDefinition Height="171"></RowDefinition>
@@ -43,39 +56,34 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="256"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-
-            <TextBlock
+            
+            <!-- Title -->
+            <TextBlock                
                 Grid.Row="0"
                 Grid.Column="1"
-                VerticalAlignment="Center"
-                HorizontalAlignment="Center"
-                FontSize="40"
-                FontWeight="DemiBold"
-                Text="Pizza Shed"
-                FontFamily="Corbel"                
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Center"                               
+                Text="Pizza Shed"                         
              ></TextBlock>
 
             <!-- Text Box to display PIN input to user -->
-            <TextBox                
-                TextAlignment="Center"                
+            <PasswordBox                                
                 Grid.Row="1"
                 Grid.Column="1"
                 VerticalAlignment="Center"
-                HorizontalAlignment="Center"
-                FontSize="30"
-                FontFamily="Corbel"
+                HorizontalAlignment="Center"                
                 Height="60"
-                Width="240"                
-                Text="****" 
-                Padding="0,15,0,0"/>
-              
+                Width="240"
+                />
+            
+            <!-- Keypad for the user to input the PIN -->
             <Button 
                 x:Name="One" 
                 Content="1" 
                 HorizontalAlignment="Left" 
                 VerticalAlignment="Top"
                 Grid.Row="2"
-                Grid.Column="1"                                
+                Grid.Column="1"                                                
                 ></Button>
             <Button 
                 x:Name="Two" 
