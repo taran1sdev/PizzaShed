@@ -55,7 +55,7 @@
         </ResourceDictionary>
     </Page.Resources>
     <Page.Content>
-        <Grid TextElement.Foreground="FloralWhite" x:Name="Content">
+        <Grid TextElement.Foreground="FloralWhite" x:Name="GridContent">
             <!-- Create rows and columns for page layout -->
             <Grid.RowDefinitions>
                 <RowDefinition Height="171"></RowDefinition>

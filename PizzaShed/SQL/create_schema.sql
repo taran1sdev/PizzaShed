@@ -1,25 +1,26 @@
-DROP TABLE Order_Product_Toppings;
-DROP TABLE Product_Allergens;
-DROP TABLE Order_Products;
-DROP TABLE Product_Toppings;
-DROP TABLE Topping_Allergens;
-DROP TABLE Toppings;
-DROP TABLE Allergens;
-DROP TABLE Deal_Items;
-DROP TABLE Meal_Deals;
-DROP TABLE Orders;
-DROP TABLE Order_Statuses;
-DROP TABLE Product_Sizes;
-DROP TABLE Products;
-DROP TABLE Users;
-DROP TABLE Customers;
-DROP TABLE Promotions;
-DROP TABLE Drivers;
+DROP TABLE IF EXISTS Order_Product_Toppings;
+DROP TABLE IF EXISTS Product_Allergens;
+DROP TABLE IF EXISTS Order_Products;
+DROP TABLE IF EXISTS Product_Toppings;
+DROP TABLE IF EXISTS Topping_Allergens;
+DROP TABLE IF EXISTS Toppings;
+DROP TABLE IF EXISTS Allergens;
+DROP TABLE IF EXISTS Deal_Items;
+DROP TABLE IF EXISTS Meal_Deals;
+DROP TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS Order_Statuses;
+DROP TABLE IF EXISTS Product_Sizes;
+DROP TABLE IF EXISTS Products;
+DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS Customers;
+DROP TABLE IF EXISTS Promotions;
+DROP TABLE IF EXISTS Drivers;
 
 CREATE TABLE Users (
   user_id int IDENTITY(1,1),
   name varchar(255) NOT NULL,
-  PIN varchar(6) NOT NULL,
+  PIN varchar(255) NOT NULL,
+  salt varchar(255) NOT NULL,
   role varchar(32) NOT NULL,
   
   PRIMARY KEY (user_id)

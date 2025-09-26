@@ -1,11 +1,11 @@
-INSERT INTO Users (name,PIN,role)
+INSERT INTO Users (name, PIN, salt, role)
 VALUES 
-('Brent', '0000', 'Manager'),
-('Alice', '0001', 'Cashier'),
-('Luigi', '0002', 'Pizzaiolo'),
-('Bob', '0003', 'Grill Cook'),
-('Bill', '0004', 'Driver'),
-('John', '0005', 'Driver');
+('Brent', 'test','test', 'Manager'),
+('Alice', 'test','test', 'Cashier'),
+('Luigi', 'test','test', 'Pizzaiolo'),
+('Bob', 'test','test', 'Grill Cook'),
+('Bill', 'test','test', 'Driver'),
+('John', 'test','test', 'Driver');
 
 INSERT INTO Customers (name, phone_no, post_code, house_no, street_address)
 VALUES ('Ali Wong', '01234 555111', 'TA6 4AB', 10, 'Oak Road'),
