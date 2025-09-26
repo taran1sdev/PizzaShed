@@ -26,6 +26,12 @@ namespace PizzaShed
             // We attach an event handler to the content grid to handle button clicks            
             InitializeComponent();
             GridContent.AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(ButtonClicked));
+            EventLogger.LogInfo("0000: " + PasswordHasher.HashPin("0000"));
+            EventLogger.LogInfo("0001: " + PasswordHasher.HashPin("0001"));
+            EventLogger.LogInfo("0002: " + PasswordHasher.HashPin("0002"));
+            EventLogger.LogInfo("0003: " + PasswordHasher.HashPin("0003"));
+            EventLogger.LogInfo("0004: " + PasswordHasher.HashPin("0004"));
+            EventLogger.LogInfo("0005: " + PasswordHasher.HashPin("0005"));
         }
         
         private static bool CheckPassword(string pin)
@@ -80,9 +86,7 @@ namespace PizzaShed
                     ErrorMessage.Text = "Login Failed..";
                     PinBox.Password = "";
                 }
-            }
-
-            e.Handled = true;
+            }       
         }
         
         // This function ensures the password box only accepts input from the on-screen keypad 
