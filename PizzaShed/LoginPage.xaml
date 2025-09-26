@@ -55,15 +55,15 @@
         </ResourceDictionary>
     </Page.Resources>
     <Page.Content>
-        <Grid TextElement.Foreground="FloralWhite">
-            <!-- Create rows to create page layout -->
+        <Grid TextElement.Foreground="FloralWhite" x:Name="Content">
+            <!-- Create rows and columns for page layout -->
             <Grid.RowDefinitions>
                 <RowDefinition Height="171"></RowDefinition>
                 <RowDefinition Height="171"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
                 <RowDefinition Height="171"></RowDefinition>
             </Grid.RowDefinitions>
-            <!-- Create columns to create page layout -->
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="256"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
@@ -79,23 +79,25 @@
                 Text="Pizza Shed"                         
              ></TextBlock>
 
-            <!-- Text Box to display PIN input to user -->
-            <PasswordBox                                
+            <!-- Password Box to display PIN input to user -->
+            <PasswordBox
+                x:Name="PinBox"
                 Grid.Row="1"
                 Grid.Column="1"
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center"                
                 Height="60"
                 Width="240"
+                PreviewKeyDown="HandleKeyboardInput"
                 />
-            <!-- Keypad for the user to input the PIN -->
+            <!-- Keypad for the user to input the PIN -->            
             <Button                
                 x:Name="One" 
                 Content="1" 
                 HorizontalAlignment="Left" 
                 VerticalAlignment="Top"
                 Grid.Row="2"
-                Grid.Column="1"                                                
+                Grid.Column="1"                 
                 ></Button>
             <Button 
                 x:Name="Two" 
@@ -180,7 +182,7 @@
                 Style="{StaticResource ClearButtonStyle}"
                 ></Button>
             <Button                  
-                x:Name="BackSpace"
+                x:Name="Backspace"
                 Content="⌫"
                 Grid.Row="3"
                 Grid.Column="1"
