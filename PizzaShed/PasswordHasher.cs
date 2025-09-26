@@ -11,9 +11,9 @@ namespace PizzaShed
     {
         private static readonly int SaltSize = 16; // 128 bits
         private static readonly int HashSize = 32; // 256 bits 
-        private static readonly int DegreeOfParallelism = 4; // Use 4 threads
-        private static readonly int Iterations = 4; // Iterate 4 times
-        private static readonly int MemorySize = 1024 * 512; // 512 MB
+        private static readonly int DegreeOfParallelism = 1; // Any more threads and the login process is too slow
+        private static readonly int Iterations = 1; // Iterate 4 times
+        private static readonly int MemorySize = 1024 * 32; // 32 MB - any more is too resource intensive
 
         public static bool VerifyPin(string pin, string hashedPin)
         {

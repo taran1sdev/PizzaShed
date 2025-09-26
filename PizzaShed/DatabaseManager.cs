@@ -82,7 +82,7 @@ namespace PizzaShed
 
             // Variables to store our user info
             int id;
-            string name, pin, role;
+            string? name, pin, role;
 
             string queryString = "SELECT user_id, name, PIN, role FROM Users;";
 
@@ -103,7 +103,10 @@ namespace PizzaShed
                     pin = reader["PIN"].ToString();
                     role = reader["role"].ToString();
 
-                    users.Add(new User(id, name, pin, role));
+                    if (name != null && pin != null && role != null)
+                    {
+                        users.Add(new User(id, name, pin, role));
+                    }                    
                 }
             }
             catch (Exception ex)

@@ -26,32 +26,63 @@ namespace PizzaShed
             // We attach an event handler to the content grid to handle button clicks            
             InitializeComponent();
             GridContent.AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(ButtonClicked));
-            DatabaseManager instance = DatabaseManager.Instance;            
-            instance.OpenConnection();
-            instance.CloseConnection();
         }
+        
+        private static bool CheckPassword(string pin)
+        {
+            DatabaseManager instance = DatabaseManager.Instance;            
+            User[] users = instance.GetUsers();
+
+            foreach (User user in users)
+            {
+                if (PasswordHasher.VerifyPin(pin, user.Pin))
+                {
+                    Session.Instance.Login(user);
+                    return true;
+                }
+            }
+            return false;            
+        }
+        
         private void ButtonClicked(object sender, RoutedEventArgs e)
         {
             var button= (e.Source as Button);
-            string password = PinBox.Password;
+            
+            if (button == null)
+            {
+                return;
+            }
+            
+            string pin = PinBox.Password;
 
             switch (button.Name)
             {
                 case "Backspace":
-                    if (password.Length > 0)
+                    if (pin.Length > 0)
                     {
-                        password = password[..^1];
+                        pin = pin[..^1];
                     }                    
                     break;
                 case "Clear":
-                    password = "";
+                    pin = "";
                     break;
                 default:
-                    password += button.Content.ToString();
+                    pin += button.Content.ToString();
                     break;
             }
 
-            PinBox.Password = password;
+            PinBox.Password = pin;
+
+            if (pin.Length == 4)
+            {
+                if (!CheckPassword(PinBox.Password))
+                {
+                    ErrorMessage.Text = "Login Failed..";
+                    PinBox.Password = "";
+                }
+            }
+
+            e.Handled = true;
         }
         
         // This function ensures the password box only accepts input from the on-screen keypad 

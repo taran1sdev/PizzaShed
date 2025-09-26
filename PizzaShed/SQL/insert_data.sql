@@ -1,11 +1,11 @@
-INSERT INTO Users (name, PIN, salt, role)
+INSERT INTO Users (name, PIN, role)
 VALUES 
-('Brent', 'test','test', 'Manager'),
-('Alice', 'test','test', 'Cashier'),
-('Luigi', 'test','test', 'Pizzaiolo'),
-('Bob', 'test','test', 'Grill Cook'),
-('Bill', 'test','test', 'Driver'),
-('John', 'test','test', 'Driver');
+('Brent', 'ixNq2nSsWiZNu8fnqXAjVvIxHKLh56Nz5EHnszlYWZ0NE1M6WPMOMTP9tJ6PMruW', 'Manager'),
+('Alice', 'xe2Awqv+pgXD3EX+EBSZ0O/5TUGTUjEacGhorHzsSyoCm+SM9jDdVa8oFvByDRdm', 'Cashier'),
+('Luigi', '2Vkn7YlETfqU/FglS7qxFpg+oUOyE4p6dVu9g9tAA2LvjI0+VBF9mXyhz7L7Par9', 'Pizzaiolo'),
+('Bob', 'jFtxP05ZZK75HmdFkeQscalH+vI874VgAsvV9lnRYQmwyXojjmYopN0oFGQ5HUd5', 'Grill Cook'),
+('Bill', 'SwZWt1DtzjVf8SNkxclr61vaONDHwJfzgWyDyDyQYHfWvtCQ6U2cTZdXoP8FjSHr', 'Driver'),
+('John', '0BZwpXpfgVstqyq7RGNexS8dZIw1sE0CDvH8e5SPN9O/Lblir6l7YSsNVg9t2tGf', 'Driver');
 
 INSERT INTO Customers (name, phone_no, post_code, house_no, street_address)
 VALUES ('Ali Wong', '01234 555111', 'TA6 4AB', 10, 'Oak Road'),

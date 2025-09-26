@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PizzaShed
 {
-    class User(int id, string name, string pin, string role)
+    public class User(int id, string name, string pin, string role)
     {
         // User fields can only be set when the object is created
         private readonly int id = id;

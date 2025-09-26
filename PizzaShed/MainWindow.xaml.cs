@@ -15,14 +15,31 @@ namespace PizzaShed
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
-    {
-        LoginPage LoginPage { get; set; }
+    {        
         public MainWindow()
         {            
             InitializeComponent();
+
+            Session.Instance.SessionChanged += OnSessionChanged;            
             EventLogger.LogInfo("Application Started");
-            LoginPage = new LoginPage();
-            WindowDisplay.Content = LoginPage;
+            UpdateUiForSession();
+        }
+
+        private void OnSessionChanged(object sender, EventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                UpdateUiForSession();
+            });
+        }
+
+        private void UpdateUiForSession()
+        {
+            if (!Session.Instance.IsLoggedIn)
+            {
+                LoginPage loginPage = new();
+                WindowDisplay.Content = loginPage;
+            }            
         }
     }
 }
