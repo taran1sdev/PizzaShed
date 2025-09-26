@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
 
 namespace PizzaShed
 {
@@ -29,7 +30,7 @@ namespace PizzaShed
         // Public property to retrieve the instance of the class
         public static DatabaseManager Instance { get { return instance; } }
 
-        public void OpenConnection()
+        private void OpenConnection()
         {
             if (conn == null)
             {
@@ -52,7 +53,7 @@ namespace PizzaShed
             }            
         }
 
-        public void CloseConnection()
+        private void CloseConnection()
         {
             if (conn == null)
             {
@@ -72,6 +73,59 @@ namespace PizzaShed
                     EventLogger.LogError("Failed to close database connection: " + ex.Message);                    
                 }
             } 
+        }
+
+        public User[] GetUsers()
+        {
+            // We create a list to hold the user objects as we do not know the quantity the query will return
+            List<User> users = [];
+
+            // Variables to store our user info
+            int id;
+            string name, pin, role;
+
+            string queryString = "SELECT user_id, name, PIN, role FROM Users;";
+
+            try
+            {
+                // SQL Command object holds our query string and database connection
+                SqlCommand query = new(queryString, conn);
+                OpenConnection();
+
+                // We execute the query and store the records returned in an SqlDataReader object
+                SqlDataReader reader = query.ExecuteReader();
+
+                // Loop over all the records returned by the query
+                while (reader.Read())
+                {
+                    id = Convert.ToInt32(reader["user_id"]);
+                    name = reader["name"].ToString();
+                    pin = reader["PIN"].ToString();
+                    role = reader["role"].ToString();
+
+                    users.Add(new User(id, name, pin, role));
+                }
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to get Users from Database: " + ex.Message);
+            }
+            finally
+            {
+                CloseConnection();
+            }
+
+            // Check that we have data to return
+            if (users.Count > 0)
+            {
+                // Convert the List to an Array before returning
+                return [.. users];
+            }
+            else
+            {
+                EventLogger.LogError("GetUsers query returned no items.");
+                return [];
+            }
         }
     }
 }
