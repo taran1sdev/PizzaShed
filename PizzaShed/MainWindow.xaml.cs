@@ -18,9 +18,9 @@ namespace PizzaShed
     {
         LoginPage LoginPage { get; set; }
         public MainWindow()
-        {
-            
+        {            
             InitializeComponent();
+            EventLogger.LogInfo("Application Started");
             LoginPage = new LoginPage();
             WindowDisplay.Content = LoginPage;
         }

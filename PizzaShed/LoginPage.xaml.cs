@@ -26,7 +26,7 @@ namespace PizzaShed
             // We attach an event handler to the content grid to handle button clicks            
             InitializeComponent();
             GridContent.AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(ButtonClicked));
-            DatabaseManager instance = DatabaseManager.Instance;
+            DatabaseManager instance = DatabaseManager.Instance;            
             instance.OpenConnection();
             instance.CloseConnection();
         }

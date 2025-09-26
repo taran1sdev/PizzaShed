@@ -12,7 +12,7 @@ namespace PizzaShed
     {
         // We create a static readonly property to ensure we only ever have a single instance of the class
         private static readonly DatabaseManager instance = new();
-        private readonly SqlConnection? conn;
+        private readonly SqlConnection? conn;        
 
         // Using a private constructor prevents outside code from creating a new instance of this class
         private DatabaseManager()
@@ -22,27 +22,22 @@ namespace PizzaShed
 
             try
             {
-                this.conn = new SqlConnection(connectionString);
+                conn = new SqlConnection(connectionString);
             }
             catch (Exception ex)
-            {
-                // Implement proper logging for production
-                Console.WriteLine("Failed to connect to database.");
-                Console.WriteLine(ex.Message);                
+            {                
+                EventLogger.LogError("Failed to establish database connection: " + ex.Message);
             }
         }
 
         // Public property to retrieve the instance of the class
-        public static DatabaseManager Instance
-        {
-            get { return instance; }
-        }
+        public static DatabaseManager Instance { get { return instance; } }
 
         public void OpenConnection()
         {
             if (conn == null)
             {
-                Console.WriteLine("No connection to database");
+                EventLogger.LogError("OpenConnection(): Database connection is null");
                 return;
             }
 
@@ -51,26 +46,21 @@ namespace PizzaShed
                 try
                 {
                     conn.Open();
-                    Console.WriteLine("Database connection opened successfully");
+                    EventLogger.LogInfo("Database connection opened successfully");
                     return;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Failed to open database connection: " + ex.Message);                    
+                    EventLogger.LogError("Failed to open database connection: " + ex.Message);                    
                 }
-            }
-            else
-            {
-                Console.WriteLine("Connection already open");
-            }
-            return;            
+            }            
         }
 
         public void CloseConnection()
         {
             if (conn == null)
             {
-                Console.WriteLine("No connection to database");
+                EventLogger.LogError("CloseConnection(): Database connection is null");
                 return;
             }
 
@@ -79,17 +69,13 @@ namespace PizzaShed
                 try 
                 {
                     conn.Close();
-                    Console.WriteLine("Connection to database closed successfully");
+                    EventLogger.LogInfo("Connection to database closed successfully");
                     return;
                 } catch (Exception ex)
                 {
-                    Console.WriteLine("Failed to close database connection: " + ex.Message);                    
+                    EventLogger.LogError("Failed to close database connection: " + ex.Message);                    
                 }
-            } else
-            {
-                Console.WriteLine("Database connection already closed");
-            }
-            return;
+            } 
         }
     }
 }
