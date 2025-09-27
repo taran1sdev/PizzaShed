@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Printing.IndexedProperties;
 
 
-namespace PizzaShed
+namespace PizzaShed.Services.Security
 {
     public static class PasswordHasher
     {        

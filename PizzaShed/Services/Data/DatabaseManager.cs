@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
+using PizzaShed.Services.Logging;
 
 namespace PizzaShed
 {
@@ -30,12 +31,12 @@ namespace PizzaShed
         // Public property to retrieve the instance of the class
         public static DatabaseManager Instance { get { return instance; } }
 
-        private void OpenConnection()
+        private bool OpenConnection()
         {
             if (conn == null)
             {
                 EventLogger.LogError("DatabaseManager.OpenConnection: Database connection is null");
-                return;
+                return false;
             }
 
             if (conn.State == System.Data.ConnectionState.Closed)
@@ -44,21 +45,23 @@ namespace PizzaShed
                 {
                     conn.Open();
                     EventLogger.LogInfo("Database connection opened successfully");
-                    return;
+                    return true;
                 }
                 catch (Exception ex)
                 {
-                    EventLogger.LogError("Failed to open database connection: " + ex.Message);                    
+                    EventLogger.LogError("Failed to open database connection: " + ex.Message);
+                    return false;
                 }
-            }            
+            }
+            return true; // If we reach here then the Connection is already open
         }
 
-        private void CloseConnection()
+        private bool CloseConnection()
         {
             if (conn == null)
             {
                 EventLogger.LogError("DatabaseManager.CloseConnection: Database connection is null");
-                return;
+                return false;
             }
 
             if (conn.State == System.Data.ConnectionState.Open)
@@ -67,67 +70,37 @@ namespace PizzaShed
                 {
                     conn.Close();
                     EventLogger.LogInfo("Connection to database closed successfully");
-                    return;
+                    return true;
                 } catch (Exception ex)
                 {
-                    EventLogger.LogError("Failed to close database connection: " + ex.Message);                    
+                    EventLogger.LogError("Failed to close database connection: " + ex.Message);
+                    return false;
                 }
-            } 
+            }
+            return true; // Again, if we reach here the connection is already closed
         }
-
-        public User[] GetUsers()
+        
+        // This function allows us to manage the Database connection within our protected singleton class
+        // The function to execute is passed as a parameter and we can specify the return type when calling the method
+        public T ExecuteQuery<T>(Func<SqlConnection, T> dbQuery)
         {
-            // We create a list to hold the user objects as we do not know the quantity the query will return
-            List<User> users = [];
-
-            // Variables to store our user info
-            int id;
-            string? name, pin, role;
-
-            string queryString = "SELECT user_id, name, PIN, role FROM Users;";
-
             try
             {
-                // SQL Command object holds our query string and database connection
-                SqlCommand query = new(queryString, conn);
-                OpenConnection();
-
-                // We execute the query and store the records returned in an SqlDataReader object
-                SqlDataReader reader = query.ExecuteReader();
-
-                // Loop over all the records returned by the query
-                while (reader.Read())
+                if (conn != null && OpenConnection())
                 {
-                    id = Convert.ToInt32(reader["user_id"]);
-                    name = reader["name"].ToString();
-                    pin = reader["PIN"].ToString();
-                    role = reader["role"].ToString();
+                    return dbQuery(conn);
+                } 
 
-                    if (name != null && pin != null && role != null)
-                    {
-                        users.Add(new User(id, name, pin, role));
-                    }                    
-                }
+                return default!;
             }
             catch (Exception ex)
             {
-                EventLogger.LogError("Failed to get Users from Database: " + ex.Message);
+                EventLogger.LogError("Database query failed: " + ex.Message);
+                return default!;
             }
             finally
             {
                 CloseConnection();
-            }
-
-            // Check that we have data to return
-            if (users.Count > 0)
-            {
-                // Convert the List to an Array before returning
-                return [.. users];
-            }
-            else
-            {
-                EventLogger.LogError("GetUsers query returned no items.");
-                return [];
             }
         }
     }

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Windows;
 
-namespace PizzaShed
+namespace PizzaShed.Services.Logging
 {
     // Static utility class for logging events
     public static class EventLogger

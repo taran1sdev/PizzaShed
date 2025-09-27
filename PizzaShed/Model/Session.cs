@@ -1,10 +1,11 @@
-﻿using System;
+﻿using PizzaShed.Services.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PizzaShed
+namespace PizzaShed.Model
 {
     public sealed class Session
     {
@@ -20,15 +21,13 @@ namespace PizzaShed
         {
             try
             {
-                if (user == null)
-                {
-                    throw new ArgumentNullException(nameof(user));
-                }
-                
+                ArgumentNullException.ThrowIfNull(user);
+
                 CurrentUser = user;
                 SessionChanged?.Invoke(this, EventArgs.Empty);
                 
-            } catch (Exception ex)
+            } 
+            catch (Exception ex)
             {
                 EventLogger.LogError("Error occured during Login: " + ex.Message);
             }

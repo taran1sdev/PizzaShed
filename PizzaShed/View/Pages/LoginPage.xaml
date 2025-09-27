@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:PizzaShed"
+      xmlns:helpers="clr-namespace:PizzaShed.Helpers"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
       d:DesignHeight="768" 
@@ -89,6 +90,7 @@
                 Height="60"
                 Width="240"
                 PreviewKeyDown="HandleKeyboardInput"
+                helpers:PasswordBoxHelper.BoundPassword="{Binding Pin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                
                 />
             
             <!-- Text box for error messages -->
@@ -101,7 +103,7 @@
                 Foreground="Red"
                 FontSize="20"
                 Margin="0,10"
-                Text=""
+                Text="{Binding ErrorMessage}"
                 ></TextBlock>
             <!-- Keypad for the user to input the PIN -->            
             <Button                
@@ -110,7 +112,9 @@
                 HorizontalAlignment="Left" 
                 VerticalAlignment="Top"
                 Grid.Row="2"
-                Grid.Column="1"                 
+                Grid.Column="1"  
+                Command="{Binding ButtonCommand}"
+                CommandParameter="1"                
                 ></Button>
             <Button 
                 x:Name="Two" 
@@ -118,7 +122,9 @@
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Top"
                 Grid.Row="2"    
-                Grid.Column="1"                              
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="2"
                 ></Button>
             <Button 
                 x:Name="Three" 
@@ -126,7 +132,9 @@
                 HorizontalAlignment="Right" 
                 VerticalAlignment="Top"
                 Grid.Row="2"    
-                Grid.Column="1"                              
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="3"
                 ></Button>
             <Button 
                 x:Name="Four" 
@@ -134,7 +142,9 @@
                 HorizontalAlignment="Left" 
                 VerticalAlignment="Center"
                 Grid.Row="2"    
-                Grid.Column="1"                              
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="4"
                 ></Button>
             <Button 
                 x:Name="Five" 
@@ -142,7 +152,9 @@
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center"
                 Grid.Row="2"    
-                Grid.Column="1"                              
+                Grid.Column="1" 
+                Command="{Binding ButtonCommand}"
+                CommandParameter="5"
                 ></Button>
             <Button
                 x:Name="Six"
@@ -151,6 +163,8 @@
                 VerticalAlignment="Center"
                 Grid.Row="2"
                 Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="6"
                 ></Button>
             <Button 
                 x:Name="Seven" 
@@ -158,7 +172,9 @@
                 HorizontalAlignment="Left" 
                 VerticalAlignment="Bottom"
                 Grid.Row="2"    
-                Grid.Column="1"                              
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="7"
                 ></Button>
             <Button 
                 x:Name="Eight" 
@@ -166,7 +182,9 @@
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Bottom"
                 Grid.Row="2"    
-                Grid.Column="1"                              
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="8"
                 ></Button>
             <Button 
                 x:Name="Nine" 
@@ -174,7 +192,9 @@
                 HorizontalAlignment="Right" 
                 VerticalAlignment="Bottom"
                 Grid.Row="2"    
-                Grid.Column="1"                              
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="9"
             ></Button>
             <Button
                 x:Name="Zero"
@@ -184,6 +204,8 @@
                 Grid.Row="3"
                 Grid.Column="1"
                 Margin="0"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="0"
                 ></Button>
             <Button
                 x:Name="Clear"
@@ -193,6 +215,8 @@
                 VerticalAlignment="Top"
                 HorizontalAlignment="Left"                              
                 Style="{StaticResource ClearButtonStyle}"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="Clear"
                 ></Button>
             <Button                  
                 x:Name="Backspace"
@@ -202,6 +226,8 @@
                 VerticalAlignment="Top"
                 HorizontalAlignment="Right"                                              
                 Style="{StaticResource ClearButtonStyle}"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="Backspace"
                 ></Button>
         </Grid>
     </Page.Content>

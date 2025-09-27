@@ -1,11 +1,11 @@
 INSERT INTO Users (name, PIN, role)
 VALUES 
-('Brent', 'ixNq2nSsWiZNu8fnqXAjVvIxHKLh56Nz5EHnszlYWZ0NE1M6WPMOMTP9tJ6PMruW', 'Manager'),
-('Alice', 'xe2Awqv+pgXD3EX+EBSZ0O/5TUGTUjEacGhorHzsSyoCm+SM9jDdVa8oFvByDRdm', 'Cashier'),
-('Luigi', '2Vkn7YlETfqU/FglS7qxFpg+oUOyE4p6dVu9g9tAA2LvjI0+VBF9mXyhz7L7Par9', 'Pizzaiolo'),
-('Bob', 'jFtxP05ZZK75HmdFkeQscalH+vI874VgAsvV9lnRYQmwyXojjmYopN0oFGQ5HUd5', 'Grill Cook'),
-('Bill', 'SwZWt1DtzjVf8SNkxclr61vaONDHwJfzgWyDyDyQYHfWvtCQ6U2cTZdXoP8FjSHr', 'Driver'),
-('John', '0BZwpXpfgVstqyq7RGNexS8dZIw1sE0CDvH8e5SPN9O/Lblir6l7YSsNVg9t2tGf', 'Driver');
+('Brent', 'xgAdWyrD3zFCBKj516AOFQPJq6D9RThkXeS/TMfiVVz+n/nQI2vzJ+0+kHhJqY300zDEvqVRAX1GW0wdm4C8sA==', 'Manager'),
+('Alice', 'ZcXG3TS/LG7ymRvKTaf4C7lUgLMO3MVHIhhQ74DRZ9Y6opYN1hADfRhn4SA+eXs5kbweoYtXXeAVLyo8XD1ioQ==', 'Cashier'),
+('Luigi', 'WelDWxnS1ppbca30sPGWL2EqPDIp2AyC396BbqSk51g2MDCWit9P5+v/auYLk+SkaCposGHgjhfb6FlHqdPXNQ==', 'Pizzaiolo'),
+('Bob', 'jDOx5TJH6KvflW296AOIc5ur1hXzDkKc3Q65ru371NgOZYIIi7A0h4N7fWt4SonJLT0QAzRjgjgt5o0OfWR2vQ==', 'Grill Cook'),
+('Bill', 'PMgv1CLtaQnylV658I29pYU6fYTRlzwlMVuSprJWxlD49cLVtVg4LhKKAzIPSzqyi4ilJehhNwxI79XSti0a6g==', 'Driver'),
+('John', 'RFh5fnWYpzzJvAFxjQfqJhxzFM03bLhpxSlSj78SmEVXRAcK3/ptoFuQSnBNKIEItq7QAC23ne6wQ/YD/8TFgQ==', 'Driver');
 
 INSERT INTO Customers (name, phone_no, post_code, house_no, street_address)
 VALUES ('Ali Wong', '01234 555111', 'TA6 4AB', 10, 'Oak Road'),

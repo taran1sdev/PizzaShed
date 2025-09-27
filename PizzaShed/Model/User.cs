@@ -6,18 +6,16 @@ using System.Threading.Tasks;
 
 namespace PizzaShed
 {
-    public class User(int id, string name, string pin, string role)
+    public class User(int id, string name, string role)
     {
         // User fields can only be set when the object is created
         private readonly int id = id;
-        private readonly string name = name;
-        private readonly string pin = pin;
+        private readonly string name = name;        
         private readonly string role = role;
 
         // We use public properties to retrieve the user info 
         public int Id { get { return id; } }
-        public string Name { get { return name; } } 
-        public string Pin { get { return pin; } }
+        public string Name { get { return name; } }         
         public string Role { get { return role; } } 
     }
 }

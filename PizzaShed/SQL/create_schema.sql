@@ -20,7 +20,6 @@ CREATE TABLE Users (
   user_id int IDENTITY(1,1),
   name varchar(255) NOT NULL,
   PIN varchar(255) NOT NULL,
-  salt varchar(255) NOT NULL,
   role varchar(32) NOT NULL,
   
   PRIMARY KEY (user_id)
