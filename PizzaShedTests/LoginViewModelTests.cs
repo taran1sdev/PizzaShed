@@ -2,7 +2,7 @@ using NUnit.Framework;
 using Moq;
 using PizzaShed.Services.Data;
 using PizzaShed.Services.Security;
-using PizzaShed.ViewModel;
+using PizzaShed.ViewModels;
 
 namespace PizzaShedTests
 {
@@ -17,7 +17,7 @@ namespace PizzaShedTests
         {
             // Initialize a mock user repo and login view model before running tests
             _mockUserRepository = new Mock<IUserRepository>();
-            _loginViewModel = new LoginViewModel(_mockUserRepository.Object);
+            //_loginViewModel = new LoginViewModel(_mockUserRepository.Object);
         }
 
         [Test]

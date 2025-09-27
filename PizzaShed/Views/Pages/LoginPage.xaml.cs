@@ -14,22 +14,19 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using PizzaShed.Services.Data;
-using PizzaShed.ViewModel;
+using PizzaShed.ViewModels;
 using PizzaShed.Helpers;
 
-namespace PizzaShed
+namespace PizzaShed.Views.Pages
 {
     /// <summary>
     /// Interaction logic for 
     /// </summary>
-    public partial class LoginPage : Page
+    public partial class LoginPage : UserControl
     {
         public LoginPage()
-        {
-            // We attach an event handler to the content grid to handle button clicks            
-            InitializeComponent();
-            var userRepository = new UserRepository();
-            DataContext = new LoginViewModel(userRepository);
+        {            
+            InitializeComponent();            
         }
                 
         

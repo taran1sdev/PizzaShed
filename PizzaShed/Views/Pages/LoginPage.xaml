@@ -1,4 +1,4 @@
-﻿<Page x:Class="PizzaShed.LoginPage"
+﻿<UserControl x:Class="PizzaShed.Views.Pages.LoginPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -10,11 +10,11 @@
       d:DesignHeight="768" 
       d:DesignWidth="1024"
       FontFamily="{materialDesign:RobotoFont}"
-      Title="LoginPage"
+      
       >
     
     <!-- We create default styles for the items on this page -->
-    <Page.Resources>
+    <UserControl.Resources>
         <ResourceDictionary>
             <!-- Syling for the headline -->
             <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MaterialDesignHeadline2TextBlock}">
@@ -54,8 +54,8 @@
             </Style>
             
         </ResourceDictionary>
-    </Page.Resources>
-    <Page.Content>
+    </UserControl.Resources>
+    <UserControl.Content>
         <Grid TextElement.Foreground="FloralWhite" x:Name="GridContent">
             <!-- Create rows and columns for page layout -->
             <Grid.RowDefinitions>
@@ -230,5 +230,5 @@
                 CommandParameter="Backspace"
                 ></Button>
         </Grid>
-    </Page.Content>
-</Page>
+    </UserControl.Content>
+</UserControl>

@@ -1,13 +1,14 @@
-﻿using PizzaShed.Services.Logging;
+﻿using PizzaShed.Model;
+using PizzaShed.Services.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PizzaShed.Model
+namespace PizzaShed.Services.Data
 {
-    public sealed class Session
+    public sealed class Session : ISession
     {
         private static readonly Session instance = new();
         public static Session Instance { get { return instance; } } 

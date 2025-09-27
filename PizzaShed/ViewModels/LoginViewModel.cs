@@ -10,19 +10,23 @@ using PizzaShed.Commands;
 using PizzaShed.Services.Data;
 using PizzaShed.Services.Security;
 
-namespace PizzaShed.ViewModel
+namespace PizzaShed.ViewModels
 {
-    public class LoginViewModel : INotifyPropertyChanged
+    public class LoginViewModel : ViewModelBase
     {
+        private readonly MainViewModel _mainViewModel;
         private readonly IUserRepository _userRepository;
+        private readonly ISession _session;
         private string _pin = "";
         private string _errorMessage = "";
 
         public ICommand ButtonCommand { get; }
 
-        public LoginViewModel(IUserRepository userRepository)
+        public LoginViewModel(MainViewModel mainViewModel, IUserRepository userRepository, ISession session)
         {
+            _mainViewModel = mainViewModel;
             _userRepository = userRepository;
+            _session = session;
 
             // Create the ButtonCommand property, initializes a RelayCommand object
             // when clicked the ExecuteButtonCommand function will be called with any
@@ -80,7 +84,10 @@ namespace PizzaShed.ViewModel
                 switch (buttonValue)
                 {
                     case "Backspace":
-                        Pin = Pin[..^1];
+                        if (Pin.Length > 0)
+                        {
+                            Pin = Pin[..^1];
+                        }                        
                         break;
                     case "Clear":
                         Pin = "";
@@ -100,12 +107,6 @@ namespace PizzaShed.ViewModel
                 ErrorMessage = "Login Failed...";
                 Pin = "";
             }
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string? name = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }
