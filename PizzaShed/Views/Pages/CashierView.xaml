@@ -1,0 +1,181 @@
+﻿<UserControl x:Class="PizzaShed.Views.Pages.CashierView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PizzaShed.Views.Pages"
+             mc:Ignorable="d" 
+             xmlns:helpers="clr-namespace:PizzaShed.Helpers"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" 
+             d:DesignWidth="1024"
+             FontFamily="{materialDesign:RobotoFont}">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignPaperLightButton}">
+                <Setter Property="FontSize" Value="34" />
+                <Setter Property="Height" Value="60" />
+                <Setter Property="Width" Value="160" />
+                <Setter Property="Margin" Value="20,20" />
+            </Style>
+
+            <Style TargetType="{x:Type RadioButton}" BasedOn="{StaticResource MaterialDesignFlatPrimaryToggleButton}">
+                <Setter Property="FontSize" Value="34"/>
+                <Setter Property="Height" Value="60" />
+                <Setter Property="Width" Value="160" />
+                <Setter Property="Margin" Value="20,20" />
+            </Style>
+
+            <Style TargetType="{x:Type ListView}" BasedOn="{StaticResource MaterialDesignListView}">
+                <Setter Property="FontSize" Value="24" />
+            </Style>
+            
+            
+            <Style x:Key="CategoryNotSelected" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                <Setter Property="FontSize" Value="30" />
+                <Setter Property="Height" Value="60" />
+                <Setter Property="Width" Value="140" />
+                <Setter Property="Margin" Value="20,60" />
+            </Style>
+
+            <Style x:Key="CategorySelected" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                <Setter Property="FontSize" Value="30" />
+                <Setter Property="Height" Value="60" />
+                <Setter Property="Width" Value="140" />
+                <Setter Property="Margin" Value="20,60" />
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="100"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+
+        <Button
+            x:Name="Logout"
+            Grid.Row="0"
+            Grid.Column="0"
+            HorizontalAlignment="Left"
+            Content="Logout"
+            />
+
+        <Button
+            x:Name="Void"
+            Grid.Row="0"
+            Grid.Column="0"
+            HorizontalAlignment="Right"
+            Content="Void"
+            />
+
+        <RadioButton
+            x:Name="Delivery"
+            Grid.Row="0"
+            Grid.Column="1"
+            HorizontalAlignment="Right"
+            Content="Delivery"
+            />
+
+        <ListView
+            x:Name="OrderItems"
+            Grid.Row="1"
+            Grid.Column="0"            
+            ItemsSource="{Binding CurrentOrderItems}"
+            SelectedItem="{Binding SelectedOrderItem}"
+            VerticalAlignment="Stretch"
+            >
+            <ListViewItem>Margherita Pizza (L)</ListViewItem>
+        </ListView>
+
+        <Button
+            x:Name="Deals"
+            Style="{StaticResource CategorySelected}"
+            Grid.Row="1"
+            Grid.Column="1"
+            Content="Deals"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Left"
+            />
+        
+        <Button
+            x:Name="Pizzas"
+            Style="{StaticResource CategoryNotSelected}"
+            Grid.Row="1"
+            Grid.Column="1"
+            Content="Pizzas"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Center"
+            />
+        
+        <Button
+            x:Name="Kebabs"
+            Style="{StaticResource CategoryNotSelected}"
+            Grid.Row="1"
+            Grid.Column="1"
+            Content="Kebabs"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Right"
+            />
+        
+        <Button
+            x:Name="BurgersWraps"
+            Style="{StaticResource CategoryNotSelected}"
+            Grid.Row="1"
+            Grid.Column="1"
+            Content="Burgers &#xa; Wraps"            
+            VerticalAlignment="Bottom"
+            HorizontalAlignment="Left"
+            Height="80"            
+            />
+        
+        <Button
+            x:Name="SidesDips"
+            Style="{StaticResource CategoryNotSelected}"
+            Grid.Row="1"
+            Grid.Column="1"
+            Content="Sides &#xa; Dips"            
+            VerticalAlignment="Bottom"
+            HorizontalAlignment="Center"
+            Height="80"            
+            />
+        
+        <Button
+            x:Name="Drinks"
+            Style="{StaticResource CategoryNotSelected}"
+            Grid.Row="1"
+            Grid.Column="1"
+            Content="Drinks"            
+            VerticalAlignment="Bottom"
+            HorizontalAlignment="Right"
+            Height="80"            
+            />
+        <Button
+            x:Name="Collections"
+            Grid.Row="3"
+            Grid.Column="0"
+            HorizontalAlignment="Left"
+            Content="Collections"
+            Width="240"
+            />
+
+        <Button
+            x:Name="Checkout"
+            Grid.Row="3"
+            Grid.Column="1"
+            HorizontalAlignment="Right"
+            Content="Checkout"
+            Width="240"
+            />
+    </Grid>
+</UserControl>

@@ -22,9 +22,9 @@ namespace PizzaShed.Views.Pages
     /// <summary>
     /// Interaction logic for 
     /// </summary>
-    public partial class LoginPage : UserControl
+    public partial class LoginView : UserControl
     {
-        public LoginPage()
+        public LoginView()
         {            
             InitializeComponent();            
         }

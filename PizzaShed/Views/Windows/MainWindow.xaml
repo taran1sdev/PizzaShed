@@ -22,7 +22,7 @@
 
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:LoginViewModel}">
-            <pages:LoginPage/>
+            <pages:LoginView/>
         </DataTemplate>
     </Window.Resources>
 
