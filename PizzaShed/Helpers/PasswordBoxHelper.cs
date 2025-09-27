@@ -54,7 +54,7 @@ namespace PizzaShed.Helpers
         }
 
         // This is for inbound changes - if the view value changes update the viewmodel
-        private static void HandlePasswordChanged(object sender, RoutedEventArgs e)
+        internal static void HandlePasswordChanged(object sender, RoutedEventArgs e)
         {
             if (sender is PasswordBox box)
             {

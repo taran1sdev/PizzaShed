@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
 using PizzaShed.Services.Logging;
 
-namespace PizzaShed
+namespace PizzaShed.Services.Data
 {
     // Sealed class ensures no other classes can inherit from this class
     public sealed class DatabaseManager
@@ -13,7 +13,7 @@ namespace PizzaShed
         private readonly SqlConnection? conn;        
 
         // Using a private constructor prevents outside code from creating a new instance of this class
-        private DatabaseManager()
+        public DatabaseManager()
         {
             // For testing - in production use a secure secrets management solution
             string connectionString = @"Server=localhost\SQLEXPRESS01;Database=PizzaShed;User ID=PizzaShedDB;Password=PizzaShedDBPassword;TrustServerCertificate=True;Trusted_Connection=True;";

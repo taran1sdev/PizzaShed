@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PizzaShed
+namespace PizzaShed.Model
 {
     public class User(int id, string name, string role)
     {
