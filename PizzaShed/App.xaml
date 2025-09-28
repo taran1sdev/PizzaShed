@@ -9,6 +9,7 @@
     
     <Application.Resources>
         <ResourceDictionary>
+            
             <ResourceDictionary.MergedDictionaries>
                 <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="Orange" SecondaryColor="Teal"  />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
@@ -20,6 +21,20 @@
                     <Setter Property="CornerRadius" Value="45"/>
                 </Style>
                 </Style.Resources>
+            </Style>
+
+            <Style x:Key="CategoryNotSelected" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                <Setter Property="FontSize" Value="30" />
+                <Setter Property="Height" Value="60" />
+                <Setter Property="Width" Value="140" />
+                <Setter Property="Margin" Value="20,60" />
+            </Style>
+
+            <Style x:Key="CategorySelected" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                <Setter Property="FontSize" Value="30" />
+                <Setter Property="Height" Value="60" />
+                <Setter Property="Width" Value="140" />
+                <Setter Property="Margin" Value="20,60" />
             </Style>
         </ResourceDictionary>
     </Application.Resources>

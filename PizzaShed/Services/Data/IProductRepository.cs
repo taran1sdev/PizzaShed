@@ -3,16 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic;
 using PizzaShed.Model;
 
 namespace PizzaShed.Services.Data
 {
-    internal interface IProductRepository
+    public interface IProductRepository<T> where T : MenuItemBase
     {
-        public List<Product> GetProductsByCategory(string category);
+        public List<T> GetProductsByCategory(string category, string? size);
 
-        public List<Product> GetProductsByCategory(string category, string size);
-
-        public List<Product> GetToppingsByCategory(string category);
+        public List<T> GetProductsByCategory(string category);        
     }
 }

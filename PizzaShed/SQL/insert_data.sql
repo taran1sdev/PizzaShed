@@ -48,202 +48,73 @@ VALUES ('Margherita', 'Pizza'),
 ('7UP', 'Drink'),
 ('Fanta', 'Drink');
 
-INSERT INTO Product_Sizes
-SELECT product_id, 'Small', 6.99
-FROM Products 
-WHERE product_name = 'Margherita';
+INSERT INTO Sizes (size_name) 
+VALUES ('Small'), ('Medium'), ('Large'), ('Regular'), ('330ml'), ('1.25l'), ('4'), ('6'), ('8'), ('60ml');
 
-INSERT INTO Product_Sizes
-SELECT product_id, 'Medium', 9.99
-FROM Products 
-WHERE product_name = 'Margherita';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Large', 11.49
-FROM Products 
-WHERE product_name = 'Margherita';
-
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Small', 7.99
-FROM Products 
-WHERE product_name IN ('Pepperoni', 'Hawaiian', 'Veggie Supreme');
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Medium', 9.99
-FROM Products 
-WHERE product_name IN ('Pepperoni', 'Hawaiian', 'Veggie Supreme');
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Large', 12.99
-FROM Products 
-WHERE product_name IN ('Pepperoni', 'Hawaiian', 'Veggie Supreme');
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Small', 8.49
-FROM Products 
-WHERE product_name = 'BBQ Chicken';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Medium', 10.49
-FROM Products 
-WHERE product_name = 'BBQ Chicken';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Large', 13.49
-FROM Products 
-WHERE product_name = 'BBQ Chicken';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Small', 8.99
-FROM Products 
-WHERE product_name IN ('Meat Feast', 'Doner Delight');
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Medium', 10.99
-FROM Products 
-WHERE product_name IN ('Meat Feast', 'Doner Delight');
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Large', 13.99
-FROM Products 
-WHERE product_name IN ('Meat Feast', 'Doner Delight');
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Small', 6.49
-FROM Products 
-WHERE product_name = 'Build-Your-Own';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Medium', 8.49
-FROM Products 
-WHERE product_name = 'Build-Your-Own';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Large', 10.99
-FROM Products 
-WHERE product_name = 'Build-Your-Own';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Regular', 6.49
-FROM Products 
-WHERE product_name = 'Doner Kebab';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Large', 7.99
-FROM Products 
-WHERE product_name = 'Doner Kebab';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Regular', 7.49
-FROM Products 
-WHERE product_name = 'Chicken Shish';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Large', 8.99
-FROM Products 
-WHERE product_name = 'Chicken Shish';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Regular', 9.49
-FROM Products 
-WHERE product_name = 'Mixed Kebab';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Regular', 7.99
-FROM Products 
-WHERE product_name = 'Kebab Box';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Regular', 5.49
-FROM Products 
-WHERE product_name = 'Cheeseburger';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Regular', 5.99
-FROM Products 
-WHERE product_name = 'Chicken Fillet Burger';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Regular', 6.49
-FROM Products 
-WHERE product_category = 'Wrap';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Regular', 2.49
-FROM Products 
-WHERE product_name = 'Chips';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Large', 3.49
-FROM Products 
-WHERE product_name = 'Chips';
-
-INSERT INTO Product_Sizes
-SELECT product_id, 'Regular', 4.49
-FROM Products 
-WHERE product_name = 'Cheesey Chips';
-
-INSERT INTO Product_Sizes
-SELECT product_id, '4pc', 3.99
-FROM Products 
-WHERE product_name = 'Garlic Bread';
-
-INSERT INTO Product_Sizes
-SELECT product_id, '6', 5.49
-FROM Products 
-WHERE product_name = 'Chicken Wings';
-
-INSERT INTO Product_Sizes
-SELECT product_id, '8', 3.49
-FROM Products 
-WHERE product_name = 'Onion Rings';
-
-INSERT INTO Product_Sizes
-SELECT product_id, '60ml', 0.7
-FROM Products 
-WHERE product_category = 'Dip';
-
-INSERT INTO Product_Sizes
-SELECT product_id, '330ml', 1.2
-FROM Products 
-WHERE product_category = 'Drink';
-
-INSERT INTO Product_Sizes
-SELECT product_id, '1.25l', 2.99
-FROM Products 
-WHERE product_category = 'Drink' AND product_name != 'Fanta';
+INSERT INTO Topping_Types (topping_type)
+VALUES ('Meat'), ('Veg'), ('Base'), ('Kebab'), ('Bread');
 
 INSERT INTO Toppings 
-VALUES ('Pepperoni', 1.5, 1.8, 2.1),
-('Ham', 1.5, 1.8, 2.1),
-('Doner', 1.5, 1.8, 2.1),
-('Sausage', 1.5, 1.8, 2.1),
-('Chicken', 1.5, 1.8, 2.1),
-('Beef', 1.5, 1.8, 2.1),
-('Bacon', 1.5, 1.8, 2.1),
-('Onion', 1, 1.2, 1.4),
-('Pepper', 1, 1.2, 1.4),
-('Tomato', 1, 1.2, 1.4),
-('Pineapple', 1, 1.2, 1.4),
-('Olive', 1, 1.2, 1.4),
-('Cucumber', 1, 1.2, 1.4),
-('Pickled Chilli', 1, 1.2, 1.4),
-('BBQ', NULL, NULL, NULL),
-('Lettuce', NULL, NULL, NULL),
-('Pitta', NULL, NULL, NULL),
-('Naan', NULL, NULL, NULL);
+Select T.ToppingName, TT.topping_type_id
+FROM
+(VALUES ('Pepperoni'),
+('Ham'),
+('Doner'),
+('Sausage'),
+('Chicken'),
+('Beef'),
+('Bacon')) AS T(ToppingName)
+CROSS JOIN Topping_Types AS TT
+WHERE TT.topping_type = 'Meat';
+
+INSERT INTO Toppings
+SELECT T.ToppingName, TT.topping_type_id
+FROM
+(Values ('Onion'),
+('Pepper'),
+('Tomato'),
+('Pineapple'),
+('Olive'),
+('Cucumber'),
+('Pickled Chilli')) AS T(ToppingName)
+CROSS JOIN Topping_Types AS TT
+WHERE TT.topping_type = 'Veg';
+
+INSERT INTO Toppings
+SELECT T.ToppingName, TT.topping_type_id
+FROM
+(Values ('Tomato'), ('BBQ')) AS T(ToppingName) 
+CROSS JOIN Topping_Types AS TT 
+WHERE TT.topping_type = 'Base';
+
+INSERT INTO Toppings
+SELECT T.ToppingName, TT.topping_type_id
+FROM
+(VALUES ('Onion'),
+('Tomato'),
+('Cucumber'),
+('Pickled Chilli'),
+('Lettuce')) AS T(ToppingName)
+CROSS JOIN Topping_Types AS TT 
+WHERE TT.topping_type = 'Kebab';
+
+INSERT INTO Toppings
+SELECT T.ToppingName, TT.topping_type_id
+FRom
+(Values ('Pitta'), ('Naan')) AS T(ToppingName)
+CROSS JOIN Topping_Types as TT
+WHERE TT.topping_type = 'Bread';
 
 INSERT INTO Product_Toppings
-SELECT P.product_id, T.topping_id
-FROM Products AS P CROSS JOIN Toppings AS T
-WHERE P.product_category = 'Pizza' AND T.topping_name NOT IN ('Lettuce', 'Pitta', 'Naan');
+SELECT P.product_id, TT.topping_type_id
+FROM Products AS P CROSS JOIN Topping_Types AS TT
+WHERE P.product_category = 'Pizza' AND TT.topping_type = 'Base';
 
 INSERT INTO Product_Toppings
-SELECT P.product_id, T.topping_id
-FROM Products AS P CROSS JOIN Toppings AS T
-WHERE P.product_category = 'Kebab' 
-AND T.topping_name IN ('Lettuce', 'Tomato', 'Onion', 'Cucmber', 'Pickled Chilli', 'Pitta', 'Naan'); 
+SELECT P.product_id, TT.topping_type_id
+FROM Products AS P CROSS JOIN Topping_Types AS TT
+WHERE P.product_name IN ('Doner Kebab', 'Mixed Kebab') 
+AND TT.topping_type = 'Bread'; 
 
 INSERT INTO Allergens (allergen_description)
 VALUES ('Celery'), ('Gluten'), ('Shellfish'), ('Egg'), ('Fish'), ('Lupin'), ('Dairy'), ('Mollusc'), 
@@ -333,82 +204,346 @@ FROM Toppings AS T CROSS JOIN Allergens AS A
 WHERE T.topping_name = 'BBQ'
 AND A.allergen_description IN ('Fish', 'Mustard');
 
+INSERT INTO Topping_Prices
+SELECT
+    (SELECT TT.topping_type_id FROM Topping_Types AS TT WHERE TT.topping_type = 'Veg'), 
+    (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Small'), 
+    1.00;
+
+INSERT INTO Topping_Prices
+SELECT
+    (SELECT TT.topping_type_id FROM Topping_Types AS TT WHERE TT.topping_type = 'Veg'), 
+    (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Medium'), 
+    1.20;
+
+INSERT INTO Topping_Prices
+SELECT
+    (SELECT TT.topping_type_id FROM Topping_Types AS TT WHERE TT.topping_type = 'Veg'), 
+    (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Large'), 
+    1.40;
+
+INSERT INTO Topping_Prices
+SELECT
+    (SELECT TT.topping_type_id FROM Topping_Types AS TT WHERE TT.topping_type = 'Meat'), 
+    (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Small'), 
+    1.50;
+
+INSERT INTO Topping_Prices
+SELECT
+    (SELECT TT.topping_type_id FROM Topping_Types AS TT WHERE TT.topping_type = 'Meat'), 
+    (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Medium'), 
+    1.80;
+
+INSERT INTO Topping_Prices
+SELECT
+    (SELECT TT.topping_type_id FROM Topping_Types AS TT WHERE TT.topping_type = 'Meat'), 
+    (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Large'), 
+    2.10;
+
+INSERT INTO Topping_Prices
+SELECT TT.topping_type_id, S.size_id, 0.0
+FROM Topping_Types AS TT 
+CROSS JOIN Sizes AS S
+WHERE TT.topping_type IN ('Kebab', 'Bread')
+AND S.size_name IN ('Regular', 'Large');
+
+INSERT INTO Topping_Prices
+SELECT TT.topping_type_id, S.size_id, 0.0
+FROM Topping_Types AS TT
+CROSS JOIN Sizes AS S
+WHERE TT.topping_type = 'Base'
+AND S.size_name IN ('Small', 'Medium', 'Large');
+
+INSERT INTO Product_Prices
+SELECT (SELECT P.product_id FROM Products AS P WHERE P.product_name = 'Margherita'), 
+(SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Small'), 6.99;
+
+INSERT INTO Product_Prices
+SELECT (SELECT P.product_id FROM Products AS P WHERE P.product_name = 'Margherita'), 
+(SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Medium'), 8.99;
+
+INSERT INTO Product_Prices
+SELECT (SELECT P.product_id FROM Products AS P WHERE P.product_name = 'Margherita'), 
+(SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Large'), 11.49;
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 7.99
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name IN ('Pepperoni', 'Hawaiian', 'Veggie Supreme')
+AND S.size_name = 'Small';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 9.99
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name IN ('Pepperoni', 'Hawaiian', 'Veggie Supreme')
+AND S.size_name = 'Medium';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 12.99
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name IN ('Pepperoni', 'Hawaiian', 'Veggie Supreme')
+AND S.size_name = 'Large';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 8.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'BBQ Chicken'
+AND S.size_name = 'Small';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 8.99
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name IN ('Meat Feast', 'Doner Delight')
+AND S.size_name = 'Small';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 10.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'BBQ Chicken'
+AND S.size_name = 'Medium';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 10.99
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name IN ('Meat Feast', 'Doner Delight')
+AND S.size_name = 'Medium';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 13.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'BBQ Chicken'
+AND S.size_name = 'Large';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 13.99
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name IN ('Meat Feast', 'Doner Delight')
+AND S.size_name = 'Large';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 6.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Build-Your-Own'
+AND S.size_name = 'Small';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 8.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Build-Your-Own'
+AND S.size_name = 'Medium';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 10.99
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Build-Your-Own'
+AND S.size_name = 'Large';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 6.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Doner Kebab'
+AND S.size_name = 'Regular';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 7.99
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Doner Kebab'
+AND S.size_name = 'Large';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 7.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Chicken Shish'
+AND S.size_name = 'Regular';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 8.99
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Chicken Shish'
+AND S.size_name = 'Large';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 9.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Mixed Kebab'
+AND S.size_name = 'Regular';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 7.99
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Kebab Box'
+AND S.size_name = 'Regular';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 5.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Cheeseburger'
+AND S.size_name = 'Regular';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 5.99
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Chicken Fillet Burger'
+AND S.size_name = 'Regular';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 6.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name LIKE '%Wrap'
+AND S.size_name = 'Regular';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 2.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Chips'
+AND S.size_name = 'Regular';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 3.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Chips'
+AND S.size_name = 'Large';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 4.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Cheesey Chips'
+AND S.size_name = 'Regular';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 2.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Garlic Bread'
+AND S.size_name = '4';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 5.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Chicken Wings'
+AND S.size_name = '6';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 3.49
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_name = 'Onion Rings'
+AND S.size_name = '8';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 0.7
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_category = 'Dip'
+AND S.size_name = '60ml';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 1.2
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_category = 'Drink'
+AND S.size_name = '330ml';
+
+INSERT INTO Product_Prices
+SELECT P.product_id, S.size_id, 0.7
+FROM Products AS P
+CROSS JOIN Sizes AS S
+WHERE P.product_category = 'Drink'
+AND P.product_name != 'Fanta'
+AND S.size_name = '1.25l';
+
 INSERT INTO Meal_Deals
 VALUES ('Margherita, Chips & Drink', 10.99),
 ('Large Pizza & Dips', 12.99),
 ('Family Deal', 24.99),
 ('Kebab Meal', 9.49);
 
-INSERT INTO Deal_Items
-SELECT MD.deal_id, 'Pizza', 'Medium', 1, 
-	(SELECT PS.size_id FROM Products AS P
-    INNER JOIN Product_Sizes AS PS ON P.product_id = PS.product_id
-    WHERE P.product_name = 'Margherita' AND PS.size_name = 'Medium') 
+INSERT INTO Deal_Items (deal_id, product_category, size_id, quantity)
+SELECT MD.deal_id, 'Pizza', (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Medium'), 1
 FROM Meal_Deals AS MD
 WHERE MD.deal_name LIKE 'Margherita%';
 
 
 INSERT INTO Deal_Items
-SELECT MD.deal_id, 'Chips', 'Regular', 1, 
-	(SELECT PS.size_id FROM Products AS P 
-     INNER JOIN Product_Sizes AS PS ON P.product_id = PS.product_id
-     WHERE P.product_name = 'Chips' AND size_name = 'Regular')
+SELECT MD.deal_id, 
+    (SELECT P.product_id FROM Products AS P WHERE P.product_name = 'Chips'), 
+    'Side', 
+	(SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Regular'), 1
 FROM Meal_Deals AS MD 
 WHERE MD.deal_name LIKE 'Margherita%';
 
-INSERT INTO Deal_Items (deal_id, product_category, size_name, quantity)
-SELECT deal_id, 'Drink', '330ml', 1
-FROM Meal_Deals 
-WHERE deal_name LIKE 'Margherita%';
+INSERT INTO Deal_Items (deal_id, product_category, size_id, quantity)
+SELECT MD.deal_id, 'Drink', (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = '330ml'), 1
+FROM Meal_Deals AS MD
+WHERE MD.deal_name LIKE 'Margherita%';
 
-INSERT INTO Deal_Items (deal_id, product_category, size_name, quantity)
-SELECT deal_id, 'Pizza', 'Large', 1
-FROM Meal_Deals
-WHERE deal_name LIKE 'Large Pizza%';
+INSERT INTO Deal_Items (deal_id, product_category, size_id, quantity)
+SELECT MD.deal_id, 'Pizza', (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Large'), 1
+FROM Meal_Deals AS MD
+WHERE MD.deal_name LIKE 'Large Pizza%';
 
-INSERT INTO Deal_Items (deal_id, product_category, size_name, quantity)
-SELECT deal_id, 'Dip', '60ml', 2
-FROM Meal_Deals
-WHERE deal_name LIKE 'Large Pizza%';
+INSERT INTO Deal_Items (deal_id, product_category, size_id, quantity)
+SELECT MD.deal_id, 'Dip', (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = '60ml'), 2
+FROM Meal_Deals AS MD
+WHERE MD.deal_name LIKE 'Large Pizza%';
 
-INSERT INTO Deal_Items (deal_id, product_category, size_name, quantity)
-SELECT deal_id, 'Pizza', 'Large', 2
-FROM Meal_Deals
-WHERE deal_name LIKE 'Family%';
+INSERT INTO Deal_Items (deal_id, product_category, size_id, quantity)
+SELECT MD.deal_id, 'Pizza', (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Large'), 2
+FROM Meal_Deals AS MD
+WHERE MD.deal_name LIKE 'Family%';
 
 INSERT INTO Deal_Items
-SELECT MD.deal_id, 'Side', 'Large', 1, 
-	(SELECT PS.size_id FROM Products AS P
-    INNER JOIN Product_Sizes AS PS ON P.product_id = PS.product_id
-    WHERE P.product_name = 'Chips' AND PS.size_name = 'Large') 
+SELECT MD.deal_id, (SELECT P.product_id FROM Products AS P WHERE P.product_name = 'Chips'),
+'Side', (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Large'), 1
 FROM Meal_Deals AS MD
 WHERE MD.deal_name LIKE 'Family%%';
 
-INSERT INTO Deal_Items (deal_id, product_category, size_name, quantity)
-SELECT deal_id, 'Drink', '1.25l', 1
-FROM Meal_Deals
-WHERE deal_name LIKE 'Family%';
+INSERT INTO Deal_Items (deal_id, product_category, size_id, quantity)
+SELECT MD.deal_id, 'Drink', (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = '1.25l'), 1
+FROM Meal_Deals AS MD
+WHERE MD.deal_name LIKE 'Family%';
 
 INSERT INTO Deal_Items
-SELECT MD.deal_id, 'Kebab', 'Regular', 1, 
-	(SELECT PS.size_id FROM Products AS P
-    INNER JOIN Product_Sizes AS PS ON P.product_id = PS.product_id
-    WHERE P.product_name = 'Doner Kebab' AND PS.size_name = 'Regular') 
+SELECT MD.deal_id, (SELECT P.product_id FROM Products AS P WHERE p.product_name = 'Doner Kebab'), 'Kebab', 
+    (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Regular'), 1 	
 FROM Meal_Deals AS MD
 WHERE MD.deal_name LIKE 'Kebab%';
 
 INSERT INTO Deal_Items
-SELECT MD.deal_id, 'Side', 'Regular', 1, 
-	(SELECT PS.size_id FROM Products AS P
-    INNER JOIN Product_Sizes AS PS ON P.product_id = PS.product_id
-    WHERE P.product_name = 'Chips' AND PS.size_name = 'Regular') 
+SELECT MD.deal_id, (SELECT P.product_id FROM Products AS P WHERE P.product_name = 'Chips'), 'Side', 
+    (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Regular'), 1
 FROM Meal_Deals AS MD
 WHERE MD.deal_name LIKE 'Kebab%';
 
-INSERT INTO Deal_Items (deal_id, product_category, size_name, quantity)
-SELECT deal_id, 'Drink', '330ml', 1
-FROM Meal_Deals
-WHERE deal_name LIKE 'Kebab%';
+INSERT INTO Deal_Items (deal_id, product_category, size_id, quantity)
+SELECT MD.deal_id, 'Drink', (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = '330ml'), 1
+FROM Meal_Deals AS MD
+WHERE MD.deal_name LIKE 'Kebab%';
 
 INSERT INTO Order_Statuses (status_name)
 VALUES ('New'), ('Preparing'), ('Ready'), ('Out for delivery'), ('Completed'), ('Cancelled'), ('Refunded')

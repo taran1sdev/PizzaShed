@@ -10,7 +10,8 @@
         xmlns:vm="clr-namespace:PizzaShed.ViewModels"   
         xmlns:pages="clr-namespace:PizzaShed.Views.Pages"
         xmlns:windows="clr-namespace:PizzaShed.Views.Windows"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         mc:Ignorable="d"
         Title="MainWindow"         
         Height="798" 
@@ -23,6 +24,10 @@
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:LoginViewModel}">
             <pages:LoginView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:CashierViewModel}">
+            <pages:CashierView/>
         </DataTemplate>
     </Window.Resources>
 

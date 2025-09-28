@@ -7,32 +7,24 @@ using System.Threading.Tasks;
 
 namespace PizzaShed.Model
 {
-    public class Product
-    {
-        public int ProductId { get; set; }
-
-        public required string Name { get; set; }
-
+    public class Product : MenuItemBase
+    {                
         public required string Category { get; set; }
 
-        public required string SizeName { get; set; }
-
-        public decimal Price { get; set; }                
+        public required string SizeName { get; set; }        
         
-        public int? ToppingId { get; set; }
+        // This List will hold choices required by the user
+        // If the Product is a Deal - this will hold the Menu Items required        
+        public List<MenuItemBase> RequiredChoices { get; set; } = [];
 
-        public required string[] Allergens { get; set; }
-
+        public List<MenuItemBase> SelectedChoices { get; set; } = [];
+        
+        // We might be able to use SelectedChoices for this.
+        //public List<Topping> ToppingSelection { get; set; } = [];
         public string DisplayName
         {
             get
             {
-                // Toppings will show as indented
-                if (ToppingId.HasValue)
-                {
-                    return $"- {Name}";
-                }
-
                 // Return the product name and size for display on POS / Order tickets
                 return Category.ToLower() switch
                 {

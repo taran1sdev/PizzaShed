@@ -25,8 +25,8 @@ namespace PizzaShed.Services.Data
                 ArgumentNullException.ThrowIfNull(user);
 
                 CurrentUser = user;
-                SessionChanged?.Invoke(this, EventArgs.Empty);
-                
+                EventLogger.LogInfo($"New user {user.Name} {user.Role} logged in successfully");
+                SessionChanged?.Invoke(this, EventArgs.Empty);                
             } 
             catch (Exception ex)
             {

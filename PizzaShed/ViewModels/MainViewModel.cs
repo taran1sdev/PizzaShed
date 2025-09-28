@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PizzaShed.Services.Data;
+using PizzaShed.Model;
 
 namespace PizzaShed.ViewModels
 {
@@ -34,36 +35,27 @@ namespace PizzaShed.ViewModels
             }
         }
 
+        // When the session is changed navigate to the view that matches the user's role
         private void OnSessionChanged(object? sender, EventArgs e)
         {
             if(_session.IsLoggedIn)
             {
-                // navigate to page
+                NavigateToView(_session.UserRole);
             }
             else
-            {
+            {                
                 CurrentViewModel = new LoginViewModel(this, _userRepository, _session);
             }
         }
     
-        public void NavigateToView(string role)
+        public void NavigateToView(string role) 
         {
             switch (role.ToLower())
-            {                
-                case "pizzaiolo":
-                    // Change
-                    break;
-                case "grill cook":
-                    // change
-                    break;
-                case "driver":
-                    // change
-                    break;
-                case "manager":
-                    // change
-                    break;
+            {                              
                 default:
-                    // cashier
+                    var ProductRepository = new ProductRepository();
+                    var ToppingRepository = new ToppingRepository();
+                    CurrentViewModel = new CashierViewModel(ProductRepository, ToppingRepository);
                     break;
             }
         }

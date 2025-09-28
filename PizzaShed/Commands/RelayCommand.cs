@@ -8,17 +8,17 @@ using System.Windows.Input;
 namespace PizzaShed.Commands
 {
     // Class to bind UI controls to methods in our ViewModel
-    public class RelayCommand : ICommand
+    public class RelayCommand<T> : ICommand
     {
         // Holds references to the functions defined in the ViewModel
-        private readonly Action<object> _execute;
-        private readonly Func<object, bool> _canExecute;
+        private readonly Action<T?> _execute;
+        private readonly Func<T?, bool>? _canExecute;
 
         
-        public RelayCommand(Action<object> execute) 
+        public RelayCommand(Action<T?> execute) 
             : this(execute, null)
         { }                
-        public RelayCommand(Action<object> execute, Func<object, bool> canExecute)
+        public RelayCommand(Action<T?> execute, Func<T?, bool>? canExecute)
         {
             ArgumentNullException.ThrowIfNull(execute);
 
@@ -29,7 +29,7 @@ namespace PizzaShed.Commands
         // Function to check if the UI control (button) is enabled
         public bool CanExecute(object? parameter)
         {           
-            return _canExecute == null || _canExecute(parameter);                        
+            return _canExecute == null || _canExecute((T?)parameter);                        
         }
 
         // Function called when user triggers the UI control (clicks button)
@@ -38,7 +38,7 @@ namespace PizzaShed.Commands
         {
             if(parameter != null)
             {
-                _execute(parameter);
+                _execute((T?)parameter);
             }            
         }
 

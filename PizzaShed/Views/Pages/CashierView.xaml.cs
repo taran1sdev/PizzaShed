@@ -12,6 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using PizzaShed.Services.Data;
+using PizzaShed.ViewModels;
+using PizzaShed.Helpers;
 
 namespace PizzaShed.Views.Pages
 {
@@ -23,6 +26,13 @@ namespace PizzaShed.Views.Pages
         public CashierView()
         {
             InitializeComponent();
+
+            var ProductRepository = new ProductRepository();
+            var ToppingRepository = new ToppingRepository();
+
+            var viewModel = new CashierViewModel(ProductRepository, ToppingRepository);
+
+            this.DataContext = viewModel;
         }
     }
 }

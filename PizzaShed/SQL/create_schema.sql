@@ -1,21 +1,3 @@
-DROP TABLE IF EXISTS Order_Product_Toppings;
-DROP TABLE IF EXISTS Product_Allergens;
-DROP TABLE IF EXISTS Order_Products;
-DROP TABLE IF EXISTS Product_Toppings;
-DROP TABLE IF EXISTS Topping_Allergens;
-DROP TABLE IF EXISTS Toppings;
-DROP TABLE IF EXISTS Allergens;
-DROP TABLE IF EXISTS Deal_Items;
-DROP TABLE IF EXISTS Meal_Deals;
-DROP TABLE IF EXISTS Orders;
-DROP TABLE IF EXISTS Order_Statuses;
-DROP TABLE IF EXISTS Product_Sizes;
-DROP TABLE IF EXISTS Products;
-DROP TABLE IF EXISTS Users;
-DROP TABLE IF EXISTS Customers;
-DROP TABLE IF EXISTS Promotions;
-DROP TABLE IF EXISTS Drivers;
-
 CREATE TABLE Users (
   user_id int IDENTITY(1,1),
   name varchar(255) NOT NULL,
@@ -75,33 +57,62 @@ CREATE TABLE Products (
   PRIMARY KEY(product_id)
 );
 
-CREATE TABLE Product_Sizes (
-  size_id int IDENTITY(1,1),
-  product_id int NOT NULL,
-  size_name varchar(8) NOT NULL,
-  price smallmoney NOT NULL,
-  
-  FOREIGN KEY (product_id) REFERENCES Products (product_id),
-  PRIMARY KEY (size_id)
-);
+CREATE TABLE Sizes (
+	size_id int IDENTITY(1,1),
+	size_name varchar(32),
+
+	PRIMARY KEY(size_id)
+)
+
 
 CREATE TABLE Toppings (
   topping_id int IDENTITY(1,1),
   topping_name varchar(32) NOT NULL,
-  price_small smallmoney,
-  price_medium smallmoney,
-  price_large smallmoney,
-  
+  topping_type_id int,
+
   PRIMARY KEY(topping_id)
 );
 
+CREATE TABLE Topping_Types (
+	topping_type_id int IDENTITY(1,1),
+	topping_type varchar(32),
+	
+	PRIMARY KEY(topping_type_id)
+);
+
+ALTER TABLE Toppings 
+	ADD CONSTRAINT FK_Toppings_ToppingTypes FOREIGN KEY (topping_type_id) 
+	REFERENCES Topping_Types (topping_type_id);
+
+
+CREATE TABLE Topping_Prices (	
+	topping_type_id integer,
+	size_id int,
+	price smallmoney
+
+	FOREIGN KEY(topping_type_id) REFERENCES Topping_Types (topping_type_id),
+	FOREIGN KEY(size_id) REFERENCES Sizes (size_id),	
+	PRIMARY KEY(size_id, topping_type_id)
+);
+
+CREATE TABLE Product_Prices (
+	product_id int,
+	size_id int,
+	price smallmoney,
+
+	FOREIGN KEY(product_id) REFERENCES Products (product_id),
+	FOREIGN KEY(size_id) REFERENCES Sizes (size_id),
+	PRIMARY KEY (product_id, size_id)
+);
+
+
 CREATE TABLE Product_Toppings (
   product_id int,
-  topping_id int,
+  topping_type_id int,
   
   FOREIGN KEY(product_id) REFERENCES Products (product_id),
-  FOREIGN KEY(topping_id) REFERENCES Toppings (topping_id),
-  PRIMARY KEY(product_id,topping_id)
+  FOREIGN KEY(topping_type_id) REFERENCES Topping_Types (topping_type_id),
+  PRIMARY KEY(product_id,topping_type_id)
 );
 
 CREATE TABLE Allergens (
@@ -129,6 +140,14 @@ CREATE TABLE Topping_Allergens (
   PRIMARY KEY(topping_id,allergen_id)
 );
 
+CREATE TABLE Allowed_Product_Categories (
+	topping_type_id int,
+	product_category varchar(32)
+
+	FOREIGN KEY(topping_type_id) REFERENCES Topping_Types (topping_type_id),
+	PRIMARY KEY (topping_type_id, product_category)
+);
+
 CREATE TABLE Meal_Deals (
   deal_id int IDENTITY(1,1),
   deal_name varchar(64) NOT NULL,
@@ -140,13 +159,14 @@ CREATE TABLE Meal_Deals (
 CREATE TABLE Deal_Items (
   deal_item_id int IDENTITY(1,1),
   deal_id int,
-  product_category varchar(16) NOT NULL,
-  size_name varchar(8) NOT NULL,
-  quantity int,
+  product_id int,
+  product_category varchar(16) NOT NULL,  
   size_id int,
+  quantity int,
   
+  FOREIGN KEY(product_id) REFERENCES Products (product_id),
   FOREIGN KEY(deal_id) REFERENCES Meal_Deals (deal_id),
-  FOREIGN KEY(size_id) REFERENCES Product_Sizes (size_id),
+  FOREIGN KEY(size_id) REFERENCES Sizes (size_id),
   PRIMARY KEY(deal_item_id)
 );
 
@@ -179,15 +199,14 @@ CREATE TABLE Order_Products (
   order_id int NOT NULL,
   product_id int NOT NULL,
   size_id int NOT NULL,
-  quantity int,
+  quantity int NOT NULL,
   deal_id int,
-  deal_item_id int,
+  deal_instance_id int,
   
   FOREIGN KEY(order_id) REFERENCES Orders (order_id),
   FOREIGN KEY(product_id) REFERENCES Products (product_id),
-  FOREIGN KEY(size_id) REFERENCES Product_Sizes (size_id),
-  FOREIGN KEY(deal_id) REFERENCES Meal_Deals (deal_id),
-  FOREIGN KEY(deal_item_id) REFERENCES Deal_Items (deal_item_id),
+  FOREIGN KEY(size_id) REFERENCES Sizes(size_id),
+  FOREIGN KEY(deal_id) REFERENCES Meal_Deals (deal_id),  
   PRIMARY KEY(order_product_id)
 );
 

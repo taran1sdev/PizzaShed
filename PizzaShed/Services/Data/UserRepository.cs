@@ -8,11 +8,10 @@ namespace PizzaShed.Services.Data
     public class UserRepository : IUserRepository
     {
         // Set properties to allow us to change the session and execute queries
-        private readonly DatabaseManager _databaseManager = DatabaseManager.Instance;
-        private readonly Session _session = Session.Instance;
+        private readonly DatabaseManager _databaseManager = DatabaseManager.Instance;        
 
         // Login functionality - query the database for user with matching pin and return a User object
-        public bool GetUserByPin(string pin)
+        public User? GetUserByPin(string pin)
         {            
             try
             {
@@ -45,17 +44,15 @@ namespace PizzaShed.Services.Data
                     return null;
                 });
                 if (user != null)
-                {
-                    // Update the session with user info
-                    _session.Login(user);
-                    return true;
+                {                    
+                    return user;
                 }
-                return false;
+                return null;
             }
             catch (Exception ex) 
             {                
                 EventLogger.LogError("UserManager.GetUserByPinError: Error occured during query execution: " + ex.Message);
-                return false;
+                return null;
             }                        
         }
     }

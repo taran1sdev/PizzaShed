@@ -9,6 +9,7 @@ using System.Windows.Input;
 using PizzaShed.Commands;
 using PizzaShed.Services.Data;
 using PizzaShed.Services.Security;
+using PizzaShed.Model;
 
 namespace PizzaShed.ViewModels
 {
@@ -31,7 +32,7 @@ namespace PizzaShed.ViewModels
             // Create the ButtonCommand property, initializes a RelayCommand object
             // when clicked the ExecuteButtonCommand function will be called with any
             // command parameters defined in the view
-            ButtonCommand = new RelayCommand(ExecuteButtonCommand);
+            ButtonCommand = new RelayCommand<string>(ExecuteButtonCommand);
         }
 
         // Holds the current pin entered by the user - this property is bound to the 
@@ -102,11 +103,13 @@ namespace PizzaShed.ViewModels
         // Check if the hashed pin matches a database entry
         private void AttemptLogin()
         {
-            if (!_userRepository.GetUserByPin(PasswordHasher.HashPin(Pin)))
+            User? user = _userRepository.GetUserByPin(PasswordHasher.HashPin(Pin));
+            if (user == null)
             {
                 ErrorMessage = "Login Failed...";
                 Pin = "";
             }
+            _session.Login(user);
         }
     }
 }
