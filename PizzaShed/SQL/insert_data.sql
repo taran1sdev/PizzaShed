@@ -19,7 +19,7 @@ VALUES ('PIZZA10', '10% off when you spend £15', 0.1, 15.0),
 INSERT INTO Products (product_name, product_category)
 VALUES ('Margherita', 'Pizza'),
 ('Pepperoni', 'Pizza'),
-('Hawaiaan', 'Pizza'),
+('Hawaiian', 'Pizza'),
 ('Veggie Supreme', 'Pizza'),
 ('BBQ Chicken', 'Pizza'),
 ('Meat Feast', 'Pizza'),
@@ -34,7 +34,7 @@ VALUES ('Margherita', 'Pizza'),
 ('Doner Wrap', 'Wrap'),
 ('Chicken Wrap', 'Wrap'),
 ('Chips', 'Side'),
-('Cheesy Chips', 'Side'),
+('Cheesey Chips', 'Side'),
 ('Garlic Bread', 'Side'),
 ('Chicken Wings', 'Side'),
 ('Onion Rings', 'Side'),
@@ -157,7 +157,7 @@ WHERE product_name = 'Kebab Box';
 INSERT INTO Product_Sizes
 SELECT product_id, 'Regular', 5.49
 FROM Products 
-WHERE product_name = 'Cheesburger';
+WHERE product_name = 'Cheeseburger';
 
 INSERT INTO Product_Sizes
 SELECT product_id, 'Regular', 5.99
@@ -312,7 +312,7 @@ AND A.allergen_description = 'Soya';
 INSERT INTO Product_Allergens
 SELECT P.product_id, A.allergen_id
 FROM Products AS P CROSS JOIN Allergens AS A
-WHERE P.product_name = 'Garlic Bread'
+WHERE P.product_name IN ('Garlic Bread', 'Onion Rings')
 AND A.allergen_description = 'Gluten';
 
 INSERT INTO Topping_Allergens

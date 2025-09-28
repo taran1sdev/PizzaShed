@@ -2,18 +2,14 @@
 using PizzaShed.Model;
 using PizzaShed.Services.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PizzaShed.Services.Data
 {
     public class UserRepository : IUserRepository
     {
         // Set properties to allow us to change the session and execute queries
-        private readonly DatabaseManager dbManager = DatabaseManager.Instance;
-        private readonly Session session = Session.Instance;
+        private readonly DatabaseManager _databaseManager = DatabaseManager.Instance;
+        private readonly Session _session = Session.Instance;
 
         // Login functionality - query the database for user with matching pin and return a User object
         public bool GetUserByPin(string pin)
@@ -21,7 +17,7 @@ namespace PizzaShed.Services.Data
             try
             {
                 // We call the execute query function that handles the DB connection
-                User? user = dbManager.ExecuteQuery(conn =>
+                User? user = _databaseManager.ExecuteQuery(conn =>
                 {                    
                     string queryString = "SELECT user_id, name, role FROM Users WHERE PIN = @pin;";
 
@@ -51,7 +47,7 @@ namespace PizzaShed.Services.Data
                 if (user != null)
                 {
                     // Update the session with user info
-                    session.Login(user);
+                    _session.Login(user);
                     return true;
                 }
                 return false;
