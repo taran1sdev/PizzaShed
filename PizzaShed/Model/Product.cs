@@ -21,7 +21,19 @@ namespace PizzaShed.Model
         
         // We might be able to use SelectedChoices for this.
         //public List<Topping> ToppingSelection { get; set; } = [];
-        public string DisplayName
+        public string MenuName
+        {
+            get
+            {
+                return Category.ToLower() switch
+                {
+                    "pizza" => Name,
+                    _ => $"{Name}\n({SizeName})",
+                };
+            }
+        }
+        
+        public string RecieptName
         {
             get
             {

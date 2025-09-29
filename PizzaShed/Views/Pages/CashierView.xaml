@@ -17,6 +17,8 @@
         <ResourceDictionary>
 
             <helpers:CategoryStyleConverter x:Key="CategoryStyleConverter" />
+            <helpers:SizeStyleConverter x:Key="SizeStyleConverter" />
+            <BooleanToVisibilityConverter x:Key="IsVisible" />
             
             <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignPaperLightButton}">
                 <Setter Property="FontSize" Value="34" />
@@ -25,12 +27,14 @@
                 <Setter Property="Margin" Value="20,20" />
             </Style>
 
-            <Style TargetType="{x:Type RadioButton}" BasedOn="{StaticResource MaterialDesignFlatPrimaryToggleButton}">
-                <Setter Property="FontSize" Value="34"/>
-                <Setter Property="Height" Value="60" />
-                <Setter Property="Width" Value="160" />
-                <Setter Property="Margin" Value="20,20" />
+            <Style x:Key="MenuStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignPaperButton}">
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="Height" Value="120"/>
+                <Setter Property="Width" Value="120" />
+                <Setter Property="Margin" Value="0,0" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
             </Style>
+            
 
             <Style TargetType="{x:Type ListView}" BasedOn="{StaticResource MaterialDesignListView}">
                 <Setter Property="FontSize" Value="24" />
@@ -68,14 +72,14 @@
             HorizontalAlignment="Right"
             Content="Void"
             />
-
-        <RadioButton
+        
+        <Button 
             x:Name="Delivery"
             Grid.Row="0"
             Grid.Column="1"
             HorizontalAlignment="Right"
             Content="Delivery"
-            />
+        />
 
         <ListView
             x:Name="OrderItems"
@@ -85,8 +89,7 @@
             SelectedItem="{Binding SelectedOrderItem}"
             VerticalAlignment="Stretch"
             >
-            <ListViewItem>Margherita Pizza (L)</ListViewItem>
-        </ListView>
+            </ListView>
 
         <Button
             x:Name="Deals"            
@@ -173,8 +176,81 @@
             
             Style="{Binding SelectedCategory,
                     Converter={StaticResource CategoryStyleConverter},
-                    ConverterParameter=Drink}"/>                        
-        
+                    ConverterParameter=Drink}"/>
+
+        <Button
+                x:Name="Small"
+                Grid.Row="1"
+                Grid.ColumnSpan="2"
+                Content="Small"
+                VerticalAlignment="Bottom"       
+                HorizontalAlignment="Left"
+                Command="{Binding SelectSizeCommand}"
+                CommandParameter="Small"
+                Visibility="{Binding IsVisible, Converter={StaticResource IsVisible}}"
+                
+                Style="{Binding CurrentSizeSelection,
+                Converter={StaticResource SizeStyleConverter},
+                ConverterParameter=Small}" />
+
+        <Button
+                x:Name="Medium"
+                Grid.Row="1"
+                Grid.ColumnSpan="2"
+                Content="Medium"
+                VerticalAlignment="Bottom"         
+                HorizontalAlignment="Center"
+                Command="{Binding SelectSizeCommand}"
+                CommandParameter="Medium"
+                Visibility="{Binding IsVisible, Converter={StaticResource IsVisible}}"    
+            
+                Style="{Binding CurrentSizeSelection,
+                Converter={StaticResource SizeStyleConverter},
+                ConverterParameter=Medium}" />
+
+        <Button
+                x:Name="Large"
+                Grid.Row="1"
+                Grid.ColumnSpan="2"
+                Content="Large"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Right"
+                Command="{Binding SelectSizeCommand}"
+                CommandParameter="Large"
+                Visibility="{Binding IsVisible, Converter={StaticResource IsVisible}}"    
+            
+                Style="{Binding CurrentSizeSelection,
+                Converter={StaticResource SizeStyleConverter},
+                ConverterParameter=Large}" />
+
+
+        <ItemsControl 
+            Grid.Row="2"
+            Grid.ColumnSpan="2"
+            ItemsSource="{Binding Path=CurrentProductMenu}"
+            >
+                
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+             
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Style="{StaticResource MenuStyle}">
+                        
+                            <TextBlock Text="{Binding Path=MenuName}"
+                                       TextWrapping="WrapWithOverflow"
+                                       HorizontalAlignment="Center"
+                                       ></TextBlock>
+                            
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            
+            
         <Button
             x:Name="Collections"
             Grid.Row="3"

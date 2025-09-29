@@ -17,7 +17,7 @@ namespace PizzaShed.Services.Data
                 List<Product> products = _databaseManager.ExecuteQuery(conn =>
                 {
                     string queryString = $@"
-                    SELECT 
+                    SELECT
                         p.product_id,
                         p.product_name,
                         p.product_category,
@@ -35,15 +35,15 @@ namespace PizzaShed.Services.Data
                             ON pa.allergen_id = a.allergen_id
                         WHERE p.product_category = @category
                         {(size != null ? "AND s.size_name = @size" : "")}
-                        GROUP BY p.product_id, p.product_name, p.product_category, s.size_name, pp.price
-                        ORDER BY p.product_name, pp.price;";
+                        GROUP BY p.product_id, s.size_name, p.product_name, p.product_category, pp.price
+                        ORDER BY s.size_name DESC";
 
                     using (SqlCommand query = new(queryString, conn)) 
                     {
                         query.Parameters.AddWithValue("@category", category);
                         
                         // First check if we are querying for size
-                        if(query.Parameters.Contains("@size"))
+                        if(size != null)
                         {
                             query.Parameters.AddWithValue("@size", size);
                         }

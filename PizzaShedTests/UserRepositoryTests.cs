@@ -65,9 +65,9 @@ namespace PizzaShedTests
                 );
 
             // Call the function with any input
-            bool result = _userRepository.GetUserByPin("1234");
+            User result = _userRepository.GetUserByPin("1234");
 
-            Assert.IsTrue(result, "GetUserByPin should return true when ExecuteQuery returns a User Object");
+            Assert.IsTrue(result == new User(1, "user", "test"), "GetUserByPin should return User when ExecuteQuery returns a User Object");
         }
 
         [Test]
@@ -81,9 +81,9 @@ namespace PizzaShedTests
                 It.IsAny<Func<SqlConnection, User?>>()))
                 .Returns(nullReturn);
 
-            bool result = _userRepository.GetUserByPin("1234");
+            User? result = _userRepository.GetUserByPin("1234");
 
-            Assert.IsFalse(result, "GetUserByPin should return false when ExecuteQuery returns null");
+            Assert.IsFalse(result == null, "GetUserByPin should return false when ExecuteQuery returns null");
         }
 
         [Test]
@@ -94,9 +94,9 @@ namespace PizzaShedTests
                 It.IsAny<Func<SqlConnection, User>>()))
                 .Throws<Exception>();
 
-            bool result = _userRepository.GetUserByPin("1234");
+            User? result = _userRepository.GetUserByPin("1234");
 
-            Assert.IsFalse(result, "GetUserByPin should return false when ExecuteQuery throws an exception");
+            Assert.IsTrue(result == null, "GetUserByPin should return null when ExecuteQuery throws an exception");
         }           
     }
 }

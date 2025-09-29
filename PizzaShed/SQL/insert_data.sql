@@ -29,7 +29,7 @@ VALUES ('Margherita', 'Pizza'),
 ('Chicken Shish', 'Kebab'),
 ('Mixed Kebab', 'Kebab'),
 ('Kebab Box', 'Kebab'),
-('Cheeseburger', 'Burger'),
+('Cheese Burger', 'Burger'),
 ('Chicken Fillet Burger', 'Burger'),
 ('Doner Wrap', 'Wrap'),
 ('Chicken Wrap', 'Wrap'),
@@ -396,7 +396,7 @@ INSERT INTO Product_Prices
 SELECT P.product_id, S.size_id, 5.49
 FROM Products AS P
 CROSS JOIN Sizes AS S
-WHERE P.product_name = 'Cheeseburger'
+WHERE P.product_name = 'Cheese Burger'
 AND S.size_name = 'Regular';
 
 INSERT INTO Product_Prices
@@ -476,6 +476,16 @@ CROSS JOIN Sizes AS S
 WHERE P.product_category = 'Drink'
 AND P.product_name != 'Fanta'
 AND S.size_name = '1.25l';
+
+INSERT INTO Allowed_Product_Categories 
+SELECT TT.topping_type_id, 'Kebab'
+FROM Topping_Types as TT
+WHERE TT.topping_type IN ('Bread', 'Kebab');
+
+INSERT INTO Allowed_Product_Categories
+SELECT TT.topping_type_id, 'Pizza'
+FROM Topping_Types as TT
+WHERE TT.topping_type IN ('Meat', 'Veg', 'Base');
 
 INSERT INTO Meal_Deals
 VALUES ('Margherita, Chips & Drink', 10.99),

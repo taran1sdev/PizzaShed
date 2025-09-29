@@ -3,6 +3,7 @@ using Moq;
 using PizzaShed.Services.Data;
 using PizzaShed.Services.Security;
 using PizzaShed.ViewModels;
+using PizzaShed.Model;
 
 namespace PizzaShedTests
 {
@@ -70,7 +71,7 @@ namespace PizzaShedTests
             string expectedPinHash = PasswordHasher.HashPin(pinToTest);
 
             // Set the mock to return true when called with the expected pin hash
-            _mockUserRepository.Setup(r => r.GetUserByPin(expectedPinHash)).Returns(true);
+            _mockUserRepository.Setup(r => r.GetUserByPin(expectedPinHash)).Returns(new User(1, "test", "test"));
 
             _loginViewModel.Pin = pinToTest;
 
@@ -87,10 +88,11 @@ namespace PizzaShedTests
         public void Pin_AttemptsLogin_OnFourDigits_Failure()
         {
             const string pinToTest = "9999";
-            string expectedPinHash = PasswordHasher.HashPin(pinToTest);
+            string expectedPinHash = PasswordHasher.HashPin(pinToTest);            
+
 
             // Set the mock to return false when called with the expected pin hash
-            _mockUserRepository.Setup(r => r.GetUserByPin(expectedPinHash)).Returns(false);
+            _mockUserRepository.Setup(r => r.GetUserByPin(expectedPinHash)).Returns(new User(1, "user", "test"));
 
             _loginViewModel.Pin = pinToTest;
 
