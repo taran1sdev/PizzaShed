@@ -104,12 +104,12 @@ namespace PizzaShed.ViewModels
         private void AttemptLogin()
         {
             User? user = _userRepository.GetUserByPin(PasswordHasher.HashPin(Pin));
-            if (user == null)
+            if (user != null)
             {
-                ErrorMessage = "Login Failed...";
-                Pin = "";
-            }
-            _session.Login(user);
+                _session.Login(user);
+            }            
+            ErrorMessage = "Login Failed...";
+            Pin = "";
         }
     }
 }

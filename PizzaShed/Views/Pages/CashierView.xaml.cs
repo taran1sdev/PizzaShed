@@ -26,13 +26,6 @@ namespace PizzaShed.Views.Pages
         public CashierView()
         {
             InitializeComponent();
-
-            var ProductRepository = new ProductRepository();
-            var ToppingRepository = new ToppingRepository();
-
-            var viewModel = new CashierViewModel(ProductRepository, ToppingRepository);
-
-            this.DataContext = viewModel;
         }
     }
 }

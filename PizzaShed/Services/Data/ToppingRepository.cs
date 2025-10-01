@@ -21,13 +21,13 @@ namespace PizzaShed.Services.Data
                 List<Topping> toppings = _databaseManager.ExecuteQuery(conn =>
                 {
                     // This query is quite long but it returns the toppings allowed for each product
-                    // category and marks which ones require a user choice
+                    // category and marks which ones require a user choice we use DISTINCT for the Kebab toppings                    
                     string queryString = $@"
-                    SELECT 
+                    SELECT {(category == "Kebab" ? "DISTINCT" : "")}
                         t.topping_id,
                         t.topping_name,
                         tp.price,
-                        tt.topping_type, 
+                        tt.topping_type,
                         CASE
                             WHEN tt.topping_type IN ('Base', 'Bread')
                             THEN CAST(1 AS bit)
@@ -52,14 +52,15 @@ namespace PizzaShed.Services.Data
                             ON tt.topping_type_id = pt.topping_type_id                        
                         WHERE apc.product_category = @category
                         {(size != null ? "AND s.size_name = @size" : "")}
-                        GROUP BY tt.topping_type, t.topping_id, t.topping_name, s.size_name, tp.price";
+                        GROUP BY tt.topping_type, t.topping_id, t.topping_name, s.size_name, tp.price
+                        {(category == "Pizza" ? "ORDER BY CASE tt.topping_type WHEN 'Meat' THEN 1 WHEN 'Base' THEN 2 WHEN 'Veg' THEN 3 ELSE 99 END" : "")}";
 
                     using (SqlCommand query = new(queryString, conn))
                     {
                         query.Parameters.AddWithValue("@category", category);
 
                         // First check if we are querying for size
-                        if (query.Parameters.Contains("@size"))
+                        if (size != null)
                         {
                             query.Parameters.AddWithValue("@size", size);
                         }
@@ -74,7 +75,7 @@ namespace PizzaShed.Services.Data
                                 while (reader.Read())
                                 {
                                     // Make sure none of required Properties contain null values before creating our object
-                                    int id = Convert.ToInt32(reader["topping"]);
+                                    int id = Convert.ToInt32(reader["topping_id"]);
                                     string? name = reader["topping_name"].ToString();
                                     decimal? price = Convert.ToDecimal(reader["price"]);
                                     bool? choiceRequired = Convert.ToBoolean(reader["choice_required"]);
@@ -98,8 +99,8 @@ namespace PizzaShed.Services.Data
 
                                 }
                                 return toppings;
-                            }
-                            return [];
+                            } else                           
+                            return [];                                                          
                         }
                     }
                 });

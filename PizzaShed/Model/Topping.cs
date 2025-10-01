@@ -12,5 +12,6 @@ namespace PizzaShed.Model
         public bool ChoiceRequired { get; set; } = false;        
 
         public string DisplayName => $" - {Name}";
+        public string MenuName => Name;
     }
 }

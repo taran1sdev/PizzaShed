@@ -43,8 +43,7 @@ namespace PizzaShed.Services.Data
             {
                 try
                 {
-                    conn.Open();
-                    EventLogger.LogInfo("Database connection opened successfully");
+                    conn.Open();                    
                     return true;
                 }
                 catch (Exception ex)
@@ -68,8 +67,7 @@ namespace PizzaShed.Services.Data
             {
                 try 
                 {
-                    conn.Close();
-                    EventLogger.LogInfo("Connection to database closed successfully");
+                    conn.Close();                    
                     return true;
                 } catch (Exception ex)
                 {

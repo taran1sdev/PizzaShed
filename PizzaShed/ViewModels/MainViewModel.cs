@@ -55,7 +55,7 @@ namespace PizzaShed.ViewModels
                 default:
                     var ProductRepository = new ProductRepository();
                     var ToppingRepository = new ToppingRepository();
-                    CurrentViewModel = new CashierViewModel(ProductRepository, ToppingRepository);
+                    CurrentViewModel = new CashierViewModel(ProductRepository, ToppingRepository, _session);
                     break;
             }
         }

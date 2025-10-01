@@ -10,8 +10,8 @@ namespace PizzaShed.Services.Data
 {
     public sealed class Session : ISession
     {
-        private static readonly Session instance = new();
-        public static Session Instance { get { return instance; } } 
+        private static readonly Session _instance = new();
+        public static Session Instance { get { return _instance; } } 
 
         public User? CurrentUser { get; private set; }
 

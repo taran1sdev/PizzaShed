@@ -19,36 +19,58 @@
             <helpers:CategoryStyleConverter x:Key="CategoryStyleConverter" />
             <helpers:SizeStyleConverter x:Key="SizeStyleConverter" />
             <BooleanToVisibilityConverter x:Key="IsVisible" />
-            
+
             <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignPaperLightButton}">
                 <Setter Property="FontSize" Value="34" />
                 <Setter Property="Height" Value="60" />
                 <Setter Property="Width" Value="160" />
-                <Setter Property="Margin" Value="20,20" />
+                <Setter Property="Margin" Value="10,5" />
             </Style>
 
-            <Style x:Key="MenuStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignPaperButton}">
-                <Setter Property="FontSize" Value="18" />
-                <Setter Property="Height" Value="120"/>
-                <Setter Property="Width" Value="120" />
-                <Setter Property="Margin" Value="0,0" />
-                <Setter Property="HorizontalAlignment" Value="Center" />
+            <Style x:Key="MenuButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignPaperButton}">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="Height" Value="80"/>
+                <Setter Property="Width" Value="110" />
+                <Setter Property="Margin" Value="5,5" />
             </Style>
-            
+
+            <Style x:Key="MenuStyle" TargetType="{x:Type ItemsControl}">
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="BorderBrush" Value="#FFFFC947" />
+                <Style.Triggers>
+                    <DataTrigger 
+                        Binding="{Binding Path=DataContext.DisplayToppings, 
+                        RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type UserControl}}}"
+                        Value="True">
+                        <Setter Property="VerticalAlignment" Value="Top" />
+                        <Setter Property="Grid.Row" Value="2" />
+                        <Setter Property="Grid.RowSpan" Value="1" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="ToppingStyle" TargetType="{x:Type ItemsControl}">
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Bottom" />
+            </Style>
 
             <Style TargetType="{x:Type ListView}" BasedOn="{StaticResource MaterialDesignListView}">
                 <Setter Property="FontSize" Value="24" />
             </Style>
         </ResourceDictionary>
-        
+
     </UserControl.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="100"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition Height="90"></RowDefinition>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="0.33*"/>
+            <RowDefinition Height="0.67*"/>
+            <RowDefinition Height="90"></RowDefinition>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -72,7 +94,7 @@
             HorizontalAlignment="Right"
             Content="Void"
             />
-        
+
         <Button 
             x:Name="Delivery"
             Grid.Row="0"
@@ -89,7 +111,7 @@
             SelectedItem="{Binding SelectedOrderItem}"
             VerticalAlignment="Stretch"
             >
-            </ListView>
+        </ListView>
 
         <Button
             x:Name="Deals"            
@@ -104,7 +126,7 @@
             Style="{Binding SelectedCategory,
                     Converter={StaticResource CategoryStyleConverter},
                     ConverterParameter=Deals}"/>
-        
+
         <Button
             x:Name="Pizzas"            
             Grid.Row="1"
@@ -117,8 +139,8 @@
             
             Style="{Binding SelectedCategory,
                     Converter={StaticResource CategoryStyleConverter},
-                    ConverterParameter=Pizza}"/>                        
-        
+                    ConverterParameter=Pizza}"/>
+
         <Button
             x:Name="Kebabs"            
             Grid.Row="1"
@@ -131,7 +153,7 @@
             
             Style="{Binding SelectedCategory,
                     Converter={StaticResource CategoryStyleConverter},
-                    ConverterParameter=Kebab}"/>                        
+                    ConverterParameter=Kebab}"/>
 
         <Button
             x:Name="BurgersWraps"            
@@ -187,7 +209,7 @@
                 HorizontalAlignment="Left"
                 Command="{Binding SelectSizeCommand}"
                 CommandParameter="Small"
-                Visibility="{Binding IsVisible, Converter={StaticResource IsVisible}}"
+                Visibility="{Binding IsPizza, Converter={StaticResource IsVisible}}"
                 
                 Style="{Binding CurrentSizeSelection,
                 Converter={StaticResource SizeStyleConverter},
@@ -202,7 +224,7 @@
                 HorizontalAlignment="Center"
                 Command="{Binding SelectSizeCommand}"
                 CommandParameter="Medium"
-                Visibility="{Binding IsVisible, Converter={StaticResource IsVisible}}"    
+                Visibility="{Binding IsPizza, Converter={StaticResource IsVisible}}"    
             
                 Style="{Binding CurrentSizeSelection,
                 Converter={StaticResource SizeStyleConverter},
@@ -212,12 +234,12 @@
                 x:Name="Large"
                 Grid.Row="1"
                 Grid.ColumnSpan="2"
-                Content="Large"
+                Content="Large" 
                 VerticalAlignment="Bottom"
                 HorizontalAlignment="Right"
                 Command="{Binding SelectSizeCommand}"
                 CommandParameter="Large"
-                Visibility="{Binding IsVisible, Converter={StaticResource IsVisible}}"    
+                Visibility="{Binding IsPizza, Converter={StaticResource IsVisible}}"    
             
                 Style="{Binding CurrentSizeSelection,
                 Converter={StaticResource SizeStyleConverter},
@@ -226,34 +248,74 @@
 
         <ItemsControl 
             Grid.Row="2"
-            Grid.ColumnSpan="2"
+            Grid.RowSpan="2"
+            Grid.ColumnSpan="2"            
             ItemsSource="{Binding Path=CurrentProductMenu}"
-            >
-                
+            Style="{StaticResource MenuStyle}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Orientation="Horizontal" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
-             
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Button Style="{StaticResource MenuStyle}">
-                        
-                            <TextBlock Text="{Binding Path=MenuName}"
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Style="{StaticResource MenuButtonStyle}">
+
+                        <TextBlock Text="{Binding Path=MenuName}"
                                        TextWrapping="WrapWithOverflow"
-                                       HorizontalAlignment="Center"
                                        ></TextBlock>
-                            
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <ItemsControl
+            Grid.Row="3"
+            Grid.ColumnSpan="2"
+            ItemsSource="{Binding Path=CurrentToppingMenu}"
+            Style="{StaticResource ToppingStyle}"
+            Visibility="{Binding DisplayToppings, Converter={StaticResource IsVisible}}">
             
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Style="{StaticResource MenuButtonStyle}">
+
+                        <TextBlock Text="{Binding Path=MenuName}"
+                                   TextWrapping="WrapWithOverflow"
+                                   ></TextBlock>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        
+        <!-- Button for selecting Half and Half pizzas -->
+        <Button
+            Grid.Row="3"
+            Grid.Column="1"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
             
+            x:Name="Half"
+            Style="{StaticResource MenuButtonStyle}"
+            Margin="10,10,30,5"
+            Visibility="{Binding IsPizza, Converter={StaticResource IsVisible}}"
+            Content="1/2"
+            >
+
+        </Button>
+
         <Button
             x:Name="Collections"
-            Grid.Row="3"
+            Grid.Row="4"
             Grid.Column="0"
             HorizontalAlignment="Left"
             Content="Collections"
@@ -262,7 +324,7 @@
 
         <Button
             x:Name="Checkout"
-            Grid.Row="3"
+            Grid.Row="4"
             Grid.Column="1"
             HorizontalAlignment="Right"
             Content="Checkout"
