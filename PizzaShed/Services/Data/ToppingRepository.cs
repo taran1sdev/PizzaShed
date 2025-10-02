@@ -117,5 +117,10 @@ namespace PizzaShed.Services.Data
         {
             return GetProductsByCategory(category, null);
         }
+
+        public List<Topping> GetMealDeals()
+        {
+            return default!; // Not implemented here
+        }
     }
 }

@@ -1,7 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
 using PizzaShed.Model;
 using PizzaShed.Services.Logging;
+using System.Reflection.Metadata;
 using System.Windows.Controls;
+using System.Windows.Media.Media3D;
 
 namespace PizzaShed.Services.Data
 {
@@ -59,11 +62,11 @@ namespace PizzaShed.Services.Data
                                 {
                                     // Make sure none of required Properties contain null values before creating our object
                                     int id = Convert.ToInt32(reader["product_id"]);
-                                    string? name = reader["product_name"].ToString();
-                                    string? category = reader["product_category"].ToString();
-                                    string? sizeName = reader["size_name"].ToString();
-                                    decimal? price = Convert.ToDecimal(reader["price"]);
-                                    string? allergensStr = reader["allergens"].ToString();
+                                    string? name = reader.IsDBNull(reader.GetOrdinal("product_name")) ? null : reader["product_name"].ToString();
+                                    string? category = reader.IsDBNull(reader.GetOrdinal("product_category")) ? null : reader["product_category"].ToString();
+                                    string? sizeName = reader.IsDBNull(reader.GetOrdinal("size_name")) ? null : reader["size_name"].ToString();
+                                    decimal? price = reader.IsDBNull(reader.GetOrdinal("price")) ? null : Convert.ToDecimal(reader["price"]);
+                                    string? allergensStr = reader.IsDBNull(reader.GetOrdinal("allergens")) ? null : reader["allergens"].ToString();
 
                                     if (name != null 
                                     && category != null 
@@ -71,12 +74,11 @@ namespace PizzaShed.Services.Data
                                     && price != null)
                                     {
                                         products.Add(new Product
-                                        {
-                                            ID = id,
+                                        {                                            
                                             Name = name,
                                             Category = category,   
                                             SizeName = sizeName,
-                                            Price = (decimal)price,
+                                            Price = price,
                                             Allergens = allergensStr == null ? [] : allergensStr.Split(',')
                                         });
                                     }
@@ -91,7 +93,7 @@ namespace PizzaShed.Services.Data
                 return products;
             } catch (Exception ex)
             {
-                EventLogger.LogError("ProductRepository.GetProductsByCategory(category) - Failed to retrieve products from Database: " + ex.Message);                
+                EventLogger.LogError("Failed to fetch products: " + ex.Message);                
             }
             return [];
         }
@@ -99,6 +101,222 @@ namespace PizzaShed.Services.Data
         public List<Product> GetProductsByCategory(string category)
         {
             return GetProductsByCategory(category, null);
+        }
+
+        private Product GetProductById(int productId, int sizeId)
+        {
+            try
+            {
+                Product product = _databaseManager.ExecuteQuery(conn =>
+                {
+                    string queryString = @"
+                        SELECT p.product_name, p.product_category, pp.price, s.size_name,
+                        STRING_AGG((a.allergen_description), ',') as allergens
+                        FROM Products AS p
+                        INNER JOIN Product_Prices AS pp
+                        ON p.product_id = pp.product_id
+                        INNER JOIN Sizes AS s
+                        ON s.size_id = pp.size_id
+                        INNER JOIN Product_Allergens AS pa
+                        ON p.product_id = pa.product_id
+                        INNER JOIN Allergens AS a
+                        ON pa.allergen_id = a.allergen_id
+                        WHERE p.product_id = @product AND s.size_id = @size
+                    ";
+
+                    using (SqlCommand query = new(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@product", productId);
+                        query.Parameters.AddWithValue("@size", sizeId);
+
+                        using (SqlDataReader reader = query.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                // If the Database contains a null value convert and ToString functions will throw an exception - this allows us to safely handle null values
+                                string? name = reader.IsDBNull(reader.GetOrdinal("product_name")) ? null : reader["product_name"].ToString();
+                                string? category = reader.IsDBNull(reader.GetOrdinal("product_category")) ? null : reader["product_category"].ToString();
+                                decimal? price = reader.IsDBNull(reader.GetOrdinal("price")) ? null : Convert.ToDecimal(reader["price"]);
+                                string? sizeName = reader.IsDBNull(reader.GetOrdinal("size_name")) ? null : reader["size_name"].ToString();
+                                string? allergensStr = reader.IsDBNull(reader.GetOrdinal("allergens")) ? null : reader["allergens"].ToString();             
+                                
+                                if (name != null && category != null
+                                    && price != null && sizeName != null)
+                                {
+                                    return new Product
+                                    {
+                                        ID = productId,
+                                        Name = name,
+                                        Category = category,
+                                        Price = price,
+                                        SizeName = sizeName,
+                                        Allergens = allergensStr == null ? [] : allergensStr.Split(',')
+                                    };
+                                }
+                            }
+                            return default!;
+                        }
+                    }
+                });
+                return product;
+            } catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to fetch product: " + ex.Message);
+            }
+            return default!;
+        }
+
+        // Function for retrieving Meal Deals
+        public List<Product> GetMealDeals()
+        {
+            try
+            {
+                List<Product> mealDeals = _databaseManager.ExecuteQuery(conn =>
+                {
+                    string queryString = @"SELECT deal_id, deal_name, price FROM Meal_Deals;";
+
+                    using (SqlCommand query = new(queryString, conn))
+                    {
+                        using (SqlDataReader reader = query.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                List<Product> deals = [];
+
+                                while (reader.Read())
+                                {
+                                    int dealId = reader.IsDBNull(reader.GetOrdinal("deal_id")) ? 0 : Convert.ToInt32(reader["deal_id"]);
+                                        
+                                    string? name = reader.IsDBNull(reader.GetOrdinal("deal_name")) ? null : reader["deal_name"].ToString();
+
+                                    decimal? price = reader.IsDBNull(reader.GetOrdinal("price")) ? null : Convert.ToDecimal(reader["price"]);                                    
+
+                                    if (name != null && price != null)
+                                    {
+                                        deals.Add(new Product
+                                        {
+                                            ID = dealId,
+                                            Name = name,
+                                            Category = "Deal",
+                                            Price = price,                                                                                        
+                                        });
+                                    } else
+                                    {
+                                        EventLogger.LogError($"NULL values returned fetching meal deals Name:{name}, Price:{price}");
+                                    }
+                                }
+                                return deals;
+                            }
+                            return [];                                                        
+                        }
+                    }                    
+                });
+
+                // We get the products in each deal before returning
+                if (mealDeals.Count > 0 )
+                {
+                    mealDeals.ForEach(m =>
+                    {
+                        m.RequiredChoices = [.. GetDealItems(m.ID).Cast<MenuItemBase>()];
+                    });
+                }
+                return mealDeals;
+            } catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to fetch meal deals: " + ex.Message);
+            }
+            return [];
+        }
+
+        // We create a datatype to store products we need to add later
+        private struct ProductIds(int productId, int sizeId)
+        {
+            public int ProductId = productId;
+            public int SizeId = sizeId;
+        }         
+
+        // This function returns the products in each deal
+        private List<Product> GetDealItems(int dealId)
+        {
+            // We create a list of our new datatype to store the products we need to retrieve
+            // once the DB connection is closed
+            List<ProductIds> productsToAdd = [];
+            
+            try
+            {                
+                List<Product> dealItems = _databaseManager.ExecuteQuery(conn =>
+                {
+                    string queryString = @"
+                        SELECT di.product_id, di.product_category, di.quantity, s.size_name, di.size_id
+                        FROM Deal_Items AS di
+                        INNER JOIN Sizes AS s
+                        ON s.size_id = di.size_id
+                        WHERE di.deal_id = @deal_id";
+
+                    using (SqlCommand query = new(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@deal_id", dealId);
+
+                        using (SqlDataReader reader = query.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {                                
+                                List<Product> dealItems = [];
+
+                                while (reader.Read())
+                                {                                    
+                                    int? product_id = reader.IsDBNull(reader.GetOrdinal("product_id")) ? null : Convert.ToInt32(reader["product_id"]);
+                                    
+                                    int quantity = reader.IsDBNull(reader.GetOrdinal("quantity")) ? 1 : Convert.ToInt32(reader["quantity"]);
+                                    
+                                    string? category = reader.IsDBNull(reader.GetOrdinal("product_category")) ? null : reader["product_category"].ToString();
+                                    string? size_name = reader.IsDBNull(reader.GetOrdinal("size_id")) ? null : reader["size_id"].ToString();
+
+                                    int? size_id = reader.IsDBNull(reader.GetOrdinal("size_id")) ? null : Convert.ToInt32(reader["size_id"]);
+
+                                    // Add an object for every deal item required
+                                    for (int i = 0; i < quantity; i++)
+                                    {
+                                        if (product_id != null && size_id != null)
+                                        {
+                                            // If the deal item cannot be chosen - add the product / size id to an object
+                                            // We will retrieve the product once this DB connection is closed
+                                            productsToAdd.Add(new ProductIds((int)product_id, (int)size_id));
+                                            continue;
+                                        } else
+                                        {
+                                            // If the deal item requires a choice - just add the category and size
+                                            if (category != null && size_name != null)
+                                            {
+                                                dealItems.Add(new Product
+                                                {
+                                                    Name = $"{category} - {size_name}",
+                                                    Category = category,
+                                                    Price = null,
+                                                    SizeName = size_name,
+                                                });
+                                            }                                            
+                                        }
+                                    }                                    
+                                }
+                                // Now the connection is closed we can fetch the products
+                                productsToAdd.ForEach(p =>
+                                {
+                                    dealItems.Add(GetProductById(p.ProductId, p.SizeId));
+                                });
+                                return dealItems;
+                            }
+                            return [];
+                        }
+                    }
+                });
+                return dealItems;
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to fetch deal items: " + ex.Message);
+            }
+            return [];
         }
     }
 }

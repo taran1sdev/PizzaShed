@@ -12,6 +12,8 @@ namespace PizzaShed.Services.Data
     {
         public List<T> GetProductsByCategory(string category, string? size);
 
-        public List<T> GetProductsByCategory(string category);        
+        public List<T> GetProductsByCategory(string category);
+
+        public List<T> GetMealDeals();
     }
 }

@@ -174,7 +174,7 @@ namespace PizzaShed.ViewModels
             switch(category)
             {
                 case "Deals":
-                    // Implement deals as menu items
+                    products.AddRange(_productRepo.GetMealDeals());
                     break;
                 case "Burger":
                     products.AddRange(_productRepo.GetProductsByCategory("Wrap"));

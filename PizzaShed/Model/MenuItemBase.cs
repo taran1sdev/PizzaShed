@@ -13,7 +13,7 @@ namespace PizzaShed.Model
 
         public required string Name { get; set; }
 
-        public required decimal Price { get; set; }
+        public required decimal? Price { get; set; }
 
         public string[] Allergens { get; set; } = [];
     }

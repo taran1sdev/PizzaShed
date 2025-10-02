@@ -12,28 +12,26 @@ namespace PizzaShed.Model
     {                
         public required string Category { get; set; }
 
-        public required string SizeName { get; set; }        
+        public string? SizeName { get; set; }        
         
         // This List will hold choices required by the user
         // If the Product is a Deal - this will hold the Menu Items required        
-        public List<Topping> RequiredChoices { get; set; } = [];
-
+        public List<MenuItemBase> RequiredChoices { get; set; } = [];
+         
         public List<Topping> SelectedChoices { get; set; } = [];
         
-        // We might be able to use SelectedChoices for this.
-        //public List<Topping> ToppingSelection { get; set; } = [];
         public string MenuName
         {
             get
             {
                 return Category.ToLower() switch
                 {
-                    "pizza" or "burger" or "wrap" => Name,                    
+                    "pizza" or "burger" or "wrap" or "deal" => Name,                      
                     _ => $"{Name}\n({SizeName})",                
                 };
             }
         }
-        
+
         public string RecieptName
         {
             get
@@ -42,8 +40,8 @@ namespace PizzaShed.Model
                 // If applicable display the size, toppings and allergens in the product
                 return Category.ToLower() switch
                 {
-                    "pizza" or "kebab" => $"{Name} ({SizeName[1..].ToUpper()})" +
-                        $"\n{RequiredChoices.FirstOrDefault()}" +
+                    "pizza" or "kebab" => $"{Name} ({SizeName?[1..].ToUpper()})" +
+                        $"\n{RequiredChoices.FirstOrDefault()?.Name}" +
                         $"\n{(string.Join("\n", SelectedChoices.Select(t => $"{t.DisplayName}")))}" +
                         $"\nContains: {(string.Join(", ", Allergens.Concat(SelectedChoices.Select(t => $"{t.Allergens}"))).Distinct())}",
                     "drink" => $"{Name} ({SizeName})",
