@@ -1,11 +1,13 @@
-﻿using System;
+﻿using PizzaShed.Model;
+using PizzaShed.Services.Data;
+using PizzaShed.Services.Logging;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PizzaShed.Services.Data;
-using PizzaShed.Model;
 
 namespace PizzaShed.ViewModels
 {
@@ -38,26 +40,24 @@ namespace PizzaShed.ViewModels
         // When the session is changed navigate to the view that matches the user's role
         private void OnSessionChanged(object? sender, EventArgs e)
         {
-            if(_session.IsLoggedIn)
+            try
             {
-                NavigateToView(_session.UserRole);
+                switch (_session.UserRole.ToLower())
+                {
+                    case "cashier" or "manager":
+                        var ProductRepository = new ProductRepository();
+                        var ToppingRepository = new ToppingRepository();
+                        CurrentViewModel = new CashierViewModel(ProductRepository, ToppingRepository, _session);
+                        break;
+                    default:
+                    CurrentViewModel = new LoginViewModel(_userRepository, _session);
+                        break;
+                }                              
             }
-            else
-            {                
-                CurrentViewModel = new LoginViewModel(this, _userRepository, _session);
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Error navigating to view " + ex.Message);
             }
-        }
-    
-        public void NavigateToView(string role) 
-        {
-            switch (role.ToLower())
-            {                              
-                default:
-                    var ProductRepository = new ProductRepository();
-                    var ToppingRepository = new ToppingRepository();
-                    CurrentViewModel = new CashierViewModel(ProductRepository, ToppingRepository, _session);
-                    break;
-            }
-        }
+        }    
     }
 }

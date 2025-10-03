@@ -41,7 +41,8 @@
                 <Style.Triggers>
                     <DataTrigger 
                         Binding="{Binding Path=DataContext.DisplayToppings, 
-                        RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type UserControl}}}"
+                        RelativeSource={RelativeSource Mode=FindAncestor,
+                        AncestorType={x:Type UserControl}}}"
                         Value="True">
                         <Setter Property="VerticalAlignment" Value="Top" />
                         <Setter Property="Grid.Row" Value="2" />
@@ -58,7 +59,20 @@
             </Style>
 
             <Style TargetType="{x:Type ListView}" BasedOn="{StaticResource MaterialDesignListView}">
-                <Setter Property="FontSize" Value="24" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="VerticalAlignment" Value="Stretch" />
+                <Style.Triggers>
+                    <DataTrigger
+                        Binding="{Binding DataContext.IsPizza,
+                        RelativeSource={RelativeSource Mode=FindAncestor,
+                        AncestorType={x:Type UserControl}}}"
+                        Value="True">
+                        
+                        <Setter Property="Margin" Value="0,0,0,50" />
+                        
+                    </DataTrigger>
+                </Style.Triggers>
             </Style>
         </ResourceDictionary>
 
@@ -85,6 +99,7 @@
             Grid.Column="0"
             HorizontalAlignment="Left"
             Content="Logout"
+            Command="{Binding LogoutCommand}"
             />
 
         <Button
@@ -108,8 +123,8 @@
             Grid.Row="1"
             Grid.Column="0"            
             ItemsSource="{Binding CurrentOrderItems}"
+            DisplayMemberPath="ReceiptName"
             SelectedItem="{Binding SelectedOrderItem}"
-            VerticalAlignment="Stretch"
             >
         </ListView>
 
@@ -260,12 +275,18 @@
 
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Button Style="{StaticResource MenuButtonStyle}">
+                    <Button Style="{StaticResource MenuButtonStyle}"
+                            Command="{Binding Path=DataContext.AddOrderItemCommand, 
+                            RelativeSource={RelativeSource Mode=FindAncestor, 
+                            AncestorType={x:Type ItemsControl}}}">
+
+                        <Button.CommandParameter>
+                            <Binding />
+                        </Button.CommandParameter>
 
                         <TextBlock Text="{Binding Path=MenuName}"
-                                       TextWrapping="WrapWithOverflow"
-                                       ></TextBlock>
-
+               TextWrapping="WrapWithOverflow"                                   
+               ></TextBlock>
                     </Button>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
@@ -286,10 +307,15 @@
 
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Button Style="{StaticResource MenuButtonStyle}">
-
+                    <Button Style="{StaticResource MenuButtonStyle}"
+                            Command="{Binding Path=DataContext.AddOrderItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}}">
+                        
+                        <Button.CommandParameter>
+                            <Binding />
+                        </Button.CommandParameter>
+                        
                         <TextBlock Text="{Binding Path=MenuName}"
-                                   TextWrapping="WrapWithOverflow"
+                                   TextWrapping="WrapWithOverflow"                                   
                                    ></TextBlock>
                     </Button>
                 </DataTemplate>

@@ -32,7 +32,7 @@ namespace PizzaShed.Model
             }
         }
 
-        public string RecieptName
+        public string ReceiptName
         {
             get
             {
@@ -40,10 +40,10 @@ namespace PizzaShed.Model
                 // If applicable display the size, toppings and allergens in the product
                 return Category.ToLower() switch
                 {
-                    "pizza" or "kebab" => $"{Name} ({SizeName?[1..].ToUpper()})" +
-                        $"\n{RequiredChoices.FirstOrDefault()?.Name}" +
+                    "pizza" or "kebab" => $"{Name} ({SizeName?[..1].ToUpper()})" +
+                        $"\n{RequiredChoices.FirstOrDefault()?.DisplayName}" +
                         $"\n{(string.Join("\n", SelectedChoices.Select(t => $"{t.DisplayName}")))}" +
-                        $"\nContains: {(string.Join(", ", Allergens.Concat(SelectedChoices.Select(t => $"{t.Allergens}"))).Distinct())}",
+                        $"\nContains: {string.Join(", ", Allergens.Union(SelectedChoices.SelectMany(t => t.Allergens)))}",
                     "drink" => $"{Name} ({SizeName})",
                     "side" => $"{Name} ({SizeName})" +
                         $"\nContains: {(string.Join(", ", Allergens))}",

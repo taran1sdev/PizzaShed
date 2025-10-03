@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace PizzaShed.Commands
 {
-    // Class to bind UI controls to methods in our ViewModel
+    // Class to bind UI controls to methods in our ViewModel - relays methods without parameters
     public class RelayCommand<T> : ICommand
     {
         // Holds references to the functions defined in the ViewModel

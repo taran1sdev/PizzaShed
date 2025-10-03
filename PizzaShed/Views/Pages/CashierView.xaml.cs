@@ -18,9 +18,6 @@ using PizzaShed.Helpers;
 
 namespace PizzaShed.Views.Pages
 {
-    /// <summary>
-    /// Interaction logic for CashierView.xaml
-    /// </summary>
     public partial class CashierView : UserControl
     {
         public CashierView()

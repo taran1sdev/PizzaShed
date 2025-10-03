@@ -93,7 +93,7 @@ namespace PizzaShed.Services.Data
                                             Price = (decimal)price,
                                             ChoiceRequired = (bool)choiceRequired,
                                             // The query returns duplicates so we remove them here
-                                            Allergens = allergensStr == null ? [] : allergensStr.Split(',').Distinct().ToArray()
+                                            Allergens = allergensStr == null ? [] : [.. allergensStr.Split(',')]
                                         });
                                     }
 

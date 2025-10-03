@@ -37,6 +37,7 @@ namespace PizzaShed.Services.Data
         public void Logout()
         {
             CurrentUser = null;
+            EventLogger.LogInfo("User logged out.");
             SessionChanged?.Invoke(this, EventArgs.Empty);
         }
 

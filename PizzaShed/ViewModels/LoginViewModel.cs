@@ -14,8 +14,7 @@ using PizzaShed.Model;
 namespace PizzaShed.ViewModels
 {
     public class LoginViewModel : ViewModelBase
-    {
-        private readonly MainViewModel _mainViewModel;
+    {        
         private readonly IUserRepository _userRepository;
         private readonly ISession _session;
         private string _pin = "";
@@ -23,9 +22,8 @@ namespace PizzaShed.ViewModels
 
         public ICommand ButtonCommand { get; }
 
-        public LoginViewModel(MainViewModel mainViewModel, IUserRepository userRepository, ISession session)
-        {
-            _mainViewModel = mainViewModel;
+        public LoginViewModel(IUserRepository userRepository, ISession session)
+        {            
             _userRepository = userRepository;
             _session = session;
 
@@ -78,7 +76,7 @@ namespace PizzaShed.ViewModels
         }
 
         // Update ViewModel on User input
-        private void ExecuteButtonCommand(object parameter) 
+        private void ExecuteButtonCommand(object? parameter) 
         {
             if (parameter is string buttonValue)
             {

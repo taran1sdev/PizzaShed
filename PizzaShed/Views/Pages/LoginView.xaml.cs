@@ -19,9 +19,6 @@ using PizzaShed.Helpers;
 
 namespace PizzaShed.Views.Pages
 {
-    /// <summary>
-    /// Interaction logic for 
-    /// </summary>
     public partial class LoginView : UserControl
     {
         public LoginView()

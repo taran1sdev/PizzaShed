@@ -79,7 +79,7 @@ namespace PizzaShed.Services.Data
                                             Category = category,   
                                             SizeName = sizeName,
                                             Price = price,
-                                            Allergens = allergensStr == null ? [] : allergensStr.Split(',')
+                                            Allergens = allergensStr == null ? [] : [.. allergensStr.Split(',')]
                                         });
                                     }
                                         
@@ -122,7 +122,8 @@ namespace PizzaShed.Services.Data
                         INNER JOIN Allergens AS a
                         ON pa.allergen_id = a.allergen_id
                         WHERE p.product_id = @product AND s.size_id = @size
-                    ";
+                        GROUP BY p.product_category, p.product_name, pp.price, s.size_name
+                        ";
 
                     using (SqlCommand query = new(queryString, conn))
                     {
@@ -150,7 +151,7 @@ namespace PizzaShed.Services.Data
                                         Category = category,
                                         Price = price,
                                         SizeName = sizeName,
-                                        Allergens = allergensStr == null ? [] : allergensStr.Split(',')
+                                        Allergens = allergensStr == null ? [] : [..allergensStr.Split(',')]
                                     };
                                 }
                             }
@@ -298,18 +299,20 @@ namespace PizzaShed.Services.Data
                                             }                                            
                                         }
                                     }                                    
-                                }
-                                // Now the connection is closed we can fetch the products
-                                productsToAdd.ForEach(p =>
-                                {
-                                    dealItems.Add(GetProductById(p.ProductId, p.SizeId));
-                                });
+                                }                                                                
                                 return dealItems;
                             }
                             return [];
                         }
                     }
                 });
+
+                // Now the connection is closed we can fetch the products
+                productsToAdd.ForEach(p =>
+                {
+                    dealItems.Add(GetProductById(p.ProductId, p.SizeId));
+                });
+
                 return dealItems;
             }
             catch (Exception ex)

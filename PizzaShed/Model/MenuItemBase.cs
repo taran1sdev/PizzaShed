@@ -15,6 +15,9 @@ namespace PizzaShed.Model
 
         public required decimal? Price { get; set; }
 
-        public string[] Allergens { get; set; } = [];
+        // HashSet makes sure we don't have duplicate values
+        public HashSet<string> Allergens { get; set; } = [];
+
+        public string DisplayName => $" - {Name}";
     }
 }
