@@ -52,8 +52,7 @@ namespace PizzaShed.Services.Data
                             ON tt.topping_type_id = pt.topping_type_id                        
                         WHERE apc.product_category = @category
                         {(size != null ? "AND s.size_name = @size" : "")}
-                        GROUP BY tt.topping_type, t.topping_id, t.topping_name, s.size_name, tp.price
-                        {(category == "Pizza" ? "ORDER BY CASE tt.topping_type WHEN 'Meat' THEN 1 WHEN 'Base' THEN 2 WHEN 'Veg' THEN 3 ELSE 99 END" : "")}";
+                        GROUP BY tt.topping_type, t.topping_id, t.topping_name, s.size_name, tp.price";
 
                     using (SqlCommand query = new(queryString, conn))
                     {
@@ -75,16 +74,19 @@ namespace PizzaShed.Services.Data
                                 while (reader.Read())
                                 {
                                     // Make sure none of required Properties contain null values before creating our object
-                                    int id = Convert.ToInt32(reader["topping_id"]);
-                                    string? name = reader["topping_name"].ToString();
-                                    decimal? price = Convert.ToDecimal(reader["price"]);
-                                    bool? choiceRequired = Convert.ToBoolean(reader["choice_required"]);
-                                    string? allergensStr = reader["allergens"].ToString();
+                                    int id = reader.IsDBNull(reader.GetOrdinal("topping_id")) ? 0 : Convert.ToInt32(reader["topping_id"]); // Private key should never be null but we still check
+                                    string? name = reader.IsDBNull(reader.GetOrdinal("topping_name")) ? null : reader["topping_name"].ToString();
+                                    decimal? price = reader.IsDBNull(reader.GetOrdinal("price")) ? 0 : Convert.ToDecimal(reader["price"]);
+                                    bool? choiceRequired = reader.IsDBNull(reader.GetOrdinal("choice_required")) ? null : Convert.ToBoolean(reader["choice_required"]);
+                                    string? allergensStr = reader.IsDBNull(reader.GetOrdinal("allergens")) ? null : reader["allergens"].ToString();
+                                    string? toppingType = reader.IsDBNull(reader.GetOrdinal("topping_type")) ? null : reader["topping_type"].ToString();
 
-                                    if (name != null
+                                    if (id != 0 
+                                    && name != null
                                     && category != null
                                     && choiceRequired != null
-                                    && price != null)
+                                    && price != null
+                                    && toppingType != null)
                                     {
                                         toppings.Add(new Topping
                                         {
@@ -92,7 +94,8 @@ namespace PizzaShed.Services.Data
                                             Name = name,
                                             Price = (decimal)price,
                                             ChoiceRequired = (bool)choiceRequired,
-                                            // The query returns duplicates so we remove them here
+                                            ToppingType = toppingType,
+                                            // Query returns duplicate values but HashSet will only store distinct values
                                             Allergens = allergensStr == null ? [] : [.. allergensStr.Split(',')]
                                         });
                                     }
@@ -104,6 +107,17 @@ namespace PizzaShed.Services.Data
                         }
                     }
                 });
+
+                if (category.Equals("Pizza", StringComparison.OrdinalIgnoreCase))
+                {
+                    toppings = [.. toppings.OrderBy(t => t.ToppingType switch
+                    {
+                        "Meat" => 1,
+                        "Base" => 2,
+                        "Veg" => 3,
+                        _ => 99
+                    })];
+                }
                 return toppings;
             }
             catch (Exception ex)

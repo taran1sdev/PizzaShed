@@ -35,31 +35,30 @@ namespace PizzaShed.ViewModels
         {
             get => _currentOrderItems;
             set => SetProperty(ref _currentOrderItems, value);
+             
         }       
 
         // Property to hold the order item the user has selected
-        private MenuItemBase? _selectedOrderItem;
-        public MenuItemBase? SelectedOrderItem
+        private Product? _selectedOrderItem;
+        public Product? SelectedOrderItem
         {
             get => _selectedOrderItem;
             set
             {
-                SetProperty(ref _selectedOrderItem, value);
-            }
+                if (SetProperty(ref _selectedOrderItem, value)) 
+                {
+                    if (SelectedOrderItem != null)
+                    {
+                        // Since we are toggling toppings this renders the correct screen for the user when an order item is selected                        
+                        SelectCategory(SelectedOrderItem.Category);
+                        if (SelectedOrderItem.Category == "Pizza")
+                        {
+                            SelectSize(SelectedOrderItem.SizeName);
+                        }
+                    }                                        
+                }
+            } 
         }
-
-        // Property to hold the topping selected by the user
-        //private Topping? _selectedToppingItem;
-        //public Topping? SelectedToppingItem
-        //{
-        //    get => _selectedToppingItem;
-        //    set 
-        //    {
-        //        // If a topping is selected we unset the order item
-        //        SetProperty(ref _selectedToppingItem, value);
-        //        SetProperty(ref _selectedOrderItem, null);
-        //    }
-        //}
 
         //------        MENU        ------//
         public ICommand SelectCategoryCommand { get; }
@@ -123,22 +122,17 @@ namespace PizzaShed.ViewModels
         public ObservableCollection<Topping> CurrentToppingMenu
         {
             get
-            {
-                int? idToExclude = null;
+            {                
                 // Removes the current Required Topping for the selected product from the view allowing the user to toggle choices
                 if (SelectedOrderItem != null && SelectedOrderItem is Product product && product.RequiredChoices.Count > 0)
-                {
-                    idToExclude = product?.RequiredChoices?.FirstOrDefault()?.ID;
-
-                    var filteredByItem = _currentToppingMenu.Where(t => t.ID != idToExclude);
+                {                    
+                    var filteredByItem = _currentToppingMenu.Where(t => !t.Equals(product.RequiredChoices.First()));
                     return new ObservableCollection<Topping>(filteredByItem);
                 }
                 else if (DisplayToppings)
                 {
-                    // If we don't have any items selected remove the default topping from the view 
-                    idToExclude = CurrentProductMenu?.FirstOrDefault()?.RequiredChoices?.FirstOrDefault()?.ID;
-
-                    var filteredByDefault = _currentToppingMenu.Where(t => t.ID != idToExclude);
+                    // If we don't have any items selected remove the default topping from the view                     
+                    var filteredByDefault = _currentToppingMenu.Where(t => !t.Equals(_currentProductMenu.First().RequiredChoices.First()));
                     return new ObservableCollection<Topping>(filteredByDefault);
                 }
                 return _currentToppingMenu;
@@ -162,7 +156,7 @@ namespace PizzaShed.ViewModels
             // Binds to menu buttons to allow the user to add items to the current order
             AddOrderItemCommand = new RelayCommand<MenuItemBase>(AddOrderItem);
             // Binds to the void button to remove menu items
-            RemoveOrderItemCommand = new RelayCommand<MenuItemBase>(RemoveOrderItem);                        
+            RemoveOrderItemCommand = new RelayGenericCommand(RemoveOrderItem);                        
 
             // This binds to the menu buttons allowing the user to change the view
             SelectCategoryCommand = new RelayCommand<string>(SelectCategory);                                    
@@ -183,26 +177,76 @@ namespace PizzaShed.ViewModels
             if (orderItem is Product product)
             {
                 CurrentOrderItems.Add(product);
+                // Select the item added
+                SelectedOrderItem = CurrentOrderItems.Last();
+                return;
             }
 
-            if (orderItem is Topping topping)
-            {
+            if (SelectedOrderItem == null) return;
 
+            // This is a bit of a complex decision tree - try and refactor it later
+            if (orderItem is Topping topping && SelectedOrderItem is Product selectedItem)
+            {                
+                if (selectedItem.Category.Equals("Pizza", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (_toppingRepo.GetProductsByCategory(selectedItem.Category, selectedItem.SizeName).Contains(topping))
+                    {
+                        // Check if we are changing the Base
+                        if (topping.ChoiceRequired)
+                        {
+                            selectedItem.RequiredChoices[0] = topping;                                                        
+                        }
+                        else if (selectedItem.Toppings.Contains(topping))
+                        {
+                            // This allows us to toggle toppings
+                            selectedItem.Toppings.Remove(topping);
+                        }
+                        else
+                        {
+                            selectedItem.Toppings.Add(topping);
+                        }
+                        SelectedOrderItem = selectedItem;
+                        return;
+                    }
+                } else if (selectedItem.Category.Equals("Kebab", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (_toppingRepo.GetProductsByCategory(selectedItem.Category).Contains(topping))
+                    {
+                        if (topping.ChoiceRequired)
+                        {
+                            selectedItem.RequiredChoices[0] = topping;                                                        
+                        }
+                        else if (selectedItem.Toppings.Contains(topping))
+                        {
+                            // This allows us to toggle toppings
+                            selectedItem.Toppings.Remove(topping);
+                        }
+                        else
+                        {
+                            selectedItem.Toppings.Add(topping);
+                        }                            
+                        return;
+                    }
+                }
+                EventLogger.LogInfo("MenuItem not valid");
             }
         }
 
-        private void RemoveOrderItem(MenuItemBase? orderItem)
+        private void RemoveOrderItem()
         {
-            if (orderItem == null) return;
+            if (SelectedOrderItem == null) return;
 
-            if (orderItem is Product product)
+            if (SelectedOrderItem is Product product)
             {
-                
-            }
-
-            if (orderItem is Topping topping)
-            {
-
+                CurrentOrderItems.Remove(product);
+                if (CurrentOrderItems.Count == 0)
+                {
+                    SelectedOrderItem = null;                    
+                } else
+                {
+                    SelectedOrderItem = CurrentOrderItems[0];
+                }
+                UpdateMenu();
             }
         }
 

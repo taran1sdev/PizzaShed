@@ -10,7 +10,7 @@ namespace PizzaShed.Services.Data
 {
     public interface IProductRepository<T> where T : MenuItemBase
     {
-        public List<T> GetProductsByCategory(string category, string? size);
+        public List<T> GetProductsByCategory(string category, string? size);        
 
         public List<T> GetProductsByCategory(string category);
 

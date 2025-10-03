@@ -108,6 +108,7 @@
             Grid.Column="0"
             HorizontalAlignment="Right"
             Content="Void"
+            Command="{Binding RemoveOrderItemCommand}"
             />
 
         <Button 
@@ -122,9 +123,10 @@
             x:Name="OrderItems"
             Grid.Row="1"
             Grid.Column="0"            
-            ItemsSource="{Binding CurrentOrderItems}"
+            ItemsSource="{Binding CurrentOrderItems, Mode=TwoWay}"
             DisplayMemberPath="ReceiptName"
-            SelectedItem="{Binding SelectedOrderItem}"
+            SelectedItem="{Binding SelectedOrderItem, Mode=TwoWay}"       
+            SelectionMode="Single"
             >
         </ListView>
 
@@ -285,8 +287,8 @@
                         </Button.CommandParameter>
 
                         <TextBlock Text="{Binding Path=MenuName}"
-               TextWrapping="WrapWithOverflow"                                   
-               ></TextBlock>
+                                   TextWrapping="WrapWithOverflow"                                   
+                                   ></TextBlock>
                     </Button>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
@@ -308,7 +310,9 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Button Style="{StaticResource MenuButtonStyle}"
-                            Command="{Binding Path=DataContext.AddOrderItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}}">
+                            Command="{Binding Path=DataContext.AddOrderItemCommand, 
+                            RelativeSource={RelativeSource Mode=FindAncestor, 
+                            AncestorType={x:Type ItemsControl}}}">
                         
                         <Button.CommandParameter>
                             <Binding />

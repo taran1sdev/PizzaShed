@@ -15,9 +15,26 @@ namespace PizzaShed.Model
 
         public required decimal? Price { get; set; }
 
+        // We override these methods so we can compare our menu items
+        public override bool Equals(object? obj)
+        {
+            if (obj is not MenuItemBase item)
+            {
+                return false;
+            }
+
+            // ID is not unique but (ID,Price) is always unique
+            return item.ID == ID && item.Price == Price;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(ID, Price);
+        }
+
         // HashSet makes sure we don't have duplicate values
         public HashSet<string> Allergens { get; set; } = [];
 
-        public string DisplayName => $" - {Name}";
+        public string DisplayName => $"\n - {Name}";
     }
 }
