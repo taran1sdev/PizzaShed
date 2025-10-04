@@ -69,10 +69,13 @@ namespace PizzaShed.Model
                         $"{string.Join("", Toppings.SelectMany(t => t.DisplayName))}" + 
                         $"\n\t\t\t\t\t\t£{Price + Toppings.Sum(t => t.Price):N2}" +
                         $"\nContains: {string.Join(", ", Allergens.Union(Toppings.SelectMany(t => t.Allergens)))}",
-                    "drink" => $"{Name} ({SizeName})",
+                    "drink" => $"{Name} ({SizeName})" +
+                               $"\n\t\t\t\t\t\t£{Price:N2}",
                     "side" => $"{Name} ({SizeName})" +
-                        $"\nContains: {(string.Join(", ", Allergens))}",
-                    _ => $"{Name}",
+                              $"\n\t\t\t\t\t\t£{Price:N2}" +
+                              $"\nContains: {(string.Join(", ", Allergens))}",
+                    _ => $"{Name}" +
+                         $"\n\t\t\t\t\t\t£{Price:N2}",
                 };
             }
         }

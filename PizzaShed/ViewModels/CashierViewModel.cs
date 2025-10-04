@@ -1,17 +1,17 @@
-﻿using PizzaShed.Services.Data;
-using PizzaShed.Model;
-using System.Windows.Input;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.ObjectModel;
-using PizzaShed.Commands;
-using System.Configuration;
 using System.Windows;
-using PizzaShed.Services.Logging;
+using System.Windows.Input;
 using System.Windows.Navigation;
+using PizzaShed.Commands;
+using PizzaShed.Model;
+using PizzaShed.Services.Data;
+using PizzaShed.Services.Logging;
 
 namespace PizzaShed.ViewModels
 {
@@ -20,8 +20,6 @@ namespace PizzaShed.ViewModels
         private readonly IProductRepository<Product> _productRepo;
         private readonly IProductRepository<Topping> _toppingRepo;
         private readonly ISession _session;
-
-
 
         //------        ORDER       ------//
         public ICommand AddOrderItemCommand { get; }
@@ -35,8 +33,46 @@ namespace PizzaShed.ViewModels
         {
             get => _currentOrderItems;
             set => SetProperty(ref _currentOrderItems, value);
-             
-        }       
+        }
+
+        // This property displays the total cost of the order to the user
+        public string OrderTotal
+        {
+            get
+            {
+                decimal? totalCost = 0;
+
+                if (CurrentOrderItems.Count > 0)
+                {
+                    CurrentOrderItems
+                        .ToList() // We convert to list as ObservableCollection's have no ForEach function
+                        .ForEach(item =>
+                        {
+                            // If we have a deal item we need to get the cost of every topping in the deal
+                            if (item.Category.Equals("Deal", StringComparison.OrdinalIgnoreCase))
+                            {
+                                item.RequiredChoices.ToList()
+                                    .ForEach(dealItem =>
+                                    {
+                                        if (dealItem is Product p)
+                                        {
+                                            totalCost += p.Toppings.Sum(t => t.Price);
+                                        }
+                                    });
+                            }
+                            // Check all categories so if paid toppings outside of the Pizza category are introducted later
+                            // our current implementation will handle these changes
+                            else if (item.Toppings.Count > 0)
+                            {
+                                totalCost += item.Toppings.Sum(t => t.Price);
+                            }
+                            // Now we can get the base price of the order item
+                            totalCost += item.Price;
+                        });
+                }
+                return $"£{totalCost:N2}";
+            }
+        }
 
         // Property to hold the order item the user has selected
         private Product? _selectedOrderItem;
@@ -45,25 +81,29 @@ namespace PizzaShed.ViewModels
             get => _selectedOrderItem;
             set
             {
-                if (SetProperty(ref _selectedOrderItem, value)) 
-                {
+                // Since this property is set everytime the user makes a change to the order (Add/Remove item or topping) 
+                // We can inform the view to update the OrderTotal here
+                OnPropertyChanged(nameof(OrderTotal));
+
+                if (SetProperty(ref _selectedOrderItem, value))
+                {                    
                     if (SelectedOrderItem != null)
                     {
-                        // Since we are toggling toppings this renders the correct screen for the user when an order item is selected                        
+                        // Toppings are toggled for menu items - to improve UX we display the correct menu in the view (i.e. Medium Pizza) 
+                        // when the user selects an order item from the ListView                        
                         SelectCategory(SelectedOrderItem.Category);
-                        if (SelectedOrderItem.Category == "Pizza")
+                        if (SelectedOrderItem.Category.Equals("Pizza", StringComparison.OrdinalIgnoreCase))
                         {
                             SelectSize(SelectedOrderItem.SizeName);
                         }
-                    }                                        
+                    }
                 }
-            } 
-        }
+            }
+        }       
 
         //------        MENU        ------//
         public ICommand SelectCategoryCommand { get; }
         public ICommand SelectSizeCommand { get; }
-
 
         // Property to hold the current menu category to display
         private string _selectedCategory;
@@ -94,7 +134,7 @@ namespace PizzaShed.ViewModels
         {
             get => _isPizza;
             set => SetProperty(ref _isPizza, value);
-        }       
+        }
 
         // Property to hold the size menu selected by the user when pizza menu is displayed
         private string? _currentSizeSelection;
@@ -103,7 +143,7 @@ namespace PizzaShed.ViewModels
             get => _currentSizeSelection;
             set => SetProperty(ref _currentSizeSelection, value);
         }
-       
+
         // Property decides whether toppings are displayed or not - manages view styling
         public bool DisplayToppings
         {
@@ -112,7 +152,7 @@ namespace PizzaShed.ViewModels
                 return SelectedCategory.ToLower() switch
                 {
                     "pizza" or "kebab" => true,
-                    _ => false
+                    _ => false,
                 };
             }
         }
@@ -122,17 +162,25 @@ namespace PizzaShed.ViewModels
         public ObservableCollection<Topping> CurrentToppingMenu
         {
             get
-            {                
+            {
                 // Removes the current Required Topping for the selected product from the view allowing the user to toggle choices
-                if (SelectedOrderItem != null && SelectedOrderItem is Product product && product.RequiredChoices.Count > 0)
-                {                    
-                    var filteredByItem = _currentToppingMenu.Where(t => !t.Equals(product.RequiredChoices.First()));
+                if (
+                    SelectedOrderItem != null
+                    && SelectedOrderItem is Product product
+                    && product.RequiredChoices.Count > 0
+                )
+                {
+                    var filteredByItem = _currentToppingMenu.Where(t =>
+                        !t.Equals(product.RequiredChoices.First())
+                    );
                     return new ObservableCollection<Topping>(filteredByItem);
                 }
                 else if (DisplayToppings)
                 {
-                    // If we don't have any items selected remove the default topping from the view                     
-                    var filteredByDefault = _currentToppingMenu.Where(t => !t.Equals(_currentProductMenu.First().RequiredChoices.First()));
+                    // If we don't have any items selected remove the default topping from the view
+                    var filteredByDefault = _currentToppingMenu.Where(t =>
+                        !t.Equals(_currentProductMenu.First().RequiredChoices.First())
+                    );
                     return new ObservableCollection<Topping>(filteredByDefault);
                 }
                 return _currentToppingMenu;
@@ -143,9 +191,12 @@ namespace PizzaShed.ViewModels
         //------        SESSION        ------//
         public ICommand LogoutCommand { get; }
 
-
         //------        CONSTRUCTOR     ------//
-        public CashierViewModel(IProductRepository<Product> productRepo, IProductRepository<Topping> toppingRepo, ISession session)
+        public CashierViewModel(
+            IProductRepository<Product> productRepo,
+            IProductRepository<Topping> toppingRepo,
+            ISession session
+        )
         {
             _productRepo = productRepo;
             _toppingRepo = toppingRepo;
@@ -156,11 +207,11 @@ namespace PizzaShed.ViewModels
             // Binds to menu buttons to allow the user to add items to the current order
             AddOrderItemCommand = new RelayCommand<MenuItemBase>(AddOrderItem);
             // Binds to the void button to remove menu items
-            RemoveOrderItemCommand = new RelayGenericCommand(RemoveOrderItem);                        
+            RemoveOrderItemCommand = new RelayGenericCommand(RemoveOrderItem);
 
             // This binds to the menu buttons allowing the user to change the view
-            SelectCategoryCommand = new RelayCommand<string>(SelectCategory);                                    
-            SelectSizeCommand = new RelayCommand<string>(SelectSize);            
+            SelectCategoryCommand = new RelayCommand<string>(SelectCategory);
+            SelectSizeCommand = new RelayCommand<string>(SelectSize);
 
             // This binds to the logout button
             LogoutCommand = new RelayGenericCommand(Logout);
@@ -172,7 +223,8 @@ namespace PizzaShed.ViewModels
         //------        ORDER        ------//
         private void AddOrderItem(MenuItemBase? orderItem)
         {
-            if (orderItem == null) return;
+            if (orderItem == null)
+                return;
 
             if (orderItem is Product product)
             {
@@ -182,49 +234,46 @@ namespace PizzaShed.ViewModels
                 return;
             }
 
-            if (SelectedOrderItem == null) return;
+            if (SelectedOrderItem == null)
+                return;
 
             // This is a bit of a complex decision tree - try and refactor it later
             if (orderItem is Topping topping && SelectedOrderItem is Product selectedItem)
-            {                
+            {
                 if (selectedItem.Category.Equals("Pizza", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (_toppingRepo.GetProductsByCategory(selectedItem.Category, selectedItem.SizeName).Contains(topping))
+                    if (
+                        _toppingRepo
+                            .GetProductsByCategory(selectedItem.Category, selectedItem.SizeName)
+                            .Contains(topping)
+                    )
                     {
                         // Check if we are changing the Base
                         if (topping.ChoiceRequired)
                         {
-                            selectedItem.RequiredChoices[0] = topping;                                                        
+                            selectedItem.RequiredChoices[0] = topping;
                         }
-                        else if (selectedItem.Toppings.Contains(topping))
-                        {
-                            // This allows us to toggle toppings
-                            selectedItem.Toppings.Remove(topping);
-                        }
-                        else
+                        else if (!selectedItem.Toppings.Remove(topping))
                         {
                             selectedItem.Toppings.Add(topping);
                         }
                         SelectedOrderItem = selectedItem;
                         return;
                     }
-                } else if (selectedItem.Category.Equals("Kebab", StringComparison.OrdinalIgnoreCase))
+                }
+                else if (selectedItem.Category.Equals("Kebab", StringComparison.OrdinalIgnoreCase))
                 {
                     if (_toppingRepo.GetProductsByCategory(selectedItem.Category).Contains(topping))
                     {
                         if (topping.ChoiceRequired)
                         {
-                            selectedItem.RequiredChoices[0] = topping;                                                        
+                            selectedItem.RequiredChoices[0] = topping;
                         }
-                        else if (selectedItem.Toppings.Contains(topping))
-                        {
-                            // This allows us to toggle toppings
-                            selectedItem.Toppings.Remove(topping);
-                        }
-                        else
+                        else if (!selectedItem.Toppings.Remove(topping))
                         {
                             selectedItem.Toppings.Add(topping);
-                        }                            
+                        }
+                        SelectedOrderItem = selectedItem;
                         return;
                     }
                 }
@@ -234,22 +283,22 @@ namespace PizzaShed.ViewModels
 
         private void RemoveOrderItem()
         {
-            if (SelectedOrderItem == null) return;
+            if (SelectedOrderItem == null)
+                return;
 
             if (SelectedOrderItem is Product product)
             {
                 CurrentOrderItems.Remove(product);
                 if (CurrentOrderItems.Count == 0)
                 {
-                    SelectedOrderItem = null;                    
-                } else
+                    SelectedOrderItem = null;
+                }
+                else
                 {
                     SelectedOrderItem = CurrentOrderItems[0];
                 }
-                UpdateMenu();
             }
         }
-
 
         //------        MENU        ------//
         // Because we have the size Sub-Menu in pizzas - we need to seperate the menu rendering from category selection
@@ -272,23 +321,35 @@ namespace PizzaShed.ViewModels
                     products.AddRange(_productRepo.GetProductsByCategory("Dip"));
                     break;
                 case "Pizza":
-                    products.AddRange(_productRepo.GetProductsByCategory(SelectedCategory, CurrentSizeSelection));
-                    toppings.AddRange(_toppingRepo.GetProductsByCategory(SelectedCategory, CurrentSizeSelection));
+                    products.AddRange(
+                        _productRepo.GetProductsByCategory(SelectedCategory, CurrentSizeSelection)
+                    );
+                    toppings.AddRange(
+                        _toppingRepo.GetProductsByCategory(SelectedCategory, CurrentSizeSelection)
+                    );
 
                     // Here we set the default base for the pizza
 
-                    products.ForEach(p => {
-
-                        Topping? defaultBase = toppings.Find(t => t.ChoiceRequired && t.Name.Equals("Tomato", StringComparison.OrdinalIgnoreCase));
-                        Topping? bbqBase = toppings.Find(t => t.ChoiceRequired && t.Name.Equals("BBQ", StringComparison.OrdinalIgnoreCase));
+                    products.ForEach(p =>
+                    {
+                        Topping? defaultBase = toppings.Find(t =>
+                            t.ChoiceRequired
+                            && t.Name.Equals("Tomato", StringComparison.OrdinalIgnoreCase)
+                        );
+                        Topping? bbqBase = toppings.Find(t =>
+                            t.ChoiceRequired
+                            && t.Name.Equals("BBQ", StringComparison.OrdinalIgnoreCase)
+                        );
 
                         switch (p.Name.ToLower())
                         {
                             case "bbq chicken":
-                                if (bbqBase != null) p.RequiredChoices.Add(bbqBase);
+                                if (bbqBase != null)
+                                    p.RequiredChoices.Add(bbqBase);
                                 break;
                             default:
-                                if (defaultBase != null) p.RequiredChoices.Add(defaultBase);
+                                if (defaultBase != null)
+                                    p.RequiredChoices.Add(defaultBase);
                                 break;
                         }
                     });
@@ -300,9 +361,13 @@ namespace PizzaShed.ViewModels
                     // Make Pitta the default for kebabs
                     products.ForEach(p =>
                     {
-                        Topping? defaultBread = toppings.Find(t => t.ChoiceRequired && t.Name.Equals("Pitta", StringComparison.OrdinalIgnoreCase));
+                        Topping? defaultBread = toppings.Find(t =>
+                            t.ChoiceRequired
+                            && t.Name.Equals("Pitta", StringComparison.OrdinalIgnoreCase)
+                        );
 
-                        if (defaultBread != null) p.RequiredChoices.Add(defaultBread);
+                        if (defaultBread != null)
+                            p.RequiredChoices.Add(defaultBread);
                     });
                     break;
                 default:
@@ -321,22 +386,30 @@ namespace PizzaShed.ViewModels
         private void SelectCategory(string? category)
         {
             // Don't do anything if user selects the current category
-            if (category == null || category == SelectedCategory) return;
+            if (category == null || category == SelectedCategory)
+                return;
 
-            // Assign the new category - this will trigger the property changed event and update the view
-            SelectedCategory = category;
+            // We set the default value for the Pizza menu layout
+            IsPizza = false;
 
-            if (category == "Pizza")
+            // Assign the new category - Because we group some categories we need to handle conversion
+            switch (category)
             {
-                // Set the property to render the size selection buttons and set initial size to display
-                IsPizza = true;
-                CurrentSizeSelection = "Small";
-            } else
-            {
-                IsPizza = false;       
-                CurrentSizeSelection = null;
+                case "Pizza":
+                    IsPizza = true;
+                    CurrentSizeSelection = "Small";
+                    break;
+                case "Wrap":
+                    category = "Burger";
+                    break;
+                case "Dip":
+                    category = "Side";
+                    break;
             }
             
+            // Assign the category selected
+            SelectedCategory = category;
+
             // Update the view
             UpdateMenu();
         }
@@ -350,13 +423,14 @@ namespace PizzaShed.ViewModels
                 UpdateMenu();
             }
         }
-        //------        SESSION        -------//    
+
+        //------        SESSION        -------//
         private void Logout()
         {
             if (_session.IsLoggedIn)
             {
-                _session.Logout();                
+                _session.Logout();
             }
-        }       
+        }
     }
 }

@@ -470,7 +470,7 @@ WHERE P.product_category = 'Drink'
 AND S.size_name = '330ml';
 
 INSERT INTO Product_Prices
-SELECT P.product_id, S.size_id, 0.7
+SELECT P.product_id, S.size_id, 2.99
 FROM Products AS P
 CROSS JOIN Sizes AS S
 WHERE P.product_category = 'Drink'
