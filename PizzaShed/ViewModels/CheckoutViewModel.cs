@@ -10,9 +10,12 @@ namespace PizzaShed.ViewModels
     public class CheckoutViewModel
     {
         private ISession _session;
-        public CheckoutViewModel(ISession session)
+        private IOrderRepository _orderRepository;
+
+        public CheckoutViewModel(IOrderRepository orderRepo, ISession session)
         {
-            _session = session;
+            _orderRepository = orderRepo;
+            _session = session;            
         }
     }
 }

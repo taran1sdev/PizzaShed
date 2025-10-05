@@ -24,7 +24,14 @@
                 <Setter Property="FontSize" Value="34" />
                 <Setter Property="Height" Value="60" />
                 <Setter Property="Width" Value="160" />
-                <Setter Property="Margin" Value="10,5" />
+                <Setter Property="Margin" Value="10,10" />
+            </Style>
+
+            <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="Height" Value="60" />
+                <Setter Property="Width" Value="160" />
+                <Setter Property="Margin" Value="10,10" />
             </Style>
         </ResourceDictionary>
 
@@ -52,6 +59,73 @@
             Command="{Binding LogoutCommand}"
             />
 
+        <ComboBox
+            x:Name="Promotions"
+            Grid.Row="0"
+            Grid.Column="1"
+            HorizontalAlignment="Left"
+            SelectedItem="0"
+            >
+            <ComboBoxItem x:Name="default"  Content="Test" />
+        </ComboBox>
+
+        <Button
+            x:Name="Phone"
+            Grid.Row="0"
+            Grid.Column="1"
+            HorizontalAlignment="Right"
+            Content="Phone"
+            Command="{Binding PhoneCommand}"
+            Visibility="{Binding IsCollection}"
+            />
+
+        <TextBlock
+            x:Name="CollectionTitle"
+            Grid.Row="1"
+            Grid.Column="0"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Center"
+            Text="Collection Time:"
+            />
+
+
+        <ComboBox
+            x:Name="CollectionTime"
+            Grid.Row="1"
+            Grid.Column="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            SelectedItem="0"
+            >
+            <ComboBoxItem Content="Test" />
+            </ComboBox>
+
+        <TextBlock
+            x:Name="NotesTitle"
+            Grid.Row="2"
+            Grid.Column="0"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Center"
+            Text="Order Notes:"
+            />
+
+        <TextBox
+            x:Name="Notes"
+            Grid.Row="2"
+            Grid.Column="0"
+            VerticalAlignment="Bottom"
+            HorizontalAlignment="Stretch"
+            />
+
+        <ListView
+            x:Name="OrderReceipt"
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            Grid.Column="1"
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+            />
+        
         <Button
             x:Name="Back"
             Grid.Row="3"
