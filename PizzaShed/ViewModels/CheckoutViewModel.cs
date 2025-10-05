@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PizzaShed.Services.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,10 @@ namespace PizzaShed.ViewModels
 {
     public class CheckoutViewModel
     {
-
+        private ISession _session;
+        public CheckoutViewModel(ISession session)
+        {
+            _session = session;
+        }
     }
 }

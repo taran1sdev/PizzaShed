@@ -46,8 +46,8 @@ namespace PizzaShed.ViewModels
                 switch (_session.UserRole.ToLower())
                 {
                     case "cashier" or "manager":
-                        var ProductRepository = new ProductRepository();
-                        var ToppingRepository = new ToppingRepository();
+                        var ProductRepository = new ProductRepository(DatabaseManager.Instance);
+                        var ToppingRepository = new ToppingRepository(DatabaseManager.Instance);
                         CurrentViewModel = new CashierViewModel(ProductRepository, ToppingRepository, _session, []);
                         break;
                     default:

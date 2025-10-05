@@ -10,7 +10,12 @@ namespace PizzaShed.Services.Data
 {
     internal class ProductRepository : IProductRepository<Product>
     {
-        private readonly DatabaseManager _databaseManager = DatabaseManager.Instance;
+        private readonly IDatabaseManager _databaseManager;
+
+        public ProductRepository(IDatabaseManager databaseManager)
+        {
+            _databaseManager = databaseManager;
+        }
 
         public List<Product> GetProductsByCategory(string category, string? size)
         {

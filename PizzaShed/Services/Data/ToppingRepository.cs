@@ -11,7 +11,12 @@ namespace PizzaShed.Services.Data
 {
     public class ToppingRepository : IProductRepository<Topping>
     {
-        private readonly DatabaseManager _databaseManager = DatabaseManager.Instance;
+        private readonly IDatabaseManager _databaseManager;
+
+        public ToppingRepository(IDatabaseManager databaseManager)
+        {
+            _databaseManager = databaseManager;
+        } 
 
         public List<Topping> GetProductsByCategory(string category, string? size)
         {

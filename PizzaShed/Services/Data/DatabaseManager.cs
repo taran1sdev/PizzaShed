@@ -6,7 +6,7 @@ using PizzaShed.Services.Logging;
 namespace PizzaShed.Services.Data
 {
     // Sealed class ensures no other classes can inherit from this class
-    public sealed class DatabaseManager
+    public sealed class DatabaseManager : IDatabaseManager
     {
         // We create a static readonly property to ensure we only ever have a single instance of the class
         private static readonly DatabaseManager instance = new();
