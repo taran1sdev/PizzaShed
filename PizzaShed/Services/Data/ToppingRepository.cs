@@ -51,7 +51,7 @@ namespace PizzaShed.Services.Data
                         LEFT JOIN Product_Toppings as pt
                             ON tt.topping_type_id = pt.topping_type_id                        
                         WHERE apc.product_category = @category
-                        {(size != null ? "AND s.size_name = @size" : "")}
+                        {(size != null && category != "Kebab" ? "AND s.size_name = @size" : "")}
                         GROUP BY tt.topping_type, t.topping_id, t.topping_name, s.size_name, tp.price";
 
                     using (SqlCommand query = new(queryString, conn))

@@ -17,8 +17,7 @@ namespace PizzaShedTests
         public void Setup()
         {
             // Initialize a mock user repo and login view model before running tests
-            _mockUserRepository = new Mock<IUserRepository>();
-            //_loginViewModel = new LoginViewModel(_mockUserRepository.Object);
+            _mockUserRepository = new Mock<IUserRepository>();            
         }
 
         [Test]
@@ -88,11 +87,11 @@ namespace PizzaShedTests
         public void Pin_AttemptsLogin_OnFourDigits_Failure()
         {
             const string pinToTest = "9999";
-            string expectedPinHash = PasswordHasher.HashPin(pinToTest);            
-
+            string expectedPinHash = PasswordHasher.HashPin(pinToTest);
+            User? nullUser = null;
 
             // Set the mock to return false when called with the expected pin hash
-            _mockUserRepository.Setup(r => r.GetUserByPin(expectedPinHash)).Returns(new User(1, "user", "test"));
+            _mockUserRepository.Setup(r => r.GetUserByPin(expectedPinHash)).Returns(nullUser);
 
             _loginViewModel.Pin = pinToTest;
 

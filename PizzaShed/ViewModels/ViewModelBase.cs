@@ -19,7 +19,7 @@ namespace PizzaShed.ViewModels
         }        
         protected bool SetProperty<T>(ref T field, T newvalue, [CallerMemberName] string? name = null) 
         {
-            if(EqualityComparer<T>.Default.Equals(field, newvalue))
+            if (EqualityComparer<T>.Default.Equals(field, newvalue))
             {
                 return false;
             }

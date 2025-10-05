@@ -75,7 +75,8 @@ namespace PizzaShed.Model
                               $"\n\t\t\t\t\t\t£{Price:N2}" +
                               $"\nContains: {(string.Join(", ", Allergens))}",
                     _ => $"{Name}" +
-                         $"\n\t\t\t\t\t\t£{Price:N2}",
+                         $"\n\t\t\t\t\t\t£{Price:N2}" +
+                         $"\nContains: {(string.Join(", ", Allergens))}",
                 };
             }
         }

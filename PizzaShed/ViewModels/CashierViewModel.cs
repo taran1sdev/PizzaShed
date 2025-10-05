@@ -81,10 +81,6 @@ namespace PizzaShed.ViewModels
             get => _selectedOrderItem;
             set
             {
-                // Since this property is set everytime the user makes a change to the order (Add/Remove item or topping) 
-                // We can inform the view to update the OrderTotal here
-                OnPropertyChanged(nameof(OrderTotal));
-
                 if (SetProperty(ref _selectedOrderItem, value))
                 {                    
                     if (SelectedOrderItem != null)
@@ -99,7 +95,17 @@ namespace PizzaShed.ViewModels
                     }
                 }
             }
-        }       
+        }
+
+        // This is a fix for duplicate items in an order
+        // ListView will always select the first instance of an object 
+        // this way we force selection when item already exists in the order
+        private int _selectedOrderIndex = -1;
+        public int SelectedOrderIndex
+        {
+            get => _selectedOrderIndex;
+            set => SetProperty(ref _selectedOrderIndex, value);
+        }
 
         //------        MENU        ------//
         public ICommand SelectCategoryCommand { get; }
@@ -115,7 +121,7 @@ namespace PizzaShed.ViewModels
                 if (SetProperty(ref _selectedCategory, value))
                 {
                     // This updates the views style depending on whether the menu category need to display toppings
-                    OnPropertyChanged(nameof(DisplayToppings));
+                    OnPropertyChanged(nameof(DisplayToppings));                    
                 }
             }
         }
@@ -168,6 +174,7 @@ namespace PizzaShed.ViewModels
                     SelectedOrderItem != null
                     && SelectedOrderItem is Product product
                     && product.RequiredChoices.Count > 0
+                    && product.Category == SelectedCategory 
                 )
                 {
                     var filteredByItem = _currentToppingMenu.Where(t =>
@@ -230,54 +237,41 @@ namespace PizzaShed.ViewModels
             {
                 CurrentOrderItems.Add(product);
                 // Select the item added
-                SelectedOrderItem = CurrentOrderItems.Last();
+                SelectedOrderIndex = CurrentOrderItems.Count - 1; 
+                OnPropertyChanged(nameof(OrderTotal));
                 return;
             }
 
             if (SelectedOrderItem == null)
                 return;
-
-            // This is a bit of a complex decision tree - try and refactor it later
-            if (orderItem is Topping topping && SelectedOrderItem is Product selectedItem)
-            {
-                if (selectedItem.Category.Equals("Pizza", StringComparison.OrdinalIgnoreCase))
+            
+            if (orderItem is Topping topping)
+            {                
+                if (
+                    SelectedOrderItem.Category.Equals("Pizza", StringComparison.OrdinalIgnoreCase)
+                    || SelectedOrderItem.Category.Equals("Kebab", StringComparison.OrdinalIgnoreCase)
+                )
                 {
                     if (
                         _toppingRepo
-                            .GetProductsByCategory(selectedItem.Category, selectedItem.SizeName)
+                            .GetProductsByCategory(SelectedOrderItem.Category, SelectedOrderItem.SizeName)
                             .Contains(topping)
                     )
                     {
-                        // Check if we are changing the Base
+                        // Check if we are changing a required choice
                         if (topping.ChoiceRequired)
                         {
-                            selectedItem.RequiredChoices[0] = topping;
+                            SelectedOrderItem.RequiredChoices[0] = topping;
+                            UpdateMenu();
                         }
-                        else if (!selectedItem.Toppings.Remove(topping))
+                        else if (!SelectedOrderItem.Toppings.Remove(topping))
                         {
-                            selectedItem.Toppings.Add(topping);
+                            SelectedOrderItem.Toppings.Add(topping);
                         }
-                        SelectedOrderItem = selectedItem;
+                        OnPropertyChanged(nameof(OrderTotal));
                         return;
                     }
-                }
-                else if (selectedItem.Category.Equals("Kebab", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (_toppingRepo.GetProductsByCategory(selectedItem.Category).Contains(topping))
-                    {
-                        if (topping.ChoiceRequired)
-                        {
-                            selectedItem.RequiredChoices[0] = topping;
-                        }
-                        else if (!selectedItem.Toppings.Remove(topping))
-                        {
-                            selectedItem.Toppings.Add(topping);
-                        }
-                        SelectedOrderItem = selectedItem;
-                        return;
-                    }
-                }
-                EventLogger.LogInfo("MenuItem not valid");
+                }                                
             }
         }
 
@@ -286,16 +280,17 @@ namespace PizzaShed.ViewModels
             if (SelectedOrderItem == null)
                 return;
 
-            if (SelectedOrderItem is Product product)
-            {
-                CurrentOrderItems.Remove(product);
+            if (CurrentOrderItems.Remove(SelectedOrderItem))
+            {                
+                OnPropertyChanged(nameof(OrderTotal));
+
                 if (CurrentOrderItems.Count == 0)
                 {
                     SelectedOrderItem = null;
                 }
                 else
                 {
-                    SelectedOrderItem = CurrentOrderItems[0];
+                    SelectedOrderIndex = CurrentOrderItems.Count - 1;
                 }
             }
         }
@@ -329,7 +324,6 @@ namespace PizzaShed.ViewModels
                     );
 
                     // Here we set the default base for the pizza
-
                     products.ForEach(p =>
                     {
                         Topping? defaultBase = toppings.Find(t =>

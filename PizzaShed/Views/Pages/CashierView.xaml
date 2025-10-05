@@ -6,6 +6,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:helpers="clr-namespace:PizzaShed.Helpers"
              xmlns:viewmodels="clr-namespace:PizzaShed.ViewModels"
+             xmlns:behaviours="clr-namespace:PizzaShed.Behaviours"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              d:DataContext="{d:DesignInstance Type=viewmodels:CashierViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="768" 
@@ -133,11 +135,15 @@
             x:Name="OrderItems"
             Grid.Row="1"
             Grid.Column="0"            
-            ItemsSource="{Binding CurrentOrderItems, Mode=TwoWay}"
+            ItemsSource="{Binding CurrentOrderItems}"
             DisplayMemberPath="ReceiptName"
-            SelectedItem="{Binding SelectedOrderItem, Mode=TwoWay}"       
+            SelectedItem="{Binding SelectedOrderItem, Mode=TwoWay}" 
+            SelectedIndex="{Binding SelectedOrderIndex, Mode=TwoWay}"
             SelectionMode="Single"
             >
+            <b:Interaction.Behaviors>
+                <behaviours:AutoScrollBehaviour />
+            </b:Interaction.Behaviors>
         </ListView>
 
         <Button
