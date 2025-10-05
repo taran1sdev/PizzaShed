@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,6 +29,16 @@ namespace PizzaShed.ViewModels
         public ICommand AddToppingItemCommand { get; }
         public ICommand RemoveOrderItemCommand { get; }
         public ICommand RemoveToppingItemCommand { get; }
+
+        // Property to hold our order type
+        private bool _isDelivery;
+        public bool IsDelivery
+        {
+            get => _isDelivery;
+            set => SetProperty(ref _isDelivery, value);
+        }
+
+        public ICommand IsDeliveryCommand { get; }
 
         private ObservableCollection<Product> _currentOrderItems;
 
@@ -97,6 +109,9 @@ namespace PizzaShed.ViewModels
                 }
             }
         }
+
+        private Product? _activeDealParent = null;
+        private int _currentDealGroupID = 0;
 
         private bool _isHalfAndHalf;
         public bool IsHalfAndHalf
@@ -198,6 +213,8 @@ namespace PizzaShed.ViewModels
             set => SetProperty(ref _currentToppingMenu, value);
         }
 
+        
+        
         //------        SESSION        ------//
         public ICommand LogoutCommand { get; }
 
@@ -214,6 +231,7 @@ namespace PizzaShed.ViewModels
 
             _currentOrderItems = [];
 
+            IsDeliveryCommand = new RelayGenericCommand(Delivery);
             // Binds to menu buttons to allow the user to add items to the current order
             AddOrderItemCommand = new RelayCommand<MenuItemBase>(AddOrderItem);
             // Binds to the void button to remove menu items
@@ -233,19 +251,53 @@ namespace PizzaShed.ViewModels
         }
 
         //------        ORDER        ------//
+
+        private void Delivery()
+        {
+            IsDelivery = !IsDelivery;
+        }
+
         private void AddOrderItem(MenuItemBase? orderItem)
         {
             if (orderItem == null)
                 return;
 
+
+            if (_activeDealParent != null && orderItem is Product selectedProduct)
+            {
+                // If we have an active deal handle it seperately
+                HandleDealSelection(selectedProduct);
+                return;
+            }
+
             // If we have any product that isn't a half and half pizza
             if (orderItem is Product product && !IsHalfAndHalf)
             {                
                 Product newItem = (Product)product.Clone();
-                CurrentOrderItems.Add(newItem);
+
+                if (newItem.Category == "Deal")
+                {
+                    // We need to handle deals and items contained in a deal differently
+                    // We create a deal group ID to manage the items contained in a single instance of a deal
+                    _currentDealGroupID++;
+                    
+                    newItem.ParentDealID = _currentDealGroupID;
+                    // We assign a field to hold the active deal parent - when set menu item choices will be handled as deal item selections
+                    _activeDealParent = newItem;
+
+                    CurrentOrderItems.Add(newItem);
+                    SelectedOrderItem = newItem;
+                    
+                    // We initialize our deal choices and add them to the current product menu
+                    InitializeDealChoices(newItem);
+                } 
+                else
+                {
+                    // Regular items can just be added to our current order
+                    CurrentOrderItems.Add(newItem);                    
+                    SelectedOrderItem = newItem;
+                }
                 
-                // Select the item added
-                SelectedOrderItem = newItem; 
                 OnPropertyChanged(nameof(OrderTotal));
                 return;
             } 
@@ -294,10 +346,7 @@ namespace PizzaShed.ViewModels
                 // We remove the temp pizza, reset the state of IsHalfAndHalf and call the function again
                 HalfAndHalf();
                 AddOrderItem(orderItem);
-            }
-
-            
-            
+            }                        
 
             if (orderItem is Topping topping)
             {
@@ -332,11 +381,178 @@ namespace PizzaShed.ViewModels
             }
         }
 
+        // When the user selects a deal item we initialize the set items and find the items we need the user to select
+        private void InitializeDealChoices(Product dealParent)
+        {
+            Product? firstPlaceholder = null;
+
+            foreach (Product requiredItem in dealParent.RequiredChoices.ToList())
+            {
+                // Create a new instance to edit
+                Product componentItem = (Product)requiredItem.Clone();
+                // Link to our parent deal item
+                componentItem.ParentDealID = dealParent.ParentDealID;
+            
+                if (requiredItem.ID != 0)
+                {
+                    // If the user can not choose we just add to orderItems
+                    FindDefaultChoices(componentItem); // We need to set the default base / bread
+                    CurrentOrderItems.Add(componentItem);
+                }
+                else
+                {
+                    // We track our placeholder products and add to orderItems
+                    componentItem.IsPlaceholder = true;
+                    CurrentOrderItems.Add(componentItem);
+
+                    if (firstPlaceholder == null)
+                    {
+                        // Set the starting point for getting user choices
+                        firstPlaceholder = componentItem;
+                    }
+                }
+
+                // Now we navigate to the relevant menu
+                if (firstPlaceholder != null)
+                {
+                    SelectedOrderItem = firstPlaceholder;
+
+                    DealNavigation(firstPlaceholder);                                            
+                } 
+                else
+                {
+                    // Deal is complete - no choice required
+                    _activeDealParent = null;
+                    SelectedOrderItem = dealParent;
+                    SelectCategory("Deals");
+                }
+            }
+            
+        }
+
+        // This function handles user choices for deal items
+        private void HandleDealSelection(Product selectedProduct)
+        {
+            if (_activeDealParent == null)
+                return;
+
+            Product? placeholderToReplace = CurrentOrderItems
+                .FirstOrDefault(p => p.ParentDealID == _activeDealParent.ParentDealID && p.IsPlaceholder);
+
+            if (placeholderToReplace == null)
+            {
+                FinalizeDeal();
+                return;
+            }
+
+            bool isValid = selectedProduct.Category == placeholderToReplace.Category
+                           && placeholderToReplace.SizeName == placeholderToReplace.SizeName;
+
+            if (isValid)
+            {
+                // We will break bindings if we replace with the new product so we just update the placeholder
+                placeholderToReplace.ID = selectedProduct.ID;
+                placeholderToReplace.Name = selectedProduct.Name;
+                placeholderToReplace.Allergens = selectedProduct.Allergens;
+                placeholderToReplace.RequiredChoices = selectedProduct.RequiredChoices;
+                placeholderToReplace.IsPlaceholder = false;
+                placeholderToReplace.InitializeDealMember();
+
+                Product? nextPlaceholder = CurrentOrderItems
+                    .FirstOrDefault(p => p.ParentDealID == _activeDealParent.ParentDealID && p.IsPlaceholder) ?? null;
+
+                if (nextPlaceholder != null)
+                {
+                    // Highlight the next selection
+                    SelectedOrderItem = nextPlaceholder;
+                    // Navigate to the relevant menu category and filter products
+                    DealNavigation(nextPlaceholder);                    
+                }
+                else
+                {
+                    // If we don't have any more choices we can end the deal item selection flow
+                    FinalizeDeal();
+                }
+
+                OnPropertyChanged(OrderTotal);
+            }
+            else
+            {
+                DealNavigation(placeholderToReplace);
+            }
+        }
+
+        // This is a helper function to redirect the user to the correcet menu for the next deal choice required
+        private void DealNavigation(Product itemToChoose)
+        {
+            SelectCategory(itemToChoose.Category);
+            if (itemToChoose.Category == "Pizza")
+            {
+                SelectSize(itemToChoose.SizeName);
+            } else
+            {
+                FilterMenuBySize(itemToChoose.SizeName);
+            }
+
+        }
+
+        // Helper function for deal items - we remove any items in the category menu that don't match the required size
+        private void FilterMenuBySize(string? size)
+        {
+            if (size == null)
+                return;
+
+            CurrentProductMenu = new ObservableCollection<Product>(CurrentProductMenu.ToList().Where(p => p.SizeName == size));
+        }
+
+
+        // This function resets our active deal and selects the parent item in the menu
+        private void FinalizeDeal()
+        {
+            if (_activeDealParent == null)
+                return;
+
+            Product finalParent = _activeDealParent;
+            _activeDealParent = null;
+
+            SelectedOrderItem = finalParent;
+            SelectCategory("Deals");
+        }
+
+
+        // This function removes all deal items when a single deal item is deleted
+        private void CleanupDeal(int dealGroupID)
+        {
+            List<Product> productsToRemove = CurrentOrderItems
+                .Where(p => p.ParentDealID == dealGroupID)
+                .ToList();
+
+            foreach (Product product in productsToRemove)
+            {
+                CurrentOrderItems.Remove(product);
+            }
+
+            if (_activeDealParent != null && _activeDealParent.ParentDealID == dealGroupID)
+            {
+                _activeDealParent = null;
+                SelectedOrderItem = null;
+                if (CurrentOrderItems.Count > 0)
+                    SelectedOrderItem = CurrentOrderItems.Last();
+                SelectCategory("Deal");                
+            }
+        }
         private void RemoveOrderItem()
         {
             if (SelectedOrderItem == null)
                 return;
 
+            if (SelectedOrderItem.ParentDealID.HasValue)
+            {
+                CleanupDeal(SelectedOrderItem.ParentDealID.Value);
+                OnPropertyChanged(nameof(OrderTotal));
+                return;
+            }
+            
             if (CurrentOrderItems.Remove(SelectedOrderItem))
             {
                 OnPropertyChanged(nameof(OrderTotal));
@@ -352,6 +568,7 @@ namespace PizzaShed.ViewModels
             }                                                    
         }
 
+        // Toggle function for our half and half selection
         private void HalfAndHalf()
         {
             IsHalfAndHalf = !IsHalfAndHalf;
@@ -362,6 +579,17 @@ namespace PizzaShed.ViewModels
                 CurrentOrderItems.Remove(_tempFirstHalf);
                 _tempFirstHalf = null;
             }
+        }
+
+        private void Checkout()
+        {
+            if (_activeDealParent != null && _activeDealParent.ParentDealID.HasValue)
+            {
+                // We don't want to proceed to checkout if we have an unfinished deal!
+                CleanupDeal(_activeDealParent.ParentDealID.Value);
+            }
+
+
         }
 
         //------        MENU        ------//
@@ -444,6 +672,29 @@ namespace PizzaShed.ViewModels
             {
                 CurrentToppingMenu = new ObservableCollection<Topping>(toppings);
             }
+        }
+
+        private void FindDefaultChoices(Product product)
+        {
+            List<Topping> toppings = [.. _toppingRepo.GetProductsByCategory(product.Category, product.SizeName).Where(t => t.ChoiceRequired)];
+            
+            Topping? defaultChoice = null;
+
+
+            if (product.Category == "Pizza")
+            {
+                defaultChoice = product.Name == "BBQ Chicken" ? toppings.Find(t => t.Name == "BBQ") : toppings.Find(t => t.Name == "Tomato");
+            } else if (product.Category == "Kebab")
+            {
+                defaultChoice = toppings.Find(t => t.Name == "Pitta");
+            }
+            else
+            {
+                return;
+            }
+
+            if (defaultChoice != null)
+                product.RequiredChoices.Add(defaultChoice);
         }
 
         private void SelectCategory(string? category)

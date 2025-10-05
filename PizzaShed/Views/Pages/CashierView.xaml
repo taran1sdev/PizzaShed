@@ -21,6 +21,8 @@
             <helpers:CategoryStyleConverter x:Key="CategoryStyleConverter" />
             <helpers:SizeStyleConverter x:Key="SizeStyleConverter" />
             <helpers:HalfStyleConverter x:Key="HalfStyleConverter" />
+            <helpers:DeliveryStyleConverter x:Key="DeliveryStyleConverter" />
+            
             <BooleanToVisibilityConverter x:Key="IsVisible" />
 
             <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignPaperLightButton}">
@@ -123,6 +125,9 @@
             Grid.Column="1"
             HorizontalAlignment="Right"
             Content="Delivery"
+            Command="{Binding IsDeliveryCommand}"
+            
+            Style="{Binding IsDelivery, Converter={StaticResource DeliveryStyleConverter}}"
         />
 
         <ListView

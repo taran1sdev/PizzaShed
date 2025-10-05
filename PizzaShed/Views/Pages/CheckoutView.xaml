@@ -1,0 +1,88 @@
+﻿<UserControl x:Class="PizzaShed.Views.Pages.CheckoutView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:helpers="clr-namespace:PizzaShed.Helpers"
+             xmlns:viewmodels="clr-namespace:PizzaShed.ViewModels"
+             xmlns:behaviours="clr-namespace:PizzaShed.Behaviours"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             d:DataContext="{d:DesignInstance Type=viewmodels:CheckoutViewModel}"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" 
+             d:DesignWidth="1024"
+             FontFamily="{materialDesign:RobotoFont}">
+
+
+    <UserControl.Resources>
+
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="IsVisible" />
+
+            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignPaperLightButton}">
+                <Setter Property="FontSize" Value="34" />
+                <Setter Property="Height" Value="60" />
+                <Setter Property="Width" Value="160" />
+                <Setter Property="Margin" Value="10,5" />
+            </Style>
+        </ResourceDictionary>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="90"></RowDefinition>
+            <RowDefinition Height="0.33*"/>
+            <RowDefinition Height="0.67*"/>
+            <RowDefinition Height="90"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.6*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Button
+            x:Name="Logout"
+            Grid.Row="0"
+            Grid.Column="0"
+            HorizontalAlignment="Left"
+            Content="Logout"
+            Command="{Binding LogoutCommand}"
+            />
+
+        <Button
+            x:Name="Back"
+            Grid.Row="3"
+            Grid.Column="0"
+            HorizontalAlignment="Left"
+            Content="Back"
+            
+            />
+
+        <Button
+            x:Name="Cancel"
+            Grid.Row="3"
+            Grid.Column="1"
+            HorizontalAlignment="Left"
+            Content="Cancel"
+            />
+
+        <Button
+            x:Name="Card"
+            Grid.Row="3"
+            Grid.Column="1"
+            HorizontalAlignment="Center"
+            Content="Card"
+            />
+
+        <Button
+            x:Name="Cash"
+            Grid.Row="3"
+            Grid.Column="1"
+            HorizontalAlignment="Right"
+            Content="Cash"
+            />
+    </Grid>
+</UserControl>

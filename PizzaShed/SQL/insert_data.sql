@@ -493,8 +493,11 @@ VALUES ('Margherita, Chips & Drink', 10.99),
 ('Family Deal', 24.99),
 ('Kebab Meal', 9.49);
 
-INSERT INTO Deal_Items (deal_id, product_category, size_id, quantity)
-SELECT MD.deal_id, 'Pizza', (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Medium'), 1
+INSERT INTO Deal_Items 
+SELECT MD.deal_id, 
+    (SELECT P.product_id FROM Products AS P WHERE P.product_name = 'Margherita'),
+    'Pizza', 
+    (SELECT S.size_id FROM Sizes AS S WHERE S.size_name = 'Medium'), 1
 FROM Meal_Deals AS MD
 WHERE MD.deal_name LIKE 'Margherita%';
 

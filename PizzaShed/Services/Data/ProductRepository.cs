@@ -117,9 +117,9 @@ namespace PizzaShed.Services.Data
                         ON p.product_id = pp.product_id
                         INNER JOIN Sizes AS s
                         ON s.size_id = pp.size_id
-                        INNER JOIN Product_Allergens AS pa
+                        LEFT JOIN Product_Allergens AS pa
                         ON p.product_id = pa.product_id
-                        INNER JOIN Allergens AS a
+                        LEFT JOIN Allergens AS a
                         ON pa.allergen_id = a.allergen_id
                         WHERE p.product_id = @product AND s.size_id = @size
                         GROUP BY p.product_category, p.product_name, pp.price, s.size_name
@@ -127,8 +127,8 @@ namespace PizzaShed.Services.Data
 
                     using (SqlCommand query = new(queryString, conn))
                     {
-                        query.Parameters.AddWithValue("@product", productId);
-                        query.Parameters.AddWithValue("@size", sizeId);
+                        query.Parameters.AddWithValue("@product", productId.ToString());
+                        query.Parameters.AddWithValue("@size", sizeId.ToString());
 
                         using (SqlDataReader reader = query.ExecuteReader())
                         {
@@ -136,20 +136,18 @@ namespace PizzaShed.Services.Data
                             {
                                 // If the Database contains a null value convert and ToString functions will throw an exception - this allows us to safely handle null values
                                 string? name = reader.IsDBNull(reader.GetOrdinal("product_name")) ? null : reader["product_name"].ToString();
-                                string? category = reader.IsDBNull(reader.GetOrdinal("product_category")) ? null : reader["product_category"].ToString();
-                                decimal? price = reader.IsDBNull(reader.GetOrdinal("price")) ? null : Convert.ToDecimal(reader["price"]);
+                                string? category = reader.IsDBNull(reader.GetOrdinal("product_category")) ? null : reader["product_category"].ToString();                                
                                 string? sizeName = reader.IsDBNull(reader.GetOrdinal("size_name")) ? null : reader["size_name"].ToString();
                                 string? allergensStr = reader.IsDBNull(reader.GetOrdinal("allergens")) ? null : reader["allergens"].ToString();             
                                 
-                                if (name != null && category != null
-                                    && price != null && sizeName != null)
+                                if (name != null && category != null && sizeName != null)
                                 {
                                     return new Product
                                     {
                                         ID = productId,
                                         Name = name,
                                         Category = category,
-                                        Price = price,
+                                        Price = 0,
                                         SizeName = sizeName,
                                         Allergens = allergensStr == null ? [] : [..allergensStr.Split(',')]
                                     };
@@ -158,7 +156,7 @@ namespace PizzaShed.Services.Data
                             return default!;
                         }
                     }
-                });
+                });                
                 return product;
             } catch (Exception ex)
             {
@@ -266,34 +264,36 @@ namespace PizzaShed.Services.Data
 
                                 while (reader.Read())
                                 {                                    
-                                    int? product_id = reader.IsDBNull(reader.GetOrdinal("product_id")) ? null : Convert.ToInt32(reader["product_id"]);
+                                    int product_id = reader.IsDBNull(reader.GetOrdinal("product_id")) ? 0 : Convert.ToInt32(reader["product_id"]);
                                     
                                     int quantity = reader.IsDBNull(reader.GetOrdinal("quantity")) ? 1 : Convert.ToInt32(reader["quantity"]);
                                     
                                     string? category = reader.IsDBNull(reader.GetOrdinal("product_category")) ? null : reader["product_category"].ToString();
-                                    string? size_name = reader.IsDBNull(reader.GetOrdinal("size_id")) ? null : reader["size_id"].ToString();
+                                    string? size_name = reader.IsDBNull(reader.GetOrdinal("size_id")) ? null : reader["size_name"].ToString();
 
-                                    int? size_id = reader.IsDBNull(reader.GetOrdinal("size_id")) ? null : Convert.ToInt32(reader["size_id"]);
+                                    int size_id = reader.IsDBNull(reader.GetOrdinal("size_id")) ? 0 : Convert.ToInt32(reader["size_id"]);
 
                                     // Add an object for every deal item required
                                     for (int i = 0; i < quantity; i++)
                                     {
-                                        if (product_id != null && size_id != null)
+                                        if (product_id != 0 && size_id != 0)
                                         {
                                             // If the deal item cannot be chosen - add the product / size id to an object
                                             // We will retrieve the product once this DB connection is closed
-                                            productsToAdd.Add(new ProductIds((int)product_id, (int)size_id));
+                                            productsToAdd.Add(new ProductIds(product_id, size_id));
                                             continue;
-                                        } else
+                                        } 
+                                        else
                                         {
                                             // If the deal item requires a choice - just add the category and size
                                             if (category != null && size_name != null)
                                             {
                                                 dealItems.Add(new Product
-                                                {
-                                                    Name = $"{category} - {size_name}",
+                                                {        
+                                                    ID = product_id,
+                                                    Name = $"{category}",
                                                     Category = category,
-                                                    Price = null,
+                                                    Price = 0,
                                                     SizeName = size_name,
                                                 });
                                             }                                            
@@ -310,7 +310,10 @@ namespace PizzaShed.Services.Data
                 // Now the connection is closed we can fetch the products
                 productsToAdd.ForEach(p =>
                 {
-                    dealItems.Add(GetProductById(p.ProductId, p.SizeId));
+                    Product itemToAdd = GetProductById(p.ProductId, p.SizeId);                    
+                    dealItems.Add(itemToAdd);
+
+                    EventLogger.LogInfo($"{itemToAdd.Name} {itemToAdd.ID}");
                 });
 
                 return dealItems;

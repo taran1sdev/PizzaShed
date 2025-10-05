@@ -21,6 +21,13 @@ namespace PizzaShed.Model
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        // Helper function for products that are members of a deal
+        public void InitializeDealMember()
+        {
+            SetupEventHandlers();
+            OnPropertyChanged(nameof(ReceiptName));
+        }      
+
         private void SetupEventHandlers()
         {
             Toppings.CollectionChanged += (s, e) =>
@@ -31,22 +38,28 @@ namespace PizzaShed.Model
             RequiredChoices.CollectionChanged += (s, e) =>
             {
                 OnPropertyChanged(nameof(ReceiptName));
-            };
+            };            
         }
 
         public override object Clone()
         {
             Product newProduct = (Product)this.MemberwiseClone();
 
-            newProduct.RequiredChoices = 
+
+            // Only deep clone non-deal items
+            if (newProduct.Category != "Deal")
+            {
+                newProduct.RequiredChoices =
                 new ObservableCollection<MenuItemBase>(
                     this.RequiredChoices.Select(r => (MenuItemBase)r.Clone())
                 );
 
-            newProduct.Toppings =
-                new ObservableCollection<Topping>(
-                    this.Toppings.Select(t => (Topping)t.Clone())
-                    );
+                newProduct.Toppings =
+                    new ObservableCollection<Topping>(
+                        this.Toppings.Select(t => (Topping)t.Clone())
+                        );
+            }
+            
 
             newProduct.SetupEventHandlers();
 
@@ -67,6 +80,10 @@ namespace PizzaShed.Model
         {
             SetupEventHandlers();
         }
+
+        public int? ParentDealID = null;
+        
+        public bool IsPlaceholder = false;
 
         public required string Category { get; set; }
 
@@ -107,10 +124,10 @@ namespace PizzaShed.Model
                                $"\n\t\t\t\t\t\t£{Price:N2}",
                     "side" => $"{Name} ({SizeName})" +
                               $"\n\t\t\t\t\t\t£{Price:N2}" +
-                              $"\nContains: {(string.Join(", ", Allergens))}",
+                              $"{(Allergens.Count > 0 ? $"\nContains: {string.Join(", ", Allergens)}" : "")}",
                     _ => $"{Name}" +
                          $"\n\t\t\t\t\t\t£{Price:N2}" +
-                         $"\nContains: {(string.Join(", ", Allergens))}",
+                         $"{(Allergens.Count > 0 ? $"\nContains: {string.Join(", ", Allergens)}" : "")}",
                 };
             }
         }
