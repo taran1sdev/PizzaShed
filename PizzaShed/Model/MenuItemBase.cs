@@ -7,8 +7,13 @@ using System.Threading.Tasks;
 namespace PizzaShed.Model
 {
     // This is a base class for all items on the menu - Products and Toppings
-    public class MenuItemBase
+    public class MenuItemBase : ICloneable
     {
+        public virtual object Clone()
+        {
+            return this.MemberwiseClone();
+        }
+
         public int ID { get; set; }
 
         public required string Name { get; set; }

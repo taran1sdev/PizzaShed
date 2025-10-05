@@ -23,6 +23,7 @@ namespace PizzaShed.ViewModels
 
         //------        ORDER       ------//
         public ICommand AddOrderItemCommand { get; }
+            
         public ICommand AddToppingItemCommand { get; }
         public ICommand RemoveOrderItemCommand { get; }
         public ICommand RemoveToppingItemCommand { get; }
@@ -97,15 +98,17 @@ namespace PizzaShed.ViewModels
             }
         }
 
-        // This is a fix for duplicate items in an order
-        // ListView will always select the first instance of an object 
-        // this way we force selection when item already exists in the order
-        private int _selectedOrderIndex = -1;
-        public int SelectedOrderIndex
+        private bool _isHalfAndHalf;
+        public bool IsHalfAndHalf
         {
-            get => _selectedOrderIndex;
-            set => SetProperty(ref _selectedOrderIndex, value);
+            get => _isHalfAndHalf;
+            set => SetProperty(ref _isHalfAndHalf, value);
         }
+
+        // Variable to temporarily store the first half when creating a HalfAndHalf pizza
+        private Product? _tempFirstHalf = null;
+
+        public ICommand HalfAndHalfCommand { get; }
 
         //------        MENU        ------//
         public ICommand SelectCategoryCommand { get; }
@@ -215,6 +218,8 @@ namespace PizzaShed.ViewModels
             AddOrderItemCommand = new RelayCommand<MenuItemBase>(AddOrderItem);
             // Binds to the void button to remove menu items
             RemoveOrderItemCommand = new RelayGenericCommand(RemoveOrderItem);
+            // Binds to the HalfAndHalf button
+            HalfAndHalfCommand = new RelayGenericCommand(HalfAndHalf);
 
             // This binds to the menu buttons allowing the user to change the view
             SelectCategoryCommand = new RelayCommand<string>(SelectCategory);
@@ -233,20 +238,72 @@ namespace PizzaShed.ViewModels
             if (orderItem == null)
                 return;
 
-            if (orderItem is Product product)
-            {
-                CurrentOrderItems.Add(product);
+            // If we have any product that isn't a half and half pizza
+            if (orderItem is Product product && !IsHalfAndHalf)
+            {                
+                Product newItem = (Product)product.Clone();
+                CurrentOrderItems.Add(newItem);
+                
                 // Select the item added
-                SelectedOrderIndex = CurrentOrderItems.Count - 1; 
+                SelectedOrderItem = newItem; 
+                OnPropertyChanged(nameof(OrderTotal));
+                return;
+            } 
+            // Selection for the first half
+            else if (orderItem is Product firstHalf && firstHalf.Category == "Pizza" && _tempFirstHalf == null)
+            {
+                _tempFirstHalf = (Product)firstHalf.Clone();
+                CurrentOrderItems.Add(_tempFirstHalf);
+                SelectedOrderItem = _tempFirstHalf;
+                OnPropertyChanged(nameof(OrderTotal));
+                return;
+            } 
+            else if (
+                orderItem is Product secondHalf 
+                && _tempFirstHalf != null
+                && secondHalf.Category == "Pizza" 
+                && secondHalf.SizeName == _tempFirstHalf.SizeName
+                && secondHalf.Name != _tempFirstHalf.Name // Check our halfs are unique
+            )
+            {                
+                Product finalPizza = new Product
+                {
+                    Name = $"{_tempFirstHalf.Name} / {secondHalf.Name}",
+                    Price = Math.Max((decimal)_tempFirstHalf.Price, (decimal)secondHalf.Price),
+                    RequiredChoices = _tempFirstHalf.RequiredChoices,
+                    Category = _tempFirstHalf.Category,
+                    Allergens = [.. _tempFirstHalf.Allergens.Union(secondHalf.Allergens)],
+                    Toppings = [],
+                    SizeName = _tempFirstHalf.SizeName,
+                };
+
+                // We clone the object to create a unique instance and subscribe event handlers
+                finalPizza = (Product)finalPizza.Clone();
+
+                HalfAndHalf();
+                
+                CurrentOrderItems.Add(finalPizza);
+                SelectedOrderItem = finalPizza;
+                
                 OnPropertyChanged(nameof(OrderTotal));
                 return;
             }
+            else if (orderItem is Product)
+            {
+                // If user selects half/half and changes size / category then we will reach this case
+                // We remove the temp pizza, reset the state of IsHalfAndHalf and call the function again
+                HalfAndHalf();
+                AddOrderItem(orderItem);
+            }
 
-            if (SelectedOrderItem == null)
-                return;
             
+            
+
             if (orderItem is Topping topping)
-            {                
+            {
+                if (SelectedOrderItem == null)
+                    return;
+
                 if (
                     SelectedOrderItem.Category.Equals("Pizza", StringComparison.OrdinalIgnoreCase)
                     || SelectedOrderItem.Category.Equals("Kebab", StringComparison.OrdinalIgnoreCase)
@@ -281,7 +338,7 @@ namespace PizzaShed.ViewModels
                 return;
 
             if (CurrentOrderItems.Remove(SelectedOrderItem))
-            {                
+            {
                 OnPropertyChanged(nameof(OrderTotal));
 
                 if (CurrentOrderItems.Count == 0)
@@ -290,8 +347,20 @@ namespace PizzaShed.ViewModels
                 }
                 else
                 {
-                    SelectedOrderIndex = CurrentOrderItems.Count - 1;
+                    SelectedOrderItem = CurrentOrderItems.Last();
                 }
+            }                                                    
+        }
+
+        private void HalfAndHalf()
+        {
+            IsHalfAndHalf = !IsHalfAndHalf;
+            
+            if (!IsHalfAndHalf && _tempFirstHalf != null)
+            {
+                // Reset our temporary field
+                CurrentOrderItems.Remove(_tempFirstHalf);
+                _tempFirstHalf = null;
             }
         }
 
@@ -384,13 +453,13 @@ namespace PizzaShed.ViewModels
                 return;
 
             // We set the default value for the Pizza menu layout
-            IsPizza = false;
+            IsPizza = false;            
 
             // Assign the new category - Because we group some categories we need to handle conversion
             switch (category)
             {
                 case "Pizza":
-                    IsPizza = true;
+                    IsPizza = true;                    
                     CurrentSizeSelection = "Small";
                     break;
                 case "Wrap":
@@ -412,7 +481,7 @@ namespace PizzaShed.ViewModels
         private void SelectSize(string? size)
         {
             if (size != null || CurrentSizeSelection != size)
-            {
+            {                
                 CurrentSizeSelection = size;
                 UpdateMenu();
             }

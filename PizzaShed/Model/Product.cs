@@ -21,7 +21,7 @@ namespace PizzaShed.Model
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        public Product()
+        private void SetupEventHandlers()
         {
             Toppings.CollectionChanged += (s, e) =>
             {
@@ -30,8 +30,42 @@ namespace PizzaShed.Model
 
             RequiredChoices.CollectionChanged += (s, e) =>
             {
-                OnPropertyChanged(nameof(ReceiptName)); 
-            };  
+                OnPropertyChanged(nameof(ReceiptName));
+            };
+        }
+
+        public override object Clone()
+        {
+            Product newProduct = (Product)this.MemberwiseClone();
+
+            newProduct.RequiredChoices = 
+                new ObservableCollection<MenuItemBase>(
+                    this.RequiredChoices.Select(r => (MenuItemBase)r.Clone())
+                );
+
+            newProduct.Toppings =
+                new ObservableCollection<Topping>(
+                    this.Toppings.Select(t => (Topping)t.Clone())
+                    );
+
+            newProduct.SetupEventHandlers();
+
+            return newProduct;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return ReferenceEquals(this, obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return RuntimeHelpers.GetHashCode(this);
+        }
+
+        public Product()
+        {
+            SetupEventHandlers();
         }
 
         public required string Category { get; set; }
