@@ -18,7 +18,7 @@ namespace PizzaShed.Model
 
         public required string Name { get; set; }
 
-        public required decimal? Price { get; set; }
+        public required decimal Price { get; set; }
 
         // We override these methods so we can compare our menu items
         public override bool Equals(object? obj)

@@ -78,7 +78,7 @@ namespace PizzaShed.Services.Data
                                             Name = name,
                                             Category = category,   
                                             SizeName = sizeName,
-                                            Price = price,
+                                            Price = (decimal)price,
                                             Allergens = allergensStr == null ? [] : [.. allergensStr.Split(',')]
                                         });
                                     }
@@ -197,7 +197,7 @@ namespace PizzaShed.Services.Data
                                             ID = dealId,
                                             Name = name,
                                             Category = "Deal",
-                                            Price = price,                                                                                        
+                                            Price = (decimal)price,                                                                                        
                                         });
                                     } else
                                     {

@@ -21,6 +21,7 @@ namespace PizzaShed.ViewModels
         {
             _userRepository = userRepository;
             _session = session;
+            _currentViewModel = this;
 
             _session.SessionChanged += OnSessionChanged;
 
@@ -47,10 +48,10 @@ namespace PizzaShed.ViewModels
                     case "cashier" or "manager":
                         var ProductRepository = new ProductRepository();
                         var ToppingRepository = new ToppingRepository();
-                        CurrentViewModel = new CashierViewModel(ProductRepository, ToppingRepository, _session);
+                        CurrentViewModel = new CashierViewModel(ProductRepository, ToppingRepository, _session, []);
                         break;
                     default:
-                    CurrentViewModel = new LoginViewModel(_userRepository, _session);
+                        CurrentViewModel = new LoginViewModel(_userRepository, _session);
                         break;
                 }                              
             }

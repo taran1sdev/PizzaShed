@@ -57,12 +57,13 @@ namespace PizzaShed.Behaviours
             )
             {
 
-                // We can safely ignore the _scrollViewer may be null warning as we only subscribe after a not null check
-                // Using Async dispatcher ensures we are on the UI thread and the UI has been updated
-                _scrollViewer.Dispatcher.InvokeAsync(() =>
+                if (_scrollViewer != null)
                 {
-                    _scrollViewer.ScrollToBottom();
-                }, DispatcherPriority.Loaded);
+                    _scrollViewer.Dispatcher.InvokeAsync(() =>
+                    {
+                        _scrollViewer.ScrollToBottom();
+                    }, DispatcherPriority.Loaded);
+                }                
             }
         }
     }

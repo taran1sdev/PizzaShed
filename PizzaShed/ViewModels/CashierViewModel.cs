@@ -25,10 +25,8 @@ namespace PizzaShed.ViewModels
 
         //------        ORDER       ------//
         public ICommand AddOrderItemCommand { get; }
-            
-        public ICommand AddToppingItemCommand { get; }
-        public ICommand RemoveOrderItemCommand { get; }
-        public ICommand RemoveToppingItemCommand { get; }
+                    
+        public ICommand RemoveOrderItemCommand { get; }        
 
         // Property to hold our order type
         private bool _isDelivery;
@@ -222,14 +220,27 @@ namespace PizzaShed.ViewModels
         public CashierViewModel(
             IProductRepository<Product> productRepo,
             IProductRepository<Topping> toppingRepo,
-            ISession session
+            ISession session,
+            ObservableCollection<Product> currentOrderItems
         )
         {
             _productRepo = productRepo;
             _toppingRepo = toppingRepo;
             _session = session;
 
-            _currentOrderItems = [];
+            if (currentOrderItems.Count > 0)
+            {
+                _currentOrderItems = currentOrderItems;
+            } else
+            {
+                _currentOrderItems = [];
+            }
+
+
+            // Set with default values initially
+            _selectedCategory = "";
+            _currentToppingMenu = [];
+            _currentProductMenu = [];
 
             IsDeliveryCommand = new RelayGenericCommand(Delivery);
             // Binds to menu buttons to allow the user to add items to the current order
@@ -321,7 +332,7 @@ namespace PizzaShed.ViewModels
                 Product finalPizza = new Product
                 {
                     Name = $"{_tempFirstHalf.Name} / {secondHalf.Name}",
-                    Price = Math.Max((decimal)_tempFirstHalf.Price, (decimal)secondHalf.Price),
+                    Price = Math.Max(_tempFirstHalf.Price, secondHalf.Price),
                     RequiredChoices = _tempFirstHalf.RequiredChoices,
                     Category = _tempFirstHalf.Category,
                     Allergens = [.. _tempFirstHalf.Allergens.Union(secondHalf.Allergens)],
