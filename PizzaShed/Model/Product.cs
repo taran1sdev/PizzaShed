@@ -1,4 +1,4 @@
-﻿using Microsoft.Xaml.Behaviors.Media;
+﻿ using Microsoft.Xaml.Behaviors.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

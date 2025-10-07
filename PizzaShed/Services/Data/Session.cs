@@ -13,7 +13,7 @@ namespace PizzaShed.Services.Data
         private static readonly Session _instance = new();
         public static Session Instance { get { return _instance; } } 
 
-        public User? CurrentUser { get; private set; }
+        public User? CurrentUser { get; private set; }        
 
         // implement redirection on session change
         public event EventHandler? SessionChanged;

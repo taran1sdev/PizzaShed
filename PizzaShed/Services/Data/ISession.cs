@@ -15,6 +15,7 @@ namespace PizzaShed.Services.Data
         void Login(User user);
         void Logout();
 
+        public User? CurrentUser { get; }
         bool IsLoggedIn { get; }
         string UserRole { get; }
     }

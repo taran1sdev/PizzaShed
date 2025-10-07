@@ -374,6 +374,7 @@
             HorizontalAlignment="Right"
             Content="Checkout"
             Width="240"
+            Command="{Binding CheckoutCommand}"
             />
     </Grid>
 </UserControl>

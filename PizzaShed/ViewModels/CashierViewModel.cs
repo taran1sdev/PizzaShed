@@ -123,6 +123,8 @@ namespace PizzaShed.ViewModels
 
         public ICommand HalfAndHalfCommand { get; }
 
+        public ICommand CheckoutCommand { get;  }
+
         //------        MENU        ------//
         public ICommand SelectCategoryCommand { get; }
         public ICommand SelectSizeCommand { get; }
@@ -249,6 +251,8 @@ namespace PizzaShed.ViewModels
             RemoveOrderItemCommand = new RelayGenericCommand(RemoveOrderItem);
             // Binds to the HalfAndHalf button
             HalfAndHalfCommand = new RelayGenericCommand(HalfAndHalf);
+            // Triggers Checkout process
+            CheckoutCommand = new RelayGenericCommand(Checkout);
 
             // This binds to the menu buttons allowing the user to change the view
             SelectCategoryCommand = new RelayCommand<string>(SelectCategory);
@@ -600,7 +604,22 @@ namespace PizzaShed.ViewModels
                 CleanupDeal(_activeDealParent.ParentDealID.Value);
             }
 
+            if (CurrentOrderItems.Count > 0 && _session.CurrentUser != null)
+            {
 
+                Order currentOrder = new(_session.CurrentUser.Id, CurrentProductMenu);
+
+                OrderRepository _orderRepository = new(DatabaseManager.Instance);
+
+                if (_orderRepository.CreateCollectionOrder(currentOrder) != 0)
+                {
+                    EventLogger.LogInfo("Order created successfully!");
+                }
+                else
+                {
+                    EventLogger.LogError("Order creation failed..");
+                }
+            }
         }
 
         //------        MENU        ------//

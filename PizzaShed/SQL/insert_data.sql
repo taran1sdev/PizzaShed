@@ -558,6 +558,6 @@ SELECT MD.deal_id, 'Drink', (SELECT S.size_id FROM Sizes AS S WHERE S.size_name 
 FROM Meal_Deals AS MD
 WHERE MD.deal_name LIKE 'Kebab%';
 
-INSERT INTO Order_Statuses (status_name)
-VALUES ('New'), ('Preparing'), ('Ready'), ('Out for delivery'), ('Completed'), ('Cancelled'), ('Refunded')
+INSERT INTO Order_Status (status_name)
+VALUES ('New'), ('Preparing'), ('Pizza Ready'), ('Grill Ready'), ('Order Ready'), ('Out for delivery'), ('Completed'), ('Cancelled'), ('Refunded')
 

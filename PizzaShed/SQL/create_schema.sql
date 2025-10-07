@@ -24,7 +24,7 @@ CREATE TABLE Customers (
 
 ALTER TABLE Customers ADD CONSTRAINT U_PHONE_NO UNIQUE(phone_no);
 
-CREATE TABLE Order_Statuses (
+CREATE TABLE Order_Status (
   order_status_id int IDENTITY(1,1),
   status_name varchar(16) NOT NULL,
   
@@ -177,7 +177,7 @@ CREATE TABLE Orders (
   order_status_id int NOT NULL,
   order_date datetime NOT NULL,
   collection_time datetime,
-  order_source varchar(8) NOT NULL,
+  order_source varchar(8),
   order_notes varchar(255),
   order_type varchar(16) NOT NULL,
   driver_id int,
@@ -188,7 +188,7 @@ CREATE TABLE Orders (
   
   FOREIGN KEY(user_id) REFERENCES Users (user_id),
   FOREIGN KEY(customer_id) REFERENCES Customers (customer_id),
-  FOREIGN KEY(order_status_id) REFERENCES Order_Statuses (order_status_id),
+  FOREIGN KEY(order_status_id) REFERENCES Order_Status (order_status_id),
   FOREIGN KEY(driver_id) REFERENCES Drivers (driver_id),
   FOREIGN KEY(promo_id) REFERENCES Promotions (promo_id),
   PRIMARY KEY(order_id)
@@ -197,9 +197,8 @@ CREATE TABLE Orders (
 CREATE TABLE Order_Products (
   order_product_id int IDENTITY(1,1),
   order_id int NOT NULL,
-  product_id int NOT NULL,
-  size_id int NOT NULL,
-  quantity int NOT NULL,
+  product_id int,
+  size_id int,
   deal_id int,
   deal_instance_id int,
   
@@ -218,3 +217,16 @@ CREATE TABLE Order_Product_Toppings (
   FOREIGN KEY(topping_id) REFERENCES Toppings(topping_id),
   PRIMARY KEY(order_product_id,topping_id)
 );
+
+--CREATE TYPE ProductListType AS Table (
+--	product_id INT,
+--	size_name VARCHAR(30),
+--	deal_id INT NULL,
+--	deal_instance_id INT NULL,
+--	client_product_id INT
+--);
+
+--CREATE TYPE ToppingListType AS TABLE (
+--	client_product_id INT,
+--	topping_id INT
+--);
