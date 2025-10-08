@@ -28,7 +28,18 @@ namespace PizzaShed.ViewModels
         //------        ORDER       ------//
         public ICommand AddOrderItemCommand { get; }
                     
-        public ICommand RemoveOrderItemCommand { get; }        
+        public ICommand RemoveOrderItemCommand { get; }     
+        
+        public int OrderID { 
+            get
+            {
+                if (_currentOrder != null)
+                {
+                    return _currentOrder.ID;
+                }
+                return 0;
+            } 
+        }
 
         // Property to hold our order type
         private bool _isDelivery;
@@ -623,7 +634,11 @@ namespace PizzaShed.ViewModels
             if (CurrentOrderItems.Count > 0 && _session.CurrentUser != null)
             {
 
-                _currentOrder = new(_session.CurrentUser.Id, CurrentOrderItems);                                
+                _currentOrder = new Order{
+                    UserID = _session.CurrentUser.Id, 
+                    OrderProducts = CurrentOrderItems,
+                    OrderStatus = "New"
+                };                                
 
                 if (!IsDelivery)
                 {

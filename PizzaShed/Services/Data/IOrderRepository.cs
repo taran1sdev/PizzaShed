@@ -10,11 +10,13 @@ namespace PizzaShed.Services.Data
 {
     public interface IOrderRepository
     {
+        public ObservableCollection<Promotion> FetchEligiblePromotions(decimal orderPrice);
+
         public int CreateDeliveryOrder(Order order, Customer customer);
         
         public int CreateCollectionOrder(Order products);        
 
-        public Order GetOrderByOrderNumber(int orderNumber);
+        public Order? GetOrderByOrderNumber(int orderNumber);
 
         public ObservableCollection<Order> GetOrdersByRole(string role);
     }

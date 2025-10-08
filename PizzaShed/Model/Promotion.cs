@@ -8,14 +8,36 @@ namespace PizzaShed.Model
 {
     public class Promotion
     {
-        public int ID { get; } 
+        public int ID { get; set; } 
         
-        public string? PromoCode { get; }
+        public string? PromoCode { get; set;  }        
 
-        public string Name { get; }
+        public required string Description { get; set; }
 
-        public decimal DiscountValue { get; }
+        public decimal DiscountValue { get; set; }
+        
+        public string ReceiptName
+        {
+            get
+            {
+                if (PromoCode == null)
+                {
+                    return Description;
+                }
+                return $"{PromoCode}: {Description}"; 
+            }
+        }
 
-        public decimal MinSpend { get; }
+        public string MenuName
+        {
+            get
+            {
+                if (PromoCode == null)
+                {
+                    return Description.Split(' ')[0];
+                }
+                return PromoCode;
+            }
+        }
     }
 }

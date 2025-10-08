@@ -85,6 +85,9 @@ namespace PizzaShed.Model
         
         public bool IsPlaceholder = false;
 
+        // This is for when we need to query toppings on existing orders
+        public int OrderProductId = 0;
+
         public required string Category { get; set; }
 
         public string? SizeName { get; set; }        

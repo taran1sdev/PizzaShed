@@ -27,11 +27,62 @@
                 <Setter Property="Margin" Value="10,10" />
             </Style>
 
+            <Style TargetType="{x:Type TextBlock}" >
+                <Setter Property="FontSize" Value="30" />
+                <Setter Property="Foreground" Value="AntiqueWhite" />
+                <Setter Property="Margin" Value="20,20" />
+            </Style>
+
             <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                 <Setter Property="FontSize" Value="18" />
                 <Setter Property="Height" Value="60" />
                 <Setter Property="Width" Value="160" />
-                <Setter Property="Margin" Value="10,10" />
+                <Setter Property="Margin" Value="20,20" />
+            </Style>
+
+            <Style TargetType="{x:Type TextBlock}" x:Key="NotesTitle">
+                <Style.Triggers>
+                    <DataTrigger 
+                        Binding="{Binding Path=DataContext.EligibleForPromotion,
+                        RelativeSource={RelativeSource Mode=FindAncestor,
+                        AncestorType={x:Type UserControl}}}"
+                        Value="True">
+                        <Setter Property="Grid.Row" Value="2" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="{x:Type TextBox}" x:Key="NotesStyle">
+                <Style.Triggers>
+                    <DataTrigger
+                        Binding="{Binding Path=DataContext.EligibleForPromotion,
+                        RelativeSource={RelativeSource Mode=FindAncestor,
+                        AncestorType={x:Type UserControl}}}"
+                        Value="True">
+                        <Setter Property="Grid.Row" Value="3" />
+                        <Setter Property="Grid.RowSpan" Value="2" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="{x:Type TextBlock}" x:Key="ReceiptLabelStyle">
+                <Setter Property="FontSize" Value="30" />
+                <Setter Property="Foreground" Value="AntiqueWhite" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="Grid.Row" Value="3" />
+                <Setter Property="Grid.Column" Value="1" />
+                <Setter Property="Height" Value="40" />
+            </Style>
+
+            <Style TargetType="{x:Type TextBlock}" x:Key="ReceiptValueStyle">
+                <Setter Property="FontSize" Value="30" />
+                <Setter Property="Foreground" Value="AntiqueWhite" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="Grid.Row" Value="3" />
+                <Setter Property="Grid.Column" Value="1" />
+                <Setter Property="Height" Value="40" />
             </Style>
         </ResourceDictionary>
 
@@ -40,8 +91,9 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="90"></RowDefinition>
-            <RowDefinition Height="0.33*"/>
-            <RowDefinition Height="0.67*"/>
+            <RowDefinition Height="0.3*"/>
+            <RowDefinition Height="0.3*" />
+            <RowDefinition Height="*"/>
             <RowDefinition Height="90"></RowDefinition>
         </Grid.RowDefinitions>
 
@@ -59,15 +111,15 @@
             Command="{Binding LogoutCommand}"
             />
 
-        <ComboBox
-            x:Name="Promotions"
+        <TextBlock 
+            x:Name="OrderNo"
             Grid.Row="0"
             Grid.Column="1"
             HorizontalAlignment="Left"
-            SelectedItem="0"
-            >
-            <ComboBoxItem x:Name="default"  Content="Test" />
-        </ComboBox>
+            VerticalAlignment="Center"
+                        
+            Text="{Binding OrderNo}"
+            />
 
         <Button
             x:Name="Phone"
@@ -76,16 +128,18 @@
             HorizontalAlignment="Right"
             Content="Phone"
             Command="{Binding PhoneCommand}"
-            Visibility="{Binding IsCollection}"
+            Visibility="{Binding IsCollection, Converter={StaticResource IsVisible}}"
             />
 
         <TextBlock
             x:Name="CollectionTitle"
             Grid.Row="1"
             Grid.Column="0"
-            VerticalAlignment="Top"
-            HorizontalAlignment="Center"
-            Text="Collection Time:"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Left"
+            Visibility="{Binding IsCollection, Converter={StaticResource IsVisible}}"
+                        
+            Text="Collection&#x0a;    Time"
             />
 
 
@@ -93,67 +147,145 @@
             x:Name="CollectionTime"
             Grid.Row="1"
             Grid.Column="0"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Bottom"
-            SelectedItem="0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            SelectedItem="0"          
+            Visibility="{Binding IsCollection, Converter={StaticResource IsVisible}}"            
             >
-            <ComboBoxItem Content="Test" />
-            </ComboBox>
+        </ComboBox>
+        
+        <TextBlock
+            x:Name="PromotionTitle"
+            Grid.Row="2"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Left"
+            Visibility="{Binding EligibleForPromotion, Converter={StaticResource IsVisible}}"
+            
+            Text="Promotion"
+            />
+
+        <ComboBox
+            x:Name="Promotions"
+            Grid.Row="2"
+            Grid.Column="0"
+            HorizontalAlignment="Right"            
+            Visibility="{Binding EligibleForPromotion, Converter={StaticResource IsVisible}}"
+            
+            ItemsSource="{Binding Path=Promotions}"
+            DisplayMemberPath="MenuName"
+            SelectedValuePath="MenuName"
+            SelectedItem="{Binding Path=SelectedPromotion}"             
+            >
+        </ComboBox>
 
         <TextBlock
             x:Name="NotesTitle"
-            Grid.Row="2"
+            Grid.Row="3"
             Grid.Column="0"
             VerticalAlignment="Top"
             HorizontalAlignment="Center"
-            Text="Order Notes:"
-            />
+            Text="Order Notes"/>
 
         <TextBox
             x:Name="Notes"
-            Grid.Row="2"
+            Grid.Row="3"
             Grid.Column="0"
-            VerticalAlignment="Bottom"
+            VerticalAlignment="Stretch"
             HorizontalAlignment="Stretch"
+            VerticalContentAlignment="Top"
+            HorizontalContentAlignment="Left"
+            FontSize="24"
+            
+            Margin="20,100,20,0"
             />
 
         <ListView
             x:Name="OrderReceipt"
             Grid.Row="1"
-            Grid.RowSpan="2"
+            Grid.RowSpan="3"
             Grid.Column="1"
             VerticalAlignment="Stretch"
-            HorizontalAlignment="Stretch"
+            HorizontalAlignment="Stretch"            
+            ItemsSource="{Binding OrderProducts}"
+            DisplayMemberPath="ReceiptName"            
+            Margin="0,0,0,120"
+            >
+            <!-- We don't need to be able to select our recipt items -->
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="Focusable" Value="False" />
+                    <Setter Property="FontSize" Value="20" />
+                    <Setter Property="Margin" Value="20,0,0,0" />
+                    <Setter Property="BorderBrush" Value="#FFFFC947" />
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
+
+        <TextBlock
+            x:Name="DiscountLabel"            
+            Style="{StaticResource ReceiptLabelStyle}"
+            Text="Discount:"
+            Margin="20,0,0,80"
+            />
+
+        <TextBlock
+            x:Name="DiscountValue"            
+            Style="{StaticResource ReceiptValueStyle}"
+            Foreground="Red"
+            Text="{Binding DiscountValue}"
+            Margin="0,0,30,80"
+            />
+
+        <TextBlock
+            x:Name="VATLabel"
+            Style="{StaticResource ReceiptLabelStyle}"
+            Text="VAT:"            
+            Margin="20,0,0,40"
+            />
+
+        <TextBlock
+            x:Name="VATValue"            
+            Style="{StaticResource ReceiptValueStyle}"
+            Text="{Binding VATValue}"
+            Margin="0,0,30,40"
+            />
+
+        <TextBlock 
+            x:Name="OrderTotalLabel"
+            Style="{StaticResource ReceiptLabelStyle}"
+            Text="Total:"   
+            Margin="20,0,0,0"
+            />
+
+        <TextBlock
+            x:Name="OrderTotalValue"            
+            Style="{StaticResource ReceiptValueStyle}"
+            Text="{Binding TotalPriceValue}"
+            Margin="0,0,30,0"
             />
         
         <Button
             x:Name="Back"
-            Grid.Row="3"
+            Grid.Row="4"
             Grid.Column="0"
             HorizontalAlignment="Left"
             Content="Back"
             
             />
 
-        <Button
-            x:Name="Cancel"
-            Grid.Row="3"
-            Grid.Column="1"
-            HorizontalAlignment="Left"
-            Content="Cancel"
-            />
 
         <Button
             x:Name="Card"
-            Grid.Row="3"
+            Grid.Row="4"
             Grid.Column="1"
-            HorizontalAlignment="Center"
+            HorizontalAlignment="Left"
             Content="Card"
             />
 
         <Button
             x:Name="Cash"
-            Grid.Row="3"
+            Grid.Row="4"
             Grid.Column="1"
             HorizontalAlignment="Right"
             Content="Cash"

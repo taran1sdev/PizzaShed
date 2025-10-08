@@ -1,27 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Configuration;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PizzaShed.Model
 {
-    public class Order
+    public class Order 
     {
+
         public int ID { get; set; } = 0;
 
-        public int UserID { get; }
+        public int UserID { get; set; }
 
         public int? CustomerID { get; set; }
 
-        public string OrderSource { get; set; }
+        public string? OrderSource { get; set; }
 
         public string? OrderNotes { get; set; }
 
-        public string OrderType { get; set; }
+        public string? OrderType { get; set; }
 
-        public string OrderStatus { get; set; }
+        public required string OrderStatus { get; set; }
 
         public DateTime OrderDate { get; set; }
 
@@ -38,28 +42,30 @@ namespace PizzaShed.Model
         {
             get
             {
-                decimal total = OrderProducts.Sum(static p => p.Price + p.Toppings.Sum(static t => t.Price));
-                if (Promo != null)
-                {
+                decimal total = OrderProducts
+                                .Sum(static p => p.Price + p.Toppings
+                                .Sum(static t => t.Price));
+                
+                if (Promo != null) 
                     total = total - (total * Promo.DiscountValue);
-                }
+                
                 return total;
             }
         }
 
+        // Return the total price excluding meal deal items (and their toppings)
+        public decimal PriceExcludingDeals => OrderProducts.Where(p => p.ParentDealID == null)
+                                                           .Sum(static p => p.Price + p.Toppings
+                                                           .Sum(static t => t.Price));                
+            
+        
+
         // For displaying VAT amounts on receipts for compliance
-        public string VAT => $"{TotalPrice * (decimal)0.2:N2}";                 
+        public decimal VAT => TotalPrice * (decimal)0.2;
 
-        public ObservableCollection<Product> OrderProducts { get; set; }
+        public ObservableCollection<Product> OrderProducts { get; set; } = [];
 
-        public Promotion? Promo { get; set; }
-
-        // When we initially create an order all we need is the userID and products in the order
-        // This may need to change when we are creating orders for display but for now it's fine
-        public Order(int userID, ObservableCollection<Product> products)
-        {
-            UserID = userID;
-            OrderProducts = products;
-        }
+        
+        public Promotion? Promo { get; set; }        
     }
 }

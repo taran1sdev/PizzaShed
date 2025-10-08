@@ -8,6 +8,7 @@ using PizzaShed.Model;
 using PizzaShed.Services.Logging;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Numerics;
 
 namespace PizzaShed.Services.Data
 {
@@ -19,6 +20,65 @@ namespace PizzaShed.Services.Data
             _databaseManager = databaseManager;
         }
 
+        public ObservableCollection<Promotion> FetchEligiblePromotions(decimal orderPrice)
+        {
+            string queryString = @"
+                SELECT 
+	                promo_id, 
+	                description,
+                    promo_code,
+	                discount_value,
+	                min_spend
+                FROM Promotions 
+                WHERE min_spend <= @orderPrice;";
+
+            try
+            {
+                return _databaseManager.ExecuteQuery(conn => 
+                {
+                    
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@orderPrice", orderPrice);
+
+                        using (SqlDataReader reader = query.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                ObservableCollection<Promotion> promotions = [];
+
+                                while (reader.Read())
+                                {
+                                    int promoId = reader.IsDBNull(reader.GetOrdinal("promo_id")) ? 0 : Convert.ToInt32(reader["promo_id"]);
+                                    string? description = reader.IsDBNull(reader.GetOrdinal("description")) ? string.Empty : reader["description"].ToString();
+                                    string? promo_code = reader.IsDBNull(reader.GetOrdinal("promo_code")) ? null : reader["promo_code"].ToString();
+                                    decimal discount = reader.IsDBNull(reader.GetOrdinal("discount_value")) ? 0 : Convert.ToDecimal(reader["discount_value"]);
+
+                                    if (description != null)
+                                    {
+                                        promotions.Add(new Promotion
+                                        {
+                                            ID = promoId,
+                                            Description = description,
+                                            PromoCode = promo_code,
+                                            DiscountValue = discount
+                                        });
+
+                                    }
+                                }
+                                return promotions;
+                            }
+                            return [];
+                        }
+                    }
+                });                   
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to fetch promotions " + ex.Message);
+            }
+            return [];
+        }
 
         public int CreateDeliveryOrder(Order order, Customer customer)
         {
@@ -141,9 +201,289 @@ namespace PizzaShed.Services.Data
             return 0;
         }
 
-        public Order GetOrderByOrderNumber(int orderNumber)
+        public Order? GetOrderByOrderNumber(int orderNumber)
         {
+            string queryString = @"
+                SELECT 
+	                o.order_id, 
+                    u.user_id,
+	                u.name, 
+	                o.order_date, 
+                    o.order_type,
+                    os.status_name
+                FROM Orders AS o
+                INNER JOIN Users AS u
+	                ON o.user_id = u.user_id
+                INNER JOIN Order_Status AS os
+	                ON o.order_status_id = os.order_status_id
+                WHERE order_id = @orderNumber;";
+
+            try
+            {
+                Order? currentOrder = _databaseManager.ExecuteQuery(conn => {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@orderNumber", orderNumber);
+
+                        using (SqlDataReader reader = query.ExecuteReader())
+                        {
+                            if (reader.HasRows && reader.Read())
+                            {
+                                int orderId = reader.IsDBNull(reader.GetOrdinal("order_id")) ? 0 : Convert.ToInt32(reader["order_id"]);
+                                int userID = reader.IsDBNull(reader.GetOrdinal("user_id")) ? 0 : Convert.ToInt32(reader["user_id"]);
+                                string? userName = reader.IsDBNull(reader.GetOrdinal("name")) ? null : reader["name"].ToString();
+                                DateTime? orderDate = reader.IsDBNull(reader.GetOrdinal("order_date")) ? null : Convert.ToDateTime(reader["order_date"]);
+                                string? orderType = reader.IsDBNull(reader.GetOrdinal("order_type")) ? null : reader["order_type"].ToString();
+                                string? orderStatus = reader.IsDBNull(reader.GetOrdinal("status_name")) ? null : reader["status_name"].ToString();
+
+                                if (orderId != 0 && orderDate != null && orderStatus != null)
+                                {
+                                    return new Order
+                                    {
+                                        ID = orderId,
+                                        UserID = userID,
+                                        OrderDate = (DateTime)orderDate,
+                                        OrderType = orderType,
+                                        OrderStatus = orderStatus
+                                    };
+                                }                                
+                            }
+                            return null;
+                        }
+                    }
+                });
+
+                if (currentOrder != null)
+                {
+                    GetOrderProducts(currentOrder.ID).ForEach(p =>
+                    {
+                        currentOrder.OrderProducts.Add(p);
+                    });                    
+
+                    return currentOrder;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Error retrieving order " + ex.Message);
+            }
             return null;
+        }
+
+        // Helper function to retrieve products associated with an order
+        private List<Product> GetOrderProducts(int orderId)
+        {
+            // To handle meal deals we switch out the product name / category when the query returns null values 
+            string queryString = @"
+                SELECT 
+	                p.product_id, 
+	                op.order_product_id, 
+	                (SELECT ISNULL(p.product_name, md.deal_name)) AS product_name, 
+                    (SELECT ISNULL(p.product_category,'Deal')) AS product_category,
+	                s.size_name, 
+	                (SELECT ISNULL(pp.price,md.price)) AS price,	
+	                op.deal_id,
+	                op.deal_instance_id,
+					STRING_AGG((a.allergen_description), ',') as allergens
+                FROM Order_Products as op
+                LEFT JOIN Products AS p
+	                ON op.product_id = p.product_id
+                LEFT JOIN sizes AS s
+	                ON op.size_id = s.size_id
+                LEFT JOIN Product_Prices AS pp
+	                ON pp.product_id = p.product_id AND pp.size_id = s.size_id
+                Left JOIN Meal_Deals AS md
+	                ON op.deal_id = md.deal_id
+				LEFT JOIN Product_Allergens AS pa
+					ON pa.product_id = p.product_id
+				LEFT JOIN Allergens AS a
+					ON a.allergen_id = pa.allergen_id
+                WHERE op.order_id = @orderId
+				GROUP BY op.order_product_id, op.deal_id, op.deal_instance_id, s.size_name, 
+                p.product_id, product_name, product_category, deal_name, md.price, pp.price";
+
+            try
+            {
+                List<Product> products = _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@orderId", orderId);
+
+                        using (SqlDataReader reader = query.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                List<Product> products = [];
+
+                                while (reader.Read())
+                                {                                    
+                                    int? productId = reader.IsDBNull(reader.GetOrdinal("product_id")) ? null : Convert.ToInt32(reader["product_id"]);
+                                    int orderProductId = reader.IsDBNull(reader.GetOrdinal("order_product_id")) ? 0 : Convert.ToInt32(reader["order_product_id"]);
+                                    string? productName = reader.IsDBNull(reader.GetOrdinal("product_name")) ? string.Empty : reader["product_name"].ToString();
+                                    string? productCategory = reader.IsDBNull(reader.GetOrdinal("product_category")) ? string.Empty : reader["product_category"].ToString();
+                                    string? sizeName = reader.IsDBNull(reader.GetOrdinal("size_name")) ? string.Empty : reader["size_name"].ToString();
+                                    decimal price = reader.IsDBNull(reader.GetOrdinal("price")) ? 0 : Convert.ToDecimal(reader["price"]);
+                                    int? dealId = reader.IsDBNull(reader.GetOrdinal("deal_id")) ? null : Convert.ToInt32(reader["deal_id"]);
+                                    int? dealInstanceId = reader.IsDBNull(reader.GetOrdinal("deal_instance_id")) ? null : Convert.ToInt32(reader["deal_instance_id"]);
+                                    string? allergens = reader.IsDBNull(reader.GetOrdinal("allergens")) ? null : reader["allergens"].ToString();
+
+                                    // Check if the product is a deal item
+                                    if (productCategory != null && productCategory == "Deal" && dealId != null && dealInstanceId != null)
+                                    {
+                                        products.Add(new Product
+                                        {
+                                            ID = (int)dealId,
+                                            ParentDealID = (int)dealInstanceId,
+                                            Category = productCategory,
+                                            Name = productName ?? "",
+                                            Price = price,
+                                            OrderProductId = orderProductId
+                                        });                                        
+                                    } // Check if the product is a member of a deal - if so set the price to 0 
+                                    else if (dealId == null && productId != null && dealInstanceId != null)
+                                    {
+                                        products.Add(new Product { 
+                                            ID = (int)productId,
+                                            ParentDealID = dealInstanceId,
+                                            Category = productCategory ?? "",
+                                            Name = productName ?? "",
+                                            SizeName = sizeName,
+                                            Price = 0,
+                                            Allergens = allergens == null ? [] : [..allergens.Split(',')],
+                                            OrderProductId = orderProductId
+                                        });
+                                    } // Anything else is a normal product - still check for nulls
+                                    else if (productId != null && productName != null && productCategory != null)
+                                    {
+                                        products.Add(new Product
+                                        {
+                                            ID = (int)productId,
+                                            Category = productCategory,
+                                            Name = productName,
+                                            SizeName = sizeName,
+                                            Price = price,
+                                            Allergens = allergens == null ? [] : [..allergens.Split(',')], 
+                                            OrderProductId = orderProductId
+                                        });
+                                    }
+                                }
+                                return products;
+                            }
+                            return [];
+                        }
+                    }
+                });
+
+
+                // Get toppings
+                products.ForEach(p =>
+                {
+                    // We only need to get toppings for categories that allow them
+                    if (p.Category == "Pizza" || p.Category == "Kebab")
+                    {                        
+                        GetProductToppings(p.OrderProductId).ForEach(t => {
+                            // If base or bread add to required choices
+                            if (t.ChoiceRequired)
+                            {
+                                p.RequiredChoices.Add(t);
+                            }
+                            else
+                            {
+                                p.Toppings.Add(t);
+                            }
+                        });
+                    }                    
+                });
+                return products;
+            }
+            catch (Exception ex) 
+            {
+                EventLogger.LogError("Failed to fetch order products " + ex.Message);
+            }
+            return [];
+        }
+
+        // Helper function to retrieve product toppings
+        private List<Topping> GetProductToppings(int orderProductId)
+        {
+            string queryString = @"
+                SELECT 
+                    t.topping_id, 
+                    t.topping_name, 
+                    tp.price,
+                     CASE
+	                    WHEN tt.topping_type IN ('Base', 'Bread')
+                        THEN CAST(1 AS bit)
+                        ELSE CAST(0 AS bit)
+                     END AS choice_required,
+					STRING_AGG((a.allergen_description), ',') as allergens
+                    FROM Order_Product_Toppings AS opt
+                    LEFT JOIN Order_Products AS op
+	                    ON op.order_product_id = opt.order_product_id
+                    LEFT JOIN Toppings AS t
+	                    ON t.topping_id = opt.topping_id
+					LEFT JOIN Topping_Allergens AS ta
+						ON ta.topping_id = t.topping_id
+					LEFT JOIN Allergens AS a
+						ON a.allergen_id = ta.allergen_id
+                    LEFT JOIN Topping_Types AS tt
+	                    ON tt.topping_type_id = t.topping_type_id
+                    LEFT JOIN Sizes AS s
+	                    ON op.size_id = s.size_id
+                    LEFT JOIN Topping_Prices AS tp
+	                    ON op.size_id = tp.size_id AND tt.topping_type_id = tp.topping_type_id
+                    WHERE op.order_product_id = @orderProductId
+					GROUP BY tt.topping_type, t.topping_name, t.topping_id, tp.price;";
+
+            try
+            {
+                List<Topping> toppings = _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@orderProductId", orderProductId);
+
+                        using (SqlDataReader reader = query.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                List<Topping> toppings = [];
+
+                                while (reader.Read())
+                                {
+                                    int toppingId = reader.IsDBNull(reader.GetOrdinal("topping_id")) ? 0 : Convert.ToInt32(reader["topping_id"]);
+                                    string? toppingName = reader.IsDBNull(reader.GetOrdinal("topping_name")) ? string.Empty : reader["topping_name"].ToString();
+                                    decimal price = reader.IsDBNull(reader.GetOrdinal("price")) ? 0 : Convert.ToDecimal(reader["price"]);
+                                    bool choiceRequired = reader.IsDBNull(reader.GetOrdinal("choice_required")) ? false : Convert.ToBoolean(reader["choice_required"]);
+                                    string? allergens = reader.IsDBNull(reader.GetOrdinal("allergens")) ? null : reader["allergens"].ToString();
+
+                                    if (toppingName != null)
+                                    {
+                                        toppings.Add(new Topping
+                                        {
+                                            ID = toppingId,
+                                            Name = toppingName,
+                                            Price = price,
+                                            ChoiceRequired = choiceRequired,
+                                            Allergens = allergens == null ? [] : [..allergens.Split(',')]
+                                        });
+                                    }
+                                }
+                                return toppings;
+                            }
+                            return [];
+                        }
+                    }
+                });
+                return toppings;
+            }            
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to fetch order product toppings " + ex.Message);
+            }
+            return [];
         }
 
         public ObservableCollection<Order> GetOrdersByRole(string role)
