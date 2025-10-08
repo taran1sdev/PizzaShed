@@ -62,7 +62,7 @@ namespace PizzaShed.Services.Data
                         product.ID,
                         product.SizeName,
                         (object)DBNull.Value,
-                        (object)DBNull.Value,
+                        product.ParentDealID ?? (object)DBNull.Value,
                         clientCounter
                     );                    
                 }

@@ -79,9 +79,10 @@ namespace PizzaShed.Services.Data
                                     && price != null)
                                     {
                                         products.Add(new Product
-                                        {                                            
+                                        {
+                                            ID = id,
                                             Name = name,
-                                            Category = category,   
+                                            Category = category,
                                             SizeName = sizeName,
                                             Price = (decimal)price,
                                             Allergens = allergensStr == null ? [] : [.. allergensStr.Split(',')]

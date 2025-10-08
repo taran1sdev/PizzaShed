@@ -46,15 +46,15 @@ namespace PizzaShed.ViewModels
             set => SetProperty(ref _currentOrderItems, value);
         }
 
-        // This property displays the total cost of the order to the user
-        public string OrderTotal
+        // This field returns the total cost for use with order creation
+        private decimal _totalCost
         {
             get
             {
-                decimal? totalCost = 0;
+                decimal totalCost = 0;
 
                 if (CurrentOrderItems.Count > 0)
-                {
+                {                    
                     CurrentOrderItems
                         .ToList() // We convert to list as ObservableCollection's have no ForEach function
                         .ForEach(item =>
@@ -79,11 +79,16 @@ namespace PizzaShed.ViewModels
                             }
                             // Now we can get the base price of the order item
                             totalCost += item.Price;
-                        });
+                        });                    
                 }
-                return $"£{totalCost:N2}";
+
+                return totalCost;
             }
         }
+        
+        // This property displays the total cost of the order to the user
+        public string OrderTotal => $"£{_totalCost:N2}";
+
 
         // Property to hold the order item the user has selected
         private Product? _selectedOrderItem;
@@ -607,7 +612,7 @@ namespace PizzaShed.ViewModels
             if (CurrentOrderItems.Count > 0 && _session.CurrentUser != null)
             {
 
-                Order currentOrder = new(_session.CurrentUser.Id, CurrentProductMenu);
+                Order currentOrder = new(_session.CurrentUser.Id, CurrentOrderItems);
 
                 OrderRepository _orderRepository = new(DatabaseManager.Instance);
 

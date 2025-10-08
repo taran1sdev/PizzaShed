@@ -33,6 +33,7 @@ namespace PizzaShed.Model
 
         public string? PaymentType { get; set; }
 
+        // Returns the total price for the order - taking discount's into consideration
         public decimal TotalPrice
         {
             get
@@ -46,12 +47,15 @@ namespace PizzaShed.Model
             }
         }
 
+        // For displaying VAT amounts on receipts for compliance
         public string VAT => $"{TotalPrice * (decimal)0.2:N2}";                 
 
         public ObservableCollection<Product> OrderProducts { get; set; }
 
         public Promotion? Promo { get; set; }
 
+        // When we initially create an order all we need is the userID and products in the order
+        // This may need to change when we are creating orders for display but for now it's fine
         public Order(int userID, ObservableCollection<Product> products)
         {
             UserID = userID;
