@@ -16,8 +16,7 @@ BEGIN
     SELECT @statusID = order_status_id FROM Order_Status WHERE status_name = 'New';
 
     BEGIN TRANSACTION;
-
-    -- 1. Insert into Orders
+    
     INSERT INTO Orders(user_id, order_status_id, order_date, order_type, paid, total_price)    
     VALUES (
         @userID,
@@ -28,22 +27,21 @@ BEGIN
         @price);
 
     SET @orderID = SCOPE_IDENTITY();
-
-    -- Check if Order insert failed
+    
     IF @orderID IS NULL OR @orderID = 0
     BEGIN
         ROLLBACK TRANSACTION;
         SELECT 0 AS NewOrderID;
         RETURN;
     END
-
-    -- 2. Create temp table for output mapping
+    
     CREATE TABLE #Inserted_Order_Products (
         order_product_id INT,
-        client_product_id INT  -- Note: Match case to TVP (client_product_id)
+        client_product_id INT  
     );
 
-    -- 3. Use MERGE to insert products and capture both IDs efficiently
+    -- If we use a regular INSERT we can't retrieve our temporary client_product_id to track the toppings for each product
+    -- Using a MERGE statement allows us to match products and toppings in one transaction
     MERGE INTO Order_Products AS Target
     USING (
         SELECT 
@@ -54,7 +52,7 @@ BEGIN
             p.client_product_id
         FROM @ProductList AS p
     ) AS Source 
-    ON 1 = 0 -- Always False condition ensures only INSERT operations occur
+    ON 1 = 0 
     WHEN NOT MATCHED BY TARGET THEN
         INSERT (order_id, product_id, size_id, deal_id, deal_instance_id)
         VALUES (
@@ -64,10 +62,10 @@ BEGIN
             Source.deal_id, 
             Source.deal_instance_id
         )
-    -- This OUTPUT clause can access both the INSERTED table and the Source table (Source.client_product_id)
+    
     OUTPUT INSERTED.order_product_id, Source.client_product_id INTO #Inserted_Order_Products;
 
-    -- 4. Insert Toppings
+    
     INSERT INTO Order_Product_Toppings (order_product_id, topping_id) 
     SELECT 
         iop.order_product_id,
@@ -75,10 +73,10 @@ BEGIN
     FROM #Inserted_Order_Products AS iop
     INNER JOIN @ToppingList AS t ON iop.client_product_id = t.client_product_id;
 
-    -- 5. Clean up temp table
+    
     DROP TABLE #Inserted_Order_Products;
 
-    -- 6. Final check and commit
+    
     IF @@ERROR = 0
         COMMIT TRANSACTION;
     ELSE

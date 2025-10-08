@@ -19,5 +19,7 @@ namespace PizzaShed.Services.Data
         public Order? GetOrderByOrderNumber(int orderNumber);
 
         public ObservableCollection<Order> GetOrdersByRole(string role);
+
+        public bool DeleteOrder(int orderId);
     }
 }

@@ -317,9 +317,7 @@ namespace PizzaShed.Services.Data
                 productsToAdd.ForEach(p =>
                 {
                     Product itemToAdd = GetProductById(p.ProductId, p.SizeId);                    
-                    dealItems.Add(itemToAdd);
-
-                    EventLogger.LogInfo($"{itemToAdd.Name} {itemToAdd.ID}");
+                    dealItems.Add(itemToAdd);                    
                 });
 
                 return dealItems;

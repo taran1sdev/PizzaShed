@@ -54,7 +54,7 @@ namespace PizzaShed.ViewModels
                 {
                     case "cashier" or "manager":
                         
-                        CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, null);
+                        CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, []);
                         CurrentViewModel.Navigate += OnCheckout;
                         break;
                     default:
@@ -79,11 +79,29 @@ namespace PizzaShed.ViewModels
                     // Unsubscribe the event to avoid memory leaks
                     CurrentViewModel.Navigate -= OnCheckout;
                     CurrentViewModel = new CheckoutViewModel(_orderRepository, _session, cashierView.OrderID);
+                    CurrentViewModel.Navigate += OnCheckoutBack;
                 }                                                
             } 
             catch (Exception ex)
             {
                 EventLogger.LogError("Error navigating to checkout " + ex.Message);
+            }
+        }
+
+        private void OnCheckoutBack(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (CurrentViewModel is CheckoutViewModel checkoutView)
+                {
+                    CurrentViewModel.Navigate -= OnCheckoutBack;
+                    CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, checkoutView.CurrentOrder);
+                    CurrentViewModel.Navigate += OnCheckout;
+                }
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Error navigating from checkout to cashier view " + ex.Message);
             }
         }
     }

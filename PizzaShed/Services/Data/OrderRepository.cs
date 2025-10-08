@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Data.SqlClient;
 using PizzaShed.Model;
 using PizzaShed.Services.Logging;
-using Microsoft.Data.SqlClient;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
+using System.Linq;
 using System.Numerics;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace PizzaShed.Services.Data
 {
@@ -490,5 +491,37 @@ namespace PizzaShed.Services.Data
         {
             return null;
         }
+
+        // We could write a procedure to update the existing order when changes are made before payment
+        // but for the prototype it is simpler to just delete the initial order created and create
+        // a new one, we can also handle a change in order type this way
+        public bool DeleteOrder(int orderId)
+        {
+            string storedProcedure = "DeleteOrder";
+
+            try
+            {
+                return _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(storedProcedure, conn))
+                    {
+                        query.CommandType = CommandType.StoredProcedure;
+
+                        query.Parameters.AddWithValue("@orderID", orderId);                        
+
+                        // If this operation fails it should throw an exception
+                        query.ExecuteNonQuery();
+                                                
+                        return true;                        
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to delete order: " + ex.Message);
+            }
+            return false;
+        }
     }
+    
 }

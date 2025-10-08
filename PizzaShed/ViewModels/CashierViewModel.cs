@@ -242,22 +242,16 @@ namespace PizzaShed.ViewModels
             IProductRepository<Topping> toppingRepo,
             IOrderRepository orderRepo,
             ISession session,
-            Order? order
+            ObservableCollection<Product> products
         )
         {            
             _productRepo = productRepo;
             _toppingRepo = toppingRepo;
             _orderRepo = orderRepo;
             _session = session;
-
-            if (order != null)
-            {
-                _currentOrderItems = order.OrderProducts;
-            } else
-            {
-                _currentOrderItems = [];
-            }
-
+            
+            // We can pass products back from checkout this way
+            _currentOrderItems = products;
 
             // Set with default values initially
             _selectedCategory = "";

@@ -272,6 +272,7 @@
             HorizontalAlignment="Left"
             Content="Back"
             
+            Command="{Binding BackCommand}"
             />
 
 
