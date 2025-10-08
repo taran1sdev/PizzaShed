@@ -9,7 +9,7 @@ namespace PizzaShed.Model
 {
     public class Order
     {
-        public int? ID { get; }
+        public int ID { get; set; } = 0;
 
         public int UserID { get; }
 

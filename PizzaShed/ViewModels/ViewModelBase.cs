@@ -17,6 +17,7 @@ namespace PizzaShed.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }        
+        
         protected bool SetProperty<T>(ref T field, T newvalue, [CallerMemberName] string? name = null) 
         {
             if (EqualityComparer<T>.Default.Equals(field, newvalue))
@@ -31,6 +32,14 @@ namespace PizzaShed.ViewModels
             return true;
         }
 
+        // This property allows us to create an event handler that will navigate between views
+        // We set it in the MainViewModel
+        public event EventHandler? Navigate;
+        // This function can be called within views
+        protected void OnNavigate()
+        {
+            Navigate?.Invoke(this, EventArgs.Empty);
+        }
     }
 }
 

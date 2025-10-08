@@ -21,7 +21,9 @@ namespace PizzaShed.ViewModels
     {
         private readonly IProductRepository<Product> _productRepo;
         private readonly IProductRepository<Topping> _toppingRepo;
+        private readonly IOrderRepository _orderRepo;
         private readonly ISession _session;
+        private Order? _currentOrder = null;
 
         //------        ORDER       ------//
         public ICommand AddOrderItemCommand { get; }
@@ -218,26 +220,28 @@ namespace PizzaShed.ViewModels
             set => SetProperty(ref _currentToppingMenu, value);
         }
 
-        
-        
-        //------        SESSION        ------//
-        public ICommand LogoutCommand { get; }
+
+
+        //------        SESSION        ------//        
+        public ICommand LogoutCommand { get; }        
 
         //------        CONSTRUCTOR     ------//
-        public CashierViewModel(
+        public CashierViewModel(            
             IProductRepository<Product> productRepo,
             IProductRepository<Topping> toppingRepo,
+            IOrderRepository orderRepo,
             ISession session,
-            ObservableCollection<Product> currentOrderItems
+            Order? order
         )
-        {
+        {            
             _productRepo = productRepo;
             _toppingRepo = toppingRepo;
+            _orderRepo = orderRepo;
             _session = session;
 
-            if (currentOrderItems.Count > 0)
+            if (order != null)
             {
-                _currentOrderItems = currentOrderItems;
+                _currentOrderItems = order.OrderProducts;
             } else
             {
                 _currentOrderItems = [];
@@ -599,7 +603,9 @@ namespace PizzaShed.ViewModels
                 CurrentOrderItems.Remove(_tempFirstHalf);
                 _tempFirstHalf = null;
             }
-        }
+        }      
+
+        
 
         private void Checkout()
         {
@@ -609,14 +615,27 @@ namespace PizzaShed.ViewModels
                 CleanupDeal(_activeDealParent.ParentDealID.Value);
             }
 
+            if (_currentOrder?.ID != 0)
+            {
+                // Handle update created order - likely most efficient to delete the order info and create a new record with the same ID?
+            }
+
             if (CurrentOrderItems.Count > 0 && _session.CurrentUser != null)
             {
 
-                Order currentOrder = new(_session.CurrentUser.Id, CurrentOrderItems);
+                _currentOrder = new(_session.CurrentUser.Id, CurrentOrderItems);                                
 
-                OrderRepository _orderRepository = new(DatabaseManager.Instance);
+                if (!IsDelivery)
+                {
+                    _currentOrder.ID = _orderRepo.CreateCollectionOrder(_currentOrder);
+                    OnNavigate();
+                }
+                else
+                {
+                    // Handle delivery (Customer info form - likely best to create a new windows)
+                }                
 
-                if (_orderRepository.CreateCollectionOrder(currentOrder) != 0)
+                if (_currentOrder.ID != 0)
                 {
                     EventLogger.LogInfo("Order created successfully!");
                 }

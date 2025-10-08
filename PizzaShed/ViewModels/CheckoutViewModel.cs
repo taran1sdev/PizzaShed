@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PizzaShed.ViewModels
 {
-    public class CheckoutViewModel
+    public class CheckoutViewModel : ViewModelBase
     {
         private ISession _session;
         private IOrderRepository _orderRepository;
