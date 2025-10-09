@@ -9,7 +9,7 @@ using System.Windows.Data;
 
 namespace PizzaShed.Helpers
 {
-    public class DeliveryStyleConverter : IValueConverter
+    public class PhoneStyleConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -17,11 +17,11 @@ namespace PizzaShed.Helpers
             {
                 if (isSelected)
                 {
-                    return Application.Current.FindResource("DeliverySelectedStyle");
+                    return Application.Current.FindResource("PhoneSelectedStyle");
                 }
                 else
                 {
-                    return Application.Current.FindResource("DeliveryButtonStyle");
+                    return Application.Current.FindResource("PhoneButtonStyle");
                 }
             }
             return DependencyProperty.UnsetValue;

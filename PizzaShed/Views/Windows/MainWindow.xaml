@@ -30,6 +30,10 @@
             <pages:CashierView/>
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type vm:CustomerViewModel}">
+            <pages:CustomerView/>
+        </DataTemplate>
+        
         <DataTemplate DataType="{x:Type vm:CheckoutViewModel}">
             <pages:CheckoutView/>
         </DataTemplate>

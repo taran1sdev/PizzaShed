@@ -4,6 +4,7 @@ GO
 
 CREATE PROCEDURE CreateCollectionOrder
     @userID INT,
+    @orderType VARCHAR(12),
     @price SMALLMONEY,
     @ProductList AS ProductListType READONLY,
     @ToppingList AS ToppingListType READONLY
@@ -22,7 +23,7 @@ BEGIN
         @userID,
         @statusID,
         GETDATE(),
-        'Collection',
+        @orderType,
         0,
         @price);
 

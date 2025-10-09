@@ -72,13 +72,29 @@ namespace PizzaShed.ViewModels
         private void OnCheckout(object? sender, EventArgs e)
         {
             try
-            {       
+            {
+                // Unsubscribe the event to avoid memory leaks
+                CurrentViewModel.Navigate -= OnCheckout;
+
                 // We need to convert to the class type to access the OrderID Property
                 if (CurrentViewModel is CashierViewModel cashierView)
+                {                                        
+                    // If we have a delivery order get the customer info before checkout
+                    if (cashierView.IsDelivery)
+                    {
+                        CurrentViewModel = new CustomerViewModel(_orderRepository, cashierView.OrderID);
+                        // We still want to navigate to checkout once we get customer info
+                        CurrentViewModel.Navigate += OnCheckout; 
+                    } else
+                    {
+                        CurrentViewModel = new CheckoutViewModel(_orderRepository, _session, cashierView.OrderID);
+                        CurrentViewModel.Navigate += OnCheckoutBack;
+                    }                        
+                } 
+                else if (CurrentViewModel is CustomerViewModel customerView)
                 {
-                    // Unsubscribe the event to avoid memory leaks
                     CurrentViewModel.Navigate -= OnCheckout;
-                    CurrentViewModel = new CheckoutViewModel(_orderRepository, _session, cashierView.OrderID);
+                    CurrentViewModel = new CheckoutViewModel(_orderRepository, _session, customerView.OrderID);
                     CurrentViewModel.Navigate += OnCheckoutBack;
                 }                                                
             } 

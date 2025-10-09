@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using PizzaShed.Services.Logging;
+using System.Data;
 
 namespace PizzaShed.ViewModels
 {
@@ -32,8 +33,49 @@ namespace PizzaShed.ViewModels
                 return [];
             }
         }
-        //------    View    ------//
+        //------    View    ------//        
         public bool IsCollection => _currentOrder?.OrderType == "Collection";
+        
+        public bool IsDelivery => !IsCollection;
+
+        private bool _isPhone;
+        public bool IsPhone
+        {
+            get => _isPhone;
+            set => SetProperty(ref _isPhone, value);
+        }
+
+        public ICommand SelectPhoneCommand { get; }
+
+        private string _expectedDeliveryTime = "";
+        public string ExpectedDeliveryTime
+        {
+            get => _expectedDeliveryTime;
+            set => SetProperty(ref _expectedDeliveryTime, value);
+        }
+
+        // Holds our collection times
+        private ObservableCollection<string> _collectionTimes = [];
+        public ObservableCollection<string> CollectionTimes
+        {
+            get => _collectionTimes;
+            set => SetProperty(ref _collectionTimes, value);
+
+        }
+
+        private string? _selectedCollectionTime;
+        public string? SelectedCollectionTime
+        {
+            get => _selectedCollectionTime;
+            set
+            {
+                SetProperty(ref _selectedCollectionTime, value);
+                SelectCollectionTime();
+            }
+        }
+
+        // Toggles the payment button visibility 
+        public bool AcceptOrder { get; set; } = false;
 
         private ObservableCollection<Promotion> _promotions = [];
         public ObservableCollection<Promotion> Promotions
@@ -87,15 +129,27 @@ namespace PizzaShed.ViewModels
         public CheckoutViewModel(IOrderRepository orderRepo, ISession session, int orderID)
         {
             _orderRepository = orderRepo;
-            _session = session;
-            
+            _session = session;            
+
             if (orderID > 0)
             {
                 _currentOrder = _orderRepository.GetOrderByOrderNumber(orderID);
-                if (_currentOrder != null) 
+                
+                if (_currentOrder != null)
+                {
                     Promotions = _orderRepository.FetchEligiblePromotions(_currentOrder.PriceExcludingDeals);
+                    if (IsCollection)
+                    {
+                        (AcceptOrder, CollectionTimes) = _orderRepository.GetCollectionTimes();
+                    } else
+                    {
+                        (AcceptOrder, ExpectedDeliveryTime) = _orderRepository.GetDeliveryTime();
+                    }
+                } 
+                    
             }
 
+            SelectPhoneCommand = new RelayGenericCommand(SelectPhone);
             BackCommand = new RelayGenericCommand(OnBack);
             LogoutCommand = new RelayGenericCommand(OnLogout);
         }
@@ -106,6 +160,19 @@ namespace PizzaShed.ViewModels
                 return;
 
             _currentOrder.Promo = SelectedPromotion;
+        }
+
+        private void SelectCollectionTime()
+        {
+            if (!AcceptOrder || _currentOrder == null || SelectedCollectionTime == null)
+                return;
+
+            _currentOrder.CollectionTime = Convert.ToDateTime(SelectedCollectionTime);
+        }
+
+        private void SelectPhone()
+        {
+            IsPhone = !IsPhone;            
         }
 
         private void OnBack()

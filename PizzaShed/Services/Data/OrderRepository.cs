@@ -150,11 +150,11 @@ namespace PizzaShed.Services.Data
             return (productTable, toppingTable);
         }
 
-        public int CreateCollectionOrder(Order order)
+        public int CreateOrder(Order order)
         {
             var (productTable, toppingTable) = CreateTVPs(order.OrderProducts.ToList());
 
-            string storedProcedure = "CreateCollectionOrder";
+            string storedProcedure = "CreateOrder";
 
             try
             {
@@ -165,6 +165,7 @@ namespace PizzaShed.Services.Data
                         query.CommandType = CommandType.StoredProcedure;
 
                         query.Parameters.AddWithValue("@userID", order.UserID);
+                        query.Parameters.AddWithValue("@orderType", order.OrderType);
                         query.Parameters.AddWithValue("@price", order.TotalPrice);
 
                         SqlParameter productListParameter = new SqlParameter("@ProductList", productTable)
@@ -535,7 +536,7 @@ namespace PizzaShed.Services.Data
         }        
 
         // Function to check if we can accept a collection order and a list of available collection time slots if we can
-        public (bool, List<string>) GetCollectionsTimes()
+        public (bool, ObservableCollection<string>) GetCollectionTimes()
         {
             OpeningTimes times = GetOpeningTimes();
 
@@ -555,27 +556,26 @@ namespace PizzaShed.Services.Data
             } else if (orderReady <= times.Open.Add(collectionSlotInterval))
             {
                 return (false, ["Too early to order"]);
-            }
-
-            TimeSpan nextSlot = now.Add(prepTime);
+            }            
 
             // check if the next slot is a 15 minute interval
-            int remainder = nextSlot.Minutes % collectionSlotInterval.Minutes;
+            int remainder = orderReady.Minutes % collectionSlotInterval.Minutes;
             
             if (remainder != 0)
             {
-                // if our current slot isn't the corrent interval subtract the remainder
-                nextSlot.Subtract(new TimeSpan(00, remainder, 00));
-                // and add the interval again
-                nextSlot.Add(collectionSlotInterval);
+                // if our current slot isn't the correct interval subtract the remainder
+                orderReady = orderReady.Subtract(new TimeSpan(00, remainder, 00));
+                // and add the interval again for the next available collection time
+                orderReady = orderReady.Add(collectionSlotInterval);                
             }
 
-            List<string> collectionSlots = [];
+            ObservableCollection<string> collectionSlots = [];
             
-            while (nextSlot < times.Close.Subtract(collectionSlotInterval))
+            while (orderReady < times.Close.Subtract(collectionSlotInterval))
             {
                 // Adds all the available collection slots to the list
-                collectionSlots.Add(nextSlot.ToString(@"hh\:mm") + " PM");
+                collectionSlots.Add(orderReady.ToString(@"hh\:mm") + " PM");
+                orderReady = orderReady.Add(collectionSlotInterval);
             }
 
             return (true, collectionSlots);
@@ -631,7 +631,7 @@ namespace PizzaShed.Services.Data
             {
                 using (SqlCommand query = new SqlCommand(queryString, conn))
                 {
-                    query.Parameters.AddWithValue("@currentDay", currentDay);
+                    query.Parameters.AddWithValue("@currentDay", currentDay.ToString());
 
                     using (SqlDataReader reader = query.ExecuteReader())
                     {

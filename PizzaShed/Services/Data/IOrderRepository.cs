@@ -14,11 +14,15 @@ namespace PizzaShed.Services.Data
 
         public int CreateDeliveryOrder(Order order, Customer customer);
         
-        public int CreateCollectionOrder(Order products);        
+        public int CreateOrder(Order products);        
 
         public Order? GetOrderByOrderNumber(int orderNumber);
 
         public ObservableCollection<Order> GetOrdersByRole(string role);
+
+        public (bool, ObservableCollection<string>) GetCollectionTimes();
+
+        public (bool, string) GetDeliveryTime();
 
         public bool DeleteOrder(int orderId);
     }

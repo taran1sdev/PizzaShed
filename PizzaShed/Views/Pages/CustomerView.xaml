@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="PizzaShed.Views.Pages.CustomerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:helpers="clr-namespace:PizzaShed.Helpers"
+             xmlns:viewmodels="clr-namespace:PizzaShed.ViewModels"
+             xmlns:behaviours="clr-namespace:PizzaShed.Behaviours"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             d:DataContext="{d:DesignInstance Type=viewmodels:CustomerViewModel}"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" 
+             d:DesignWidth="1024"
+             FontFamily="{materialDesign:RobotoFont}">
+    <Grid>
+            
+    </Grid>
+</UserControl>

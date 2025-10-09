@@ -620,29 +620,19 @@ namespace PizzaShed.ViewModels
                 CleanupDeal(_activeDealParent.ParentDealID.Value);
             }
 
-            if (_currentOrder?.ID != 0)
-            {
-                // Handle update created order - likely most efficient to delete the order info and create a new record with the same ID?
-            }
-
             if (CurrentOrderItems.Count > 0 && _session.CurrentUser != null)
             {
 
                 _currentOrder = new Order{
                     UserID = _session.CurrentUser.Id, 
                     OrderProducts = CurrentOrderItems,
-                    OrderStatus = "New"
-                };                                
+                    OrderStatus = "New",
+                    OrderType = IsDelivery ? "Delivery" : "Collection"
+                };
 
-                if (!IsDelivery)
-                {
-                    _currentOrder.ID = _orderRepo.CreateCollectionOrder(_currentOrder);
-                    OnNavigate();
-                }
-                else
-                {
-                    // Handle delivery (Customer info form - likely best to create a new windows)
-                }                
+                _currentOrder.ID = _orderRepo.CreateOrder(_currentOrder);
+
+                OnNavigate();             
 
                 if (_currentOrder.ID != 0)
                 {

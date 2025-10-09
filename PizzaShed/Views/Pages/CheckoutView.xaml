@@ -19,6 +19,7 @@
 
         <ResourceDictionary>
             <BooleanToVisibilityConverter x:Key="IsVisible" />
+            <helpers:PhoneStyleConverter x:Key="PhoneStyleConverter" />
 
             <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignPaperLightButton}">
                 <Setter Property="FontSize" Value="34" />
@@ -141,8 +142,10 @@
             Grid.Column="1"
             HorizontalAlignment="Right"
             Content="Phone"
-            Command="{Binding PhoneCommand}"
-            Visibility="{Binding IsCollection, Converter={StaticResource IsVisible}}"
+            Command="{Binding SelectPhoneCommand}"
+            Visibility="{Binding IsCollection, Converter={StaticResource IsVisible}}"            
+            
+            Style="{Binding IsPhone, Converter={StaticResource PhoneStyleConverter}}"
             />
 
         <TextBlock
@@ -162,9 +165,11 @@
             Grid.Row="1"
             Grid.Column="0"
             HorizontalAlignment="Right"
-            VerticalAlignment="Center"
-            SelectedItem="0"          
+            VerticalAlignment="Center"                   
             Visibility="{Binding IsCollection, Converter={StaticResource IsVisible}}"            
+            
+            ItemsSource="{Binding Path=CollectionTimes}"
+            SelectedItem="{Binding Path=SelectedCollectionTime}" 
             >
         </ComboBox>
         
@@ -288,6 +293,7 @@
             Grid.Column="1"
             HorizontalAlignment="Left"
             Content="Card"
+            Visibility="{Binding AcceptOrder, Converter={StaticResource IsVisible}}"
             />
 
         <Button
@@ -296,6 +302,7 @@
             Grid.Column="1"
             HorizontalAlignment="Right"
             Content="Cash"
+            Visibility="{Binding AcceptOrder, Converter={StaticResource IsVisible}}"
             />
     </Grid>
 </UserControl>
