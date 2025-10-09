@@ -213,6 +213,7 @@ namespace PizzaShed.Services.Data
 	                u.name, 
 	                o.order_date, 
                     o.order_type,
+                    o.delivery_fee,
                     os.status_name
                 FROM Orders AS o
                 INNER JOIN Users AS u
@@ -237,6 +238,7 @@ namespace PizzaShed.Services.Data
                                 string? userName = reader.IsDBNull(reader.GetOrdinal("name")) ? null : reader["name"].ToString();
                                 DateTime? orderDate = reader.IsDBNull(reader.GetOrdinal("order_date")) ? null : Convert.ToDateTime(reader["order_date"]);
                                 string? orderType = reader.IsDBNull(reader.GetOrdinal("order_type")) ? null : reader["order_type"].ToString();
+                                decimal? deliveryFee = reader.IsDBNull(reader.GetOrdinal("delivery_fee")) ? null : Convert.ToDecimal(reader["delivery_fee"]);
                                 string? orderStatus = reader.IsDBNull(reader.GetOrdinal("status_name")) ? null : reader["status_name"].ToString();
 
                                 if (orderId != 0 && orderDate != null && orderStatus != null)
@@ -247,7 +249,8 @@ namespace PizzaShed.Services.Data
                                         UserID = userID,
                                         OrderDate = (DateTime)orderDate,
                                         OrderType = orderType,
-                                        OrderStatus = orderStatus
+                                        OrderStatus = orderStatus,
+                                        DeliveryFee = deliveryFee
                                     };
                                 }                                
                             }

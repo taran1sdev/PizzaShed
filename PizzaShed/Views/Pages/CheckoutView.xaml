@@ -81,7 +81,7 @@
             </Style>
 
             <Style TargetType="{x:Type TextBlock}" x:Key="ReceiptLabelStyle">
-                <Setter Property="FontSize" Value="30" />
+                <Setter Property="FontSize" Value="24" />
                 <Setter Property="Foreground" Value="AntiqueWhite" />
                 <Setter Property="HorizontalAlignment" Value="Left" />
                 <Setter Property="VerticalAlignment" Value="Bottom" />
@@ -91,7 +91,7 @@
             </Style>
 
             <Style TargetType="{x:Type TextBlock}" x:Key="ReceiptValueStyle">
-                <Setter Property="FontSize" Value="30" />
+                <Setter Property="FontSize" Value="24" />
                 <Setter Property="Foreground" Value="AntiqueWhite" />
                 <Setter Property="HorizontalAlignment" Value="Right" />
                 <Setter Property="VerticalAlignment" Value="Bottom" />
@@ -189,8 +189,7 @@
             Grid.Row="2"
             Grid.Column="0"
             HorizontalAlignment="Right"            
-            Visibility="{Binding EligibleForPromotion, Converter={StaticResource IsVisible}}"
-            
+            Visibility="{Binding EligibleForPromotion, Converter={StaticResource IsVisible}}"            
             ItemsSource="{Binding Path=Promotions}"
             DisplayMemberPath="MenuName"
             SelectedValuePath="MenuName"
@@ -231,11 +230,26 @@
             </ListView.ItemContainerStyle>
         </ListView>
 
+        <TextBlock 
+            x:Name="DeliveryLabel"
+            Style="{StaticResource ReceiptLabelStyle}"
+            Text="Delivery Fee:"
+            Margin="20,0,0,75"
+            Visibility="{Binding IsDelivery, Converter={StaticResource IsVisible}}"
+            />
+
+        <TextBlock
+            x:Name="DeliveryValue"
+            Style="{StaticResource ReceiptValueStyle}"
+            Text="{Binding DeliveryValue}"
+            Margin="20,0,0,75"
+            Visibility="{Binding IsDelivery, Converter={StaticResource IsVisible}}"
+            />
         <TextBlock
             x:Name="DiscountLabel"            
             Style="{StaticResource ReceiptLabelStyle}"
             Text="Discount:"
-            Margin="20,0,0,80"
+            Margin="20,0,0,50"
             Visibility="{Binding EligibleForPromotion, Converter={StaticResource IsVisible}}"
             />
 
@@ -244,7 +258,7 @@
             Style="{StaticResource ReceiptValueStyle}"
             Foreground="Red"
             Text="{Binding DiscountValue}"
-            Margin="0,0,30,80"
+            Margin="0,0,30,50"
             Visibility="{Binding EligibleForPromotion, Converter={StaticResource IsVisible}}"
             />
 
@@ -252,14 +266,14 @@
             x:Name="VATLabel"
             Style="{StaticResource ReceiptLabelStyle}"
             Text="VAT:"            
-            Margin="20,0,0,40"
+            Margin="20,0,0,25"
             />
 
         <TextBlock
             x:Name="VATValue"            
             Style="{StaticResource ReceiptValueStyle}"
             Text="{Binding VATValue}"
-            Margin="0,0,30,40"
+            Margin="0,0,30,25"
             />
 
         <TextBlock 

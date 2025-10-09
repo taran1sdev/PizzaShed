@@ -95,6 +95,9 @@ namespace PizzaShed.ViewModels
                         });                    
                 }
 
+                if (IsError && totalCost > (decimal)12.0)
+                    IsError = false;
+
                 return totalCost;
             }
         }
@@ -231,7 +234,13 @@ namespace PizzaShed.ViewModels
             set => SetProperty(ref _currentToppingMenu, value);
         }
 
-
+        // Displays an error message if minimum spend for delivery not achieved
+        private bool _isError;
+        public bool IsError
+        {
+            get => _isError;
+            set => SetProperty(ref _isError, value);
+        }
 
         //------        SESSION        ------//        
         public ICommand LogoutCommand { get; }        
@@ -284,6 +293,7 @@ namespace PizzaShed.ViewModels
         private void Delivery()
         {
             IsDelivery = !IsDelivery;
+            IsError = false;
         }
 
         private void AddOrderItem(MenuItemBase? orderItem)
@@ -622,6 +632,11 @@ namespace PizzaShed.ViewModels
 
             if (CurrentOrderItems.Count > 0 && _session.CurrentUser != null)
             {
+                if (IsDelivery && _totalCost < (decimal)12.00) 
+                {
+                    IsError = true;  
+                    return;
+                }
 
                 _currentOrder = new Order{
                     UserID = _session.CurrentUser.Id, 
@@ -629,6 +644,7 @@ namespace PizzaShed.ViewModels
                     OrderStatus = "New",
                     OrderType = IsDelivery ? "Delivery" : "Collection"
                 };
+                
 
                 _currentOrder.ID = _orderRepo.CreateOrder(_currentOrder);
 

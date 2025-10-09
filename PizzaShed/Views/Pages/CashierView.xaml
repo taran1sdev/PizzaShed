@@ -367,6 +367,19 @@
             Width="240"
             />
 
+        <TextBlock
+            x:Name="DeliveryError"
+            Grid.Row="4"
+            Grid.Column="1"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Margin="20,20"
+            Text="£12 Minimum"
+            FontSize="24"
+            Visibility="{Binding IsError, Converter={StaticResource IsVisible}}"
+            Foreground="OrangeRed"
+            />
+
         <Button
             x:Name="Checkout"
             Grid.Row="4"

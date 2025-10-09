@@ -1,8 +1,8 @@
-IF OBJECT_ID('dbo.CreateCollectionOrder', 'P') IS NOT NULL
-    DROP PROCEDURE CreateCollectionOrder
+IF OBJECT_ID('dbo.CreateOrder', 'P') IS NOT NULL
+    DROP PROCEDURE CreateOrder
 GO
 
-CREATE PROCEDURE CreateCollectionOrder
+CREATE PROCEDURE CreateOrder
     @userID INT,
     @orderType VARCHAR(12),
     @price SMALLMONEY,

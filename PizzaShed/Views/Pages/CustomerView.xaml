@@ -80,6 +80,13 @@
             Text=""
             />
 
+        <ListView
+            x:Name="NameView"
+            Grid.Row="1"
+            Grid.Column="2"
+            Margin="20,20"
+            />
+
         <TextBlock
             x:Name="NumberLabel"
             Grid.Row="2"
@@ -100,6 +107,7 @@
             Grid.Column="2"
             Text="Invalid Number"
             Style="{StaticResource ErrorStyle}"
+            Visibility="{Binding PostcodeError}"
             />
         
         <TextBlock

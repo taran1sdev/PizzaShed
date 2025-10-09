@@ -37,6 +37,8 @@ namespace PizzaShed.Model
 
         public string? PaymentType { get; set; }
 
+        public decimal? DeliveryFee { get; set; }
+
         // Returns the total price for the order - taking discount's into consideration
         public decimal TotalPrice
         {
@@ -48,6 +50,10 @@ namespace PizzaShed.Model
                 
                 if (Promo != null) 
                     total = total - (total * Promo.DiscountValue);
+
+                // Add the delivery fee after calculating discounts
+                if (DeliveryFee != null)
+                    total += (decimal)DeliveryFee;
                 
                 return total;
             }

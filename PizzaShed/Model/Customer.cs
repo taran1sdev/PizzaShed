@@ -8,20 +8,52 @@ namespace PizzaShed.Model
 {
     public class Customer
     {
-        public int ID { get; }
+        private int _id = 0;
+        public int ID 
+        { 
+            get => _id;
+            set
+            {
+                // this value should only be set once
+                if (_id == 0)
+                {
+                    _id = value;
+                }
+            
+            } 
+        }
 
-        public string Name { get; }
+        private string _name = "";
 
-        public string PhoneNumber { get; }
+        public string Name 
+        { 
+            get => _name; 
+            set
+            {
+                // We should only be able to set this once
+                if (_name == "")
+                {
+                    _name = value;
+                }
+            } 
+        }
 
-        public string PostCode { get; }
+        public required string PhoneNumber { get; set; }
 
-        public string? FlatNo { get; }
+        public required string PostCode { get; set;  }
 
-        public int HouseNo { get; }
+        public string? FlatNo { get; set; }
 
-        public string StreetAddress { get; }
+        public required int HouseNo { get; set; }
 
-        public string? DeliveryNotes { get; }
+        public required string StreetAddress { get; set; }
+
+        public string? DeliveryNotes { get; set; }
+
+        // We display customers name and postcode in our listview 
+        // that way if we have duplicate names in the DB the cashier
+        // can check with the customer that the postcode is correct
+        // before populating the form
+        public string ListName => $"{Name} : {PostCode}"; 
     }
 }

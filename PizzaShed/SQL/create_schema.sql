@@ -17,12 +17,13 @@ CREATE TABLE Customers (
   flat_no varchar(8),
   house_no int NOT NULL,
   street_address varchar(128) NOT NULL,
-  delivery_notes varchar(255),
+  delivery_notes varchar(255)  
   
   PRIMARY KEY (customer_id)
 );
 
 ALTER TABLE Customers ADD CONSTRAINT U_PHONE_NO UNIQUE(phone_no);
+
 
 CREATE TABLE Order_Status (
   order_status_id int IDENTITY(1,1),
@@ -37,6 +38,13 @@ CREATE TABLE Drivers (
   current_status varchar NOT NULL,
   
   PRIMARY KEY(driver_id)
+);
+
+CREATE TABLE Delivery_Fees (
+	max_distance int,
+	price smallmoney,
+
+	PRIMARY KEY(max_distance)
 );
 
 CREATE TABLE Promotions (
@@ -184,6 +192,7 @@ CREATE TABLE Orders (
   paid bit NOT NULL,
   payment_type varchar(32),
   total_price smallmoney NOT NULL,
+  delivery_fee smallmoney,
   promo_id int,
   
   FOREIGN KEY(user_id) REFERENCES Users (user_id),

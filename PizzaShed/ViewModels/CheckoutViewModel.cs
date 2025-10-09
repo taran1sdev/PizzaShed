@@ -108,6 +108,16 @@ namespace PizzaShed.ViewModels
         //------    ORDER   ------//
         public string OrderNo => $"Order #{_currentOrder?.ID:0000}";
 
+        public string DeliveryValue
+        {
+            get
+            {
+                if (IsDelivery && _currentOrder?.DeliveryFee != null)
+                    return $"£{_currentOrder.DeliveryFee:N2}";
+                return "";
+            }
+        }
+
         public string DiscountValue
         {
             get
@@ -141,6 +151,7 @@ namespace PizzaShed.ViewModels
                     if (IsCollection)
                     {
                         (AcceptOrder, CollectionTimes) = _orderRepository.GetCollectionTimes();
+                        SelectedCollectionTime = CollectionTimes.FirstOrDefault();
                     } else
                     {
                         (AcceptOrder, ExpectedDeliveryTime) = _orderRepository.GetDeliveryTime();
