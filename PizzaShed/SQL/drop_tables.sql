@@ -19,3 +19,4 @@ DROP TABLE IF EXISTS Drivers;
 DROP TABLE IF EXISTS Sizes;
 DROP TABLE IF EXISTS Allowed_Product_Categories;
 DROP TABLE IF EXISTS Topping_Types;
+DROP TABLE IF EXISTS Opening_Times;

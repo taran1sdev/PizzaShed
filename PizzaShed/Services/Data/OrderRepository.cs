@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -493,8 +494,8 @@ namespace PizzaShed.Services.Data
         }
 
         // We could write a procedure to update the existing order when changes are made before payment
-        // but for the prototype it is simpler to just delete the initial order created and create
-        // a new one, we can also handle a change in order type this way
+        // but for the prototype it is simpler to just delete the initial order and create a new one,
+        // we can also handle a change in order type this way
         public bool DeleteOrder(int orderId)
         {
             string storedProcedure = "DeleteOrder";
@@ -521,6 +522,136 @@ namespace PizzaShed.Services.Data
                 EventLogger.LogError("Failed to delete order: " + ex.Message);
             }
             return false;
+        }
+
+        // We can't return multiple values with ExecuteQuery so we create a datatype to return
+        private struct OpeningTimes(TimeSpan open, TimeSpan close)
+        {
+            public TimeSpan Open = open;
+            public TimeSpan Close = close;
+            // Peak times don't change so we can hardcode these values
+            public TimeSpan PeakStart = new(18, 00, 00);
+            public TimeSpan PeakEnd = new(21, 00, 00);
+        }        
+
+        // Function to check if we can accept a collection order and a list of available collection time slots if we can
+        public (bool, List<string>) GetCollectionsTimes()
+        {
+            OpeningTimes times = GetOpeningTimes();
+
+            TimeSpan now = DateTime.Now.TimeOfDay;                        
+
+            // Collections will be returned in 15 minute intervals - 10:00, 10:15 etc.            
+            TimeSpan collectionSlotInterval = new(00, 15, 00);
+            // Expected time for order to be ready - longer during peak hours
+            TimeSpan prepTime = now > times.PeakStart && now < times.PeakEnd ? new TimeSpan(00, 25, 00) : new TimeSpan(00, 15, 00);
+
+            TimeSpan orderReady = now.Add(prepTime);
+
+            // Only accept orders that will be ready 15 minutes before closing
+            if (orderReady >= times.Close.Subtract(collectionSlotInterval))
+            {
+                return (false, ["Too late to order"]);
+            } else if (orderReady <= times.Open.Add(collectionSlotInterval))
+            {
+                return (false, ["Too early to order"]);
+            }
+
+            TimeSpan nextSlot = now.Add(prepTime);
+
+            // check if the next slot is a 15 minute interval
+            int remainder = nextSlot.Minutes % collectionSlotInterval.Minutes;
+            
+            if (remainder != 0)
+            {
+                // if our current slot isn't the corrent interval subtract the remainder
+                nextSlot.Subtract(new TimeSpan(00, remainder, 00));
+                // and add the interval again
+                nextSlot.Add(collectionSlotInterval);
+            }
+
+            List<string> collectionSlots = [];
+            
+            while (nextSlot < times.Close.Subtract(collectionSlotInterval))
+            {
+                // Adds all the available collection slots to the list
+                collectionSlots.Add(nextSlot.ToString(@"hh\:mm") + " PM");
+            }
+
+            return (true, collectionSlots);
+        }
+
+        // Function to check if we will accept and order, and what time delivery can be expected
+        public (bool, string) GetDeliveryTime()
+        {
+            OpeningTimes times = GetOpeningTimes();
+
+            TimeSpan now = DateTime.Now.TimeOfDay;            
+
+            int availableDrivers = now > times.PeakStart && now < times.PeakEnd ? 2 : 1;
+
+            
+            // It takes 2-5 minutes to drive 1 mile in a city
+            // the maximum time for a round trip in a 4-mile radius should be 40 minutes
+            // If we have 2 drivers we half this value
+            // This is just the initial logic we should really calculate this from the database
+            TimeSpan expectedRoundTrip = availableDrivers > 1 ? new TimeSpan(00, 20, 00) : new TimeSpan(00, 40, 00);
+            
+            // Expected time for order to be ready - longer during peak hours
+            TimeSpan prepTime = now > times.PeakStart && now < times.PeakEnd ? new TimeSpan(00, 25, 00) : new TimeSpan(00, 15, 00);
+
+            TimeSpan orderReady = now.Add(prepTime);
+
+            // If the shop closes before the time it takes to make / deliver the order we reject it
+            if (orderReady > times.Close.Subtract(expectedRoundTrip))
+            {
+                return (false, "Too late to order");
+            } // If the order is before the shop opens also reject it 
+            else if (orderReady < times.Open.Add(prepTime))
+            {
+                return (false, "Too early to order");
+            }
+
+            return (true, orderReady.ToString(@"hh\:mm") + " PM");
+        }
+
+
+        // Helper function to get the opening times from the database
+        private OpeningTimes GetOpeningTimes()
+        {
+            DayOfWeek currentDay = DateTime.Now.DayOfWeek;            
+
+            string queryString = @"
+                SELECT open_time, close_time 
+                FROM Opening_Times
+                WHERE day_name LIKE @currentDay;
+            ";
+
+            return _databaseManager.ExecuteQuery(conn =>
+            {
+                using (SqlCommand query = new SqlCommand(queryString, conn))
+                {
+                    query.Parameters.AddWithValue("@currentDay", currentDay);
+
+                    using (SqlDataReader reader = query.ExecuteReader())
+                    {
+                        if (reader.HasRows && reader.Read())
+                        {
+                            int openTimeOrdinal = reader.GetOrdinal("open_time");
+                            int closeTimeOrdinal = reader.GetOrdinal("close_time");
+
+                            TimeSpan? open = reader.IsDBNull(openTimeOrdinal) ? null : reader.GetTimeSpan(openTimeOrdinal);
+                            TimeSpan? close = reader.IsDBNull(closeTimeOrdinal) ? null : reader.GetTimeSpan(closeTimeOrdinal);
+
+                            if (open != null && close != null)
+                            {
+                                return new OpeningTimes((TimeSpan)open, (TimeSpan)close);
+                            }                            
+                        }
+                        return default!;
+                    }
+                }
+            });            
         }
     }
     

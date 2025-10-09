@@ -218,6 +218,15 @@ CREATE TABLE Order_Product_Toppings (
   PRIMARY KEY(order_product_id,topping_id)
 );
 
+CREATE TABLE Opening_Times (
+	day_id INT,
+	day_name VARCHAR(10),
+	open_time TIME(0),
+	close_time TIME(0)
+	
+	PRIMARY KEY(day_id)
+);
+
 --CREATE TYPE ProductListType AS Table (
 --	product_id INT,
 --	size_name VARCHAR(30),

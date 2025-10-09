@@ -561,3 +561,12 @@ WHERE MD.deal_name LIKE 'Kebab%';
 INSERT INTO Order_Status (status_name)
 VALUES ('New'), ('Preparing'), ('Pizza Ready'), ('Grill Ready'), ('Order Ready'), ('Out for delivery'), ('Completed'), ('Cancelled'), ('Refunded')
 
+INSERT INTO Opening_Times (day_id, day_name, open_time, close_time)
+VALUES 
+	(1, 'Monday', '12:00:00', '23:00:00'),
+	(2, 'Tuesday', '12:00:00', '23:00:00'),
+	(3, 'Wednesday', '12:00:00', '23:00:00'),
+	(4, 'Thursday', '12:00:00', '23:00:00'),
+	(5, 'Friday', '12:00:00', '00:00:00'),
+	(6, 'Saturday', '12:00:00', '00:00:00'),
+	(7, 'Sunday', '12:00:00', '22:00:00');
