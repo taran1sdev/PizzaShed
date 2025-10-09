@@ -1,4 +1,5 @@
 ﻿using PizzaShed.Services.Data;
+using PizzaShed.Model;
 using PizzaShed.ViewModels;
 using PizzaShed.Views.Windows;
 using System.Configuration;
@@ -16,12 +17,19 @@ namespace PizzaShed
         {
             base.OnStartup(e);
 
-            IUserRepository userRepository = new UserRepository();
+            IDatabaseManager databaseManager = DatabaseManager.Instance;
             ISession session = new Session();
+
+            IUserRepository userRepository = new UserRepository(databaseManager);
+            IProductRepository<Product> productRepository = new ProductRepository(databaseManager);
+            IProductRepository<Topping> toppingRepository = new ToppingRepository(databaseManager);
+            IOrderRepository orderRepository = new OrderRepository(databaseManager);
+            ICustomerRepository customerRepository = new CustomerRepository(databaseManager);
+            
 
             MainWindow window = new()
             {
-                DataContext = new MainViewModel(userRepository, session)
+                DataContext = new MainViewModel(session, userRepository, productRepository, toppingRepository, orderRepository, customerRepository)
             };
 
             window.Show();

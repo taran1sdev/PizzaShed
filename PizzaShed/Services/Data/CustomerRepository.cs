@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using PizzaShed.Model;
 using PizzaShed.Services.Logging;
+using System.Collections.ObjectModel;
 
 namespace PizzaShed.Services.Data
 {
@@ -15,7 +16,7 @@ namespace PizzaShed.Services.Data
 
         // This function searches the database for a customer with a partial name
         // The row returned (if any) will populate a listview for quick selection
-        public Customer? GetCustomerByPartialName(string partialName)
+        public ObservableCollection<Customer> GetCustomerByPartialName(string partialName)
         {
             string queryString = @"
                 SELECT TOP(1) * FROM Customers
@@ -24,7 +25,7 @@ namespace PizzaShed.Services.Data
 
             try
             {
-                return _databaseManager.ExecuteQuery(conn =>
+                Customer? customer = _databaseManager.ExecuteQuery(conn =>
                 {
 
                     using (SqlCommand query = new(queryString, conn))
@@ -69,13 +70,16 @@ namespace PizzaShed.Services.Data
                         }
                     }
                 });
+                if (customer == null)
+                    return [];
 
+                return [customer];
             }
             catch (Exception ex)
             {
                 EventLogger.LogError("Error occured fetching customer by name: " + ex.Message);
             }
-            return null;
+            return [];
         }
         
         

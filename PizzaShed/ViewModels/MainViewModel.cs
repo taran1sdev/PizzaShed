@@ -3,6 +3,7 @@ using PizzaShed.Services.Data;
 using PizzaShed.Services.Logging;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
@@ -16,18 +17,28 @@ namespace PizzaShed.ViewModels
     {
         private readonly IUserRepository _userRepository;
         private readonly ISession _session;
-        private IProductRepository<Product> _productRepository;
-        private IProductRepository<Topping> _toppingRepository;
-        private IOrderRepository _orderRepository;
+        private readonly IProductRepository<Product> _productRepository;
+        private readonly IProductRepository<Topping> _toppingRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly ICustomerRepository _customerRepository;
+        
         private ViewModelBase _currentViewModel;
 
-        public MainViewModel(IUserRepository userRepository, ISession session)
+        public MainViewModel(
+            ISession session, 
+            IUserRepository userRepository, 
+            IProductRepository<Product> productRepository,
+            IProductRepository<Topping> toppingRepository,
+            IOrderRepository orderRepository,
+            ICustomerRepository customerRepository
+            )
         {
-            _userRepository = userRepository;
             _session = session;
-            _productRepository = new ProductRepository(DatabaseManager.Instance);
-            _toppingRepository = new ToppingRepository(DatabaseManager.Instance);
-            _orderRepository = new OrderRepository(DatabaseManager.Instance);
+            _userRepository = userRepository;
+            _productRepository = productRepository;
+            _toppingRepository = toppingRepository;
+            _orderRepository = orderRepository;
+            _customerRepository = customerRepository;
             _currentViewModel = this;
 
             _session.SessionChanged += OnSessionChanged;
@@ -82,20 +93,21 @@ namespace PizzaShed.ViewModels
                     // If we have a delivery order get the customer info before checkout
                     if (cashierView.IsDelivery)
                     {
-                        CurrentViewModel = new CustomerViewModel(_orderRepository, cashierView.OrderID);
+                        CurrentViewModel = new CustomerViewModel(_orderRepository, _customerRepository, cashierView.OrderID);
                         // We still want to navigate to checkout once we get customer info
-                        CurrentViewModel.Navigate += OnCheckout; 
+                        CurrentViewModel.Navigate += OnCheckout;
+                        CurrentViewModel.NavigateBack += OnCheckoutBack;
                     } else
                     {
                         CurrentViewModel = new CheckoutViewModel(_orderRepository, _session, cashierView.OrderID);
-                        CurrentViewModel.Navigate += OnCheckoutBack;
+                        CurrentViewModel.NavigateBack += OnCheckoutBack;
                     }                        
                 } 
                 else if (CurrentViewModel is CustomerViewModel customerView)
                 {
                     CurrentViewModel.Navigate -= OnCheckout;
                     CurrentViewModel = new CheckoutViewModel(_orderRepository, _session, customerView.OrderID);
-                    CurrentViewModel.Navigate += OnCheckoutBack;
+                    CurrentViewModel.NavigateBack += OnCheckoutBack;
                 }                                                
             } 
             catch (Exception ex)
@@ -104,16 +116,31 @@ namespace PizzaShed.ViewModels
             }
         }
 
+        // This function will handle navigation from Checkout / Customer view back to cashier
         private void OnCheckoutBack(object? sender, EventArgs e)
         {
             try
             {
+                CurrentViewModel.NavigateBack -= OnCheckoutBack;
                 if (CurrentViewModel is CheckoutViewModel checkoutView)
-                {
-                    CurrentViewModel.Navigate -= OnCheckoutBack;
+                {                    
                     CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, checkoutView.CurrentOrder);
                     CurrentViewModel.Navigate += OnCheckout;
                 }
+                else if (CurrentViewModel is CustomerViewModel customerView)
+                {
+                    CurrentViewModel.Navigate -= OnCheckout;
+                    
+                    // Since we aren't passing the products to the Customer view model we retrieve / delete them here
+                    Order? currentOrder = _orderRepository.GetOrderByOrderNumber(customerView.OrderID);                    
+                    ObservableCollection<Product> orderProducts = currentOrder == null ? [] : currentOrder.OrderProducts;
+
+                    _orderRepository.DeleteOrder(customerView.OrderID);
+
+                    CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, orderProducts);
+                    CurrentViewModel.Navigate += OnCheckout;
+                }
+                
             }
             catch (Exception ex)
             {

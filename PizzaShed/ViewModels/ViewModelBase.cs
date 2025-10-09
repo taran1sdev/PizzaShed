@@ -40,6 +40,14 @@ namespace PizzaShed.ViewModels
         {
             Navigate?.Invoke(this, EventArgs.Empty);
         }
+
+        // This handles navigating back 
+        public event EventHandler? NavigateBack;
+
+        protected void OnNavigateBack()
+        {
+            NavigateBack?.Invoke(this, EventArgs.Empty);
+        }
     }
 }
 

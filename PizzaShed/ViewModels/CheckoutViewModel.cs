@@ -193,7 +193,7 @@ namespace PizzaShed.ViewModels
                         
                 
             if (_orderRepository.DeleteOrder(_currentOrder.ID))
-                OnNavigate();
+                OnNavigateBack();
         }
     
         private void OnLogout()

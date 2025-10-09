@@ -8,8 +8,12 @@ namespace PizzaShed.Services.Data
     public class UserRepository : IUserRepository
     {
         // Set properties to allow us to change the session and execute queries
-        private readonly DatabaseManager _databaseManager = DatabaseManager.Instance;        
+        private readonly IDatabaseManager _databaseManager;        
 
+        public UserRepository(IDatabaseManager databaseManager)
+        {
+            _databaseManager = databaseManager;
+        }
         // Login functionality - query the database for user with matching pin and return a User object
         public User? GetUserByPin(string pin)
         {            
