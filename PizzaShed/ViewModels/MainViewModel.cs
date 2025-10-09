@@ -144,7 +144,7 @@ namespace PizzaShed.ViewModels
             }
             catch (Exception ex)
             {
-                EventLogger.LogError("Error navigating from checkout to cashier view " + ex.Message);
+                EventLogger.LogError("Error navigating from checkout to cashier view: " + ex.Message);
             }
         }
     }

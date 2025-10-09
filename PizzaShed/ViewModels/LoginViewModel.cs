@@ -17,8 +17,6 @@ namespace PizzaShed.ViewModels
     {        
         private readonly IUserRepository _userRepository;
         private readonly ISession _session;
-        private string _pin = "";
-        private string _errorMessage = "";
 
         public ICommand ButtonCommand { get; }
 
@@ -35,15 +33,15 @@ namespace PizzaShed.ViewModels
 
         // Holds the current pin entered by the user - this property is bound to the 
         // BoundPassword property we created in PasswordBoxHelper
-        public string Pin {
+        private string _pin = "";
+        public string Pin { 
             get => _pin; 
             set
             {
                 if (_pin != value)
                 {
                     // Update the view if the value in the password box has changed
-                    _pin = value;
-                    OnPropertyChanged();
+                    SetProperty(ref _pin, value);
                 }
 
                 // Try and login if we reach 4 characters 
@@ -59,8 +57,9 @@ namespace PizzaShed.ViewModels
                 }
             } 
         }
-        
+
         // Holds the current error message being displayed to the user
+        private string _errorMessage = "";
         public string ErrorMessage 
         {
             get => _errorMessage;

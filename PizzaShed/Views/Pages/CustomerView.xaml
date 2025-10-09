@@ -116,17 +116,16 @@
         <TextBox
             x:Name="NumberBox"
             Grid.Row="2"
-            Grid.Column="1"
-            Text=""
+            Grid.Column="1"            
+            Text="{Binding CustomerNumber, Mode=TwoWay}"
             />
 
         <TextBlock
             x:Name="NumberError"
             Grid.Row="2"
-            Grid.Column="2"
-            Text="Invalid Number"
+            Grid.Column="2"            
             Style="{StaticResource ErrorStyle}"
-            Visibility="{Binding PostcodeError}"
+            Text="{Binding NumberError}"
             />
         
         <TextBlock
@@ -140,9 +139,9 @@
             x:Name="FlatBox"
             Grid.Row="3"
             Grid.Column="1"
-            Text=""
+            Text="{Binding CustomerFlat, Mode=TwoWay}"
             Width="80"
-            HorizontalAlignment="Left"
+            HorizontalAlignment="Left"            
             />
 
         <TextBlock
@@ -156,9 +155,9 @@
             x:Name="HouseBox"
             Grid.Row="3"
             Grid.Column="2"
-            Text=""
+            Text="{Binding CustomerHouse, Mode=TwoWay}"
             Width="100"
-            HorizontalAlignment="Left"            
+            HorizontalAlignment="Left"             
             />
 
         <TextBlock
@@ -174,7 +173,7 @@
             Grid.Column="1"
             Grid.ColumnSpan="2"
             Margin="20,20,135,20"
-            Text=""
+            Text="{Binding CustomerAddress, Mode=TwoWay}"
             />
 
         <TextBlock
@@ -188,14 +187,14 @@
             x:Name="PostcodeBox"
             Grid.Row="5"
             Grid.Column="1"
-            Text=""
+            Text="{Binding CustomerPostcode, Mode=TwoWay}"
             />
 
         <TextBlock
             x:Name="PostcodeError"
             Grid.Row="5"
             Grid.Column="2"
-            Text="Invalid Postcode"
+            Text="{Binding PostcodeError}"
             Style="{StaticResource ErrorStyle}"
             />
 
@@ -212,7 +211,7 @@
             Grid.Column="1"
             Grid.ColumnSpan="2"
             Margin="20,20,135,20"
-            Text=""
+            Text="{Binding CustomerDeliveryNote, Mode=TwoWay}"
             />
 
         <Button
@@ -228,6 +227,7 @@
             Grid.Row="7"
             Grid.Column="1"
             Content="Clear"
+            Command="{Binding ClearCommand}"
             />
 
         <Button

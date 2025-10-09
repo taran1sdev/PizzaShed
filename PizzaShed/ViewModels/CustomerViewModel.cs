@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using PizzaShed.Commands;
@@ -48,6 +49,43 @@ namespace PizzaShed.ViewModels
             }
         }
 
+        private string _numberError;
+        public string NumberError
+        {
+            get => _numberError;
+            set => SetProperty(ref _numberError, value);
+        }
+
+        // Regex to ensure a valid number is input
+        private Regex numberRegex = new Regex(@"^\(?0( *\d\)?){10}$");
+        
+        private string _customerNumber;
+        public string CustomerNumber
+        {
+            get
+            {
+                if (CurrentCustomer != null)
+                    return CurrentCustomer.PhoneNumber;
+                return _customerNumber;
+            }
+            set
+            {
+                if (numberRegex.IsMatch(value))
+                {
+                    SetProperty(ref _customerNumber, value);
+                } else
+                {
+                    NumberError = "Invalid Number";
+                }                    
+
+            }
+        }
+
+        // Regex for checking postcode in area
+        private Regex postcodeRangeRegex = new Regex(@"^\(?TA6( *\d\)?){1}( *\p{Lu}\)?){2}$");
+        // Regex for checking valid postcode
+        private Regex postcodeValidRegex = new Regex(@"^\(?( *\p{Lu}\)?){2}( *\d\)?){1}( *\p{Lu}\)?){2}$");
+        public ICommand ClearCommand { get; }
         public ICommand BackCommand { get; }
         public CustomerViewModel(IOrderRepository orderRepository, ICustomerRepository customerRepository, int orderId)
         {
@@ -55,10 +93,15 @@ namespace PizzaShed.ViewModels
             _customerRepository = customerRepository;
             _orderId = orderId;
 
+            ClearCommand = new RelayGenericCommand(OnClear);
             BackCommand = new RelayGenericCommand(OnBack);
         }
 
-        public void OnBack()
+        private void OnClear()
+        {
+            CurrentCustomer = null;
+        }
+        private void OnBack()
         {
             OnNavigateBack();
         }
