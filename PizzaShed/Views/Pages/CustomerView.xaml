@@ -5,15 +5,209 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:helpers="clr-namespace:PizzaShed.Helpers"
-             xmlns:viewmodels="clr-namespace:PizzaShed.ViewModels"
-             xmlns:behaviours="clr-namespace:PizzaShed.Behaviours"
-             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:viewmodels="clr-namespace:PizzaShed.ViewModels"                          
              d:DataContext="{d:DesignInstance Type=viewmodels:CustomerViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="768" 
              d:DesignWidth="1024"
              FontFamily="{materialDesign:RobotoFont}">
+
+    
+    <UserControl.Resources>
+
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="IsVisible" />
+
+            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignPaperLightButton}">
+                <Setter Property="FontSize" Value="34" />
+                <Setter Property="Height" Value="60" />
+                <Setter Property="Width" Value="160" />
+                <Setter Property="Margin" Value="10,10" />
+            </Style>
+
+            <Style TargetType="{x:Type TextBlock}" >
+                <Setter Property="FontSize" Value="30" />
+                <Setter Property="Foreground" Value="AntiqueWhite" />
+                <Setter Property="Margin" Value="0,0" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style TargetType="{x:Type TextBlock}" x:Key="ErrorStyle">
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Foreground" Value="OrangeRed" />
+                <Setter Property="FontSize" Value="24" />
+            </Style>
+
+            <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="Margin" Value="20,20" />
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+        
     <Grid>
-            
+        <Grid.RowDefinitions>
+            <RowDefinition Height="90" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="130" />
+            <RowDefinition Height="90" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.5*" />
+            <ColumnDefinition Width="0.5*" />
+            <ColumnDefinition Width="0.5*" />
+            <ColumnDefinition Width="0.5*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock
+            x:Name="NameLabel"
+            Grid.Row="1"
+            Grid.Column="0"
+            Text="Name:"
+            />
+
+        <TextBox
+            x:Name="NameBox"
+            Grid.Row="1"
+            Grid.Column="1"
+            Text=""
+            />
+
+        <TextBlock
+            x:Name="NumberLabel"
+            Grid.Row="2"
+            Grid.Column="0"
+            Text="Phone No:"
+            />
+
+        <TextBox
+            x:Name="NumberBox"
+            Grid.Row="2"
+            Grid.Column="1"
+            Text=""
+            />
+
+        <TextBlock
+            x:Name="NumberError"
+            Grid.Row="2"
+            Grid.Column="2"
+            Text="Invalid Number"
+            Style="{StaticResource ErrorStyle}"
+            />
+        
+        <TextBlock
+            x:Name="FlatLabel"
+            Grid.Row="3"
+            Grid.Column="0"
+            Text="Apt/Buzzer:"
+            />
+
+        <TextBox
+            x:Name="FlatBox"
+            Grid.Row="3"
+            Grid.Column="1"
+            Text=""
+            Width="80"
+            HorizontalAlignment="Left"
+            />
+
+        <TextBlock
+            x:Name="HouseName"
+            Grid.Row="3"
+            Grid.Column="1"
+            Text="House No:"
+            />
+
+        <TextBox
+            x:Name="HouseBox"
+            Grid.Row="3"
+            Grid.Column="2"
+            Text=""
+            Width="100"
+            HorizontalAlignment="Left"
+            />
+
+        <TextBlock
+            x:Name="AddressName"
+            Grid.Row="4"
+            Grid.Column="0"
+            Text="Address:"
+            />
+
+        <TextBox
+            x:Name="AddressBox"
+            Grid.Row="4"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            Margin="20,20,135,20"
+            Text=""
+            />
+
+        <TextBlock
+            x:Name="PostcodeName"
+            Grid.Row="5"
+            Grid.Column="0"
+            Text="PostCode:"
+            />
+
+        <TextBox
+            x:Name="PostcodeBox"
+            Grid.Row="5"
+            Grid.Column="1"
+            Text=""
+            />
+
+        <TextBlock
+            x:Name="PostcodeError"
+            Grid.Row="5"
+            Grid.Column="2"
+            Text="Invalid Postcode"
+            Style="{StaticResource ErrorStyle}"
+            />
+
+        <TextBlock
+            x:Name="NotesLabel"
+            Grid.Row="6"
+            Grid.Column="0"
+            Text="Delivery&#x0a;    Note:"
+            />
+
+        <TextBox
+            x:Name="NotesBox"
+            Grid.Row="6"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            Margin="20,20,135,20"
+            Text=""
+            />
+
+        <Button
+            x:Name="Back"
+            Grid.Row="7"
+            Grid.Column="0"
+            Content="Back"
+            />
+        
+        <Button
+            x:Name="Clear"
+            Grid.Row="7"
+            Grid.Column="1"
+            Content="Clear"
+            />
+
+        <Button
+            x:Name="Checkout"
+            Grid.Row="7"
+            Grid.Column="3"
+            FontSize="30"
+            Content="Checkout"
+            />
     </Grid>
 </UserControl>
