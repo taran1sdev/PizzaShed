@@ -17,15 +17,37 @@ namespace PizzaShed.ViewModels
     {
         private IOrderRepository _orderRepository;
         private ICustomerRepository _customerRepository;
-        private int _orderId;
+        private readonly int _orderId;
 
         public int OrderID => _orderId;
 
-        private Customer? _currentCustomer;
-        public Customer? CurrentCustomer
+        private Customer _currentCustomer = new Customer();
+        public Customer CurrentCustomer
         {
             get => _currentCustomer;
-            set => SetProperty(ref _currentCustomer, value);
+            set
+            {                
+                SetProperty(ref _currentCustomer, value);
+                // Update the name displayed on the user form
+                NameSearch = _currentCustomer.Name;                   
+            }
+        }
+
+        // We need to use a nullable proxy for setting the
+        // current customer from the ListView selection
+        // using CurrentCustomer directly results in null references
+        private Customer? _proxyCustomer;
+        public Customer? ProxyCustomer
+        {
+            get => _proxyCustomer;
+            set
+            {
+                SetProperty(ref _proxyCustomer, value);
+                if (ProxyCustomer != null)
+                {
+                    CurrentCustomer = ProxyCustomer;
+                }
+            }
         }
 
         private ObservableCollection<Customer> _customerSuggestion = [];
@@ -34,59 +56,40 @@ namespace PizzaShed.ViewModels
             get => _customerSuggestion;
             set
             {
-                SetProperty(ref _customerSuggestion, value);
+                SetProperty(ref _customerSuggestion, value);                            
             }
         }
 
-        private string _customerName = "";
-        public string CustomerName
+        private string _nameSearch = "";
+        public string NameSearch
         {
-            get => _customerName;
+            get =>_nameSearch;
             set
             {
-                SetProperty(ref _customerName, value);
-                CustomerSuggestion = _customerRepository.GetCustomerByPartialName(CustomerName);
-            }
-        }
-
-        private string _numberError;
-        public string NumberError
-        {
-            get => _numberError;
-            set => SetProperty(ref _numberError, value);
-        }
-
-        // Regex to ensure a valid number is input
-        private Regex numberRegex = new Regex(@"^\(?0( *\d\)?){10}$");
-        
-        private string _customerNumber;
-        public string CustomerNumber
-        {
-            get
-            {
-                if (CurrentCustomer != null)
-                    return CurrentCustomer.PhoneNumber;
-                return _customerNumber;
-            }
-            set
-            {
-                if (numberRegex.IsMatch(value))
+                if (CurrentCustomer.ID == 0 && value.Length > 0)
                 {
-                    SetProperty(ref _customerNumber, value);
-                } else
+                    SetProperty(ref _nameSearch, value);
+                    CurrentCustomer.Name = value;
+                    CustomerSuggestion = _customerRepository.GetCustomerByPartialName(_nameSearch);
+                }
+                else
                 {
-                    NumberError = "Invalid Number";
-                }                    
-
+                    SetProperty(ref _nameSearch, value);
+                }
             }
         }
 
-        // Regex for checking postcode in area
-        private Regex postcodeRangeRegex = new Regex(@"^\(?TA6( *\d\)?){1}( *\p{Lu}\)?){2}$");
-        // Regex for checking valid postcode
-        private Regex postcodeValidRegex = new Regex(@"^\(?( *\p{Lu}\)?){2}( *\d\)?){1}( *\p{Lu}\)?){2}$");
+        public string _errorMessage = "";
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set => SetProperty(ref _errorMessage, value);
+        }
+
         public ICommand ClearCommand { get; }
         public ICommand BackCommand { get; }
+
+        public ICommand CheckoutCommand { get; }
         public CustomerViewModel(IOrderRepository orderRepository, ICustomerRepository customerRepository, int orderId)
         {
             _orderRepository = orderRepository;
@@ -95,15 +98,86 @@ namespace PizzaShed.ViewModels
 
             ClearCommand = new RelayGenericCommand(OnClear);
             BackCommand = new RelayGenericCommand(OnBack);
+            CheckoutCommand = new RelayGenericCommand(OnCheckout);
         }
 
         private void OnClear()
         {
-            CurrentCustomer = null;
+            CustomerSuggestion = [];
+            CurrentCustomer = new Customer();
         }
         private void OnBack()
         {
             OnNavigateBack();
+        }
+
+        private void OnCheckout()
+        {
+            ErrorMessage = "";
+            // Don't progress if we have errors or missing info
+            if (
+                CurrentCustomer.PostcodeError != ""
+                || CurrentCustomer.NumberError != ""
+                || CurrentCustomer.StreetAddress == ""
+                || CurrentCustomer.Name == ""
+                || CurrentCustomer.House == ""
+                || CurrentCustomer.Postcode == ""
+                || CurrentCustomer.PhoneNumber == ""
+            )
+                return;
+            
+            // Handle order for existing customer            
+            if (CurrentCustomer.ID != 0)
+            {
+                if (!_customerRepository.UpdateCustomer(CurrentCustomer))
+                {
+                    ErrorMessage = "Failed to update\n customer record";
+                    return;
+                }                    
+            } 
+            else
+            {
+                CurrentCustomer.ID = _customerRepository.CreateNewCustomer(CurrentCustomer);
+                if (CurrentCustomer.ID == 0)
+                {
+                    ErrorMessage = "Failed to create\n new customer";
+                    return;
+                }
+            }
+            
+            if (!_orderRepository.UpdateDeliveryOrder(OrderID, CurrentCustomer.ID, GetDistanceInMiles()))
+            {
+                ErrorMessage = "Failed to update\n Order";
+                return;
+            }
+
+            OnNavigate();
+        }
+
+        // Helper function for distance calculation 
+        private int GetDistanceInMiles()
+        {
+            // We assume here that the shops postcode is TA6 5**
+            // distance is calculated as the difference between
+            // the 4th numeric character of the shop and customers postcode
+
+            // We remove any whitespace from the postcode so we can get the correct character            
+            string postcode = Regex.Replace(CurrentCustomer.Postcode, @"\s+", "");
+
+            // Try and convert the digit
+            if (int.TryParse(postcode[3].ToString(), out int digit))
+            {
+                // Get the difference
+                int distance = 5 - digit;
+                // If we get a negative value divide by -1 to convert to positive
+                if (digit < 0)
+                {
+                    distance /= -1;
+                }
+                
+                return distance;
+            }
+            return -1;
         }
     }
 }

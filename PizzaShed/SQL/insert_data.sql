@@ -13,7 +13,7 @@ VALUES ('Ali Wong', '01234 555111', 'TA6 4AB', 10, 'Oak Road'),
 ('Jess Brown', '01234 555333', 'TA6 1EF', 7, 'Mill Close');
 
 INSERT INTO Delivery_Fees
-VALUES (2, 2.00), (4, 4.00);
+VALUES (2, 2.00), (4, 3.00);
 
 INSERT INTO Promotions (promo_code, description, discount_value, min_spend)
 VALUES ('PIZZA10', '10% off when you spend £15', 0.1, 15.0),

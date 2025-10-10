@@ -107,7 +107,7 @@ namespace PizzaShed.ViewModels
                 {
                     CurrentViewModel.Navigate -= OnCheckout;
                     CurrentViewModel = new CheckoutViewModel(_orderRepository, _session, customerView.OrderID);
-                    CurrentViewModel.NavigateBack += OnCheckoutBack;
+                    CurrentViewModel.NavigateBack += OnCheckoutBack;                    
                 }                                                
             } 
             catch (Exception ex)

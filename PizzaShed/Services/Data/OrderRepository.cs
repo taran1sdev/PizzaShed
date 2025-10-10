@@ -82,10 +82,51 @@ namespace PizzaShed.Services.Data
             return [];
         }
 
-        public int CreateDeliveryOrder(Order order, Customer customer)
+        // Funciton to update a delivery order once we have customer information
+        public bool UpdateDeliveryOrder(int orderId, int customerId, int distance)
         {
-            return 0;
-        }
+            // This query creates a variable to hold the delivery fee then updates the 
+            // record in the order table
+            string queryString = @"
+                DECLARE @delivery_fee smallmoney;
+                
+                SELECT @delivery_fee = price 
+                FROM Delivery_Fees 
+                WHERE max_distance >= @distance
+                ORDER BY price DESC;
+                                
+                UPDATE Orders
+                SET customer_id = @customerID,
+                delivery_fee = @delivery_fee,
+                total_price = total_price + @delivery_fee
+                WHERE order_id = @orderID
+                ";
+
+            try
+            {
+                return _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@orderID", orderId);
+                        query.Parameters.AddWithValue("@customerID", customerId);
+                        query.Parameters.AddWithValue("@distance", distance);
+
+                        if (query.ExecuteNonQuery() > 0)
+                        {
+                            EventLogger.LogInfo("Successfully updated order record");
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to update order: " + ex.Message);
+            }
+            return false;
+        }        
 
         // We create a stored procedure in MSSQL to handle order creation
         // this allows us to create tables containing orders / toppings

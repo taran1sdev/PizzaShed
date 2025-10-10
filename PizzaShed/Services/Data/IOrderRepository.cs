@@ -12,7 +12,7 @@ namespace PizzaShed.Services.Data
     {
         public ObservableCollection<Promotion> FetchEligiblePromotions(decimal orderPrice);
 
-        public int CreateDeliveryOrder(Order order, Customer customer);
+        public bool UpdateDeliveryOrder(int orderId, int customerId, int distance);
         
         public int CreateOrder(Order products);        
 

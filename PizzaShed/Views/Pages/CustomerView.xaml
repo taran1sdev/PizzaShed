@@ -89,7 +89,7 @@
             x:Name="NameBox"
             Grid.Row="1"
             Grid.Column="1"
-            Text="{Binding CustomerName, Mode=TwoWay}"               
+            Text="{Binding NameSearch, Mode=TwoWay}"               
             />
 
         <ListView
@@ -99,7 +99,7 @@
             Margin="20,20"
             ItemsSource="{Binding CustomerSuggestion}"
             DisplayMemberPath="ListName"
-            SelectedItem="{Binding CurrentCustomer, Mode=TwoWay}"
+            SelectedItem="{Binding ProxyCustomer, Mode=TwoWay}"
             Style="{StaticResource MaterialDesignListView}"
             FontSize="18"
             >
@@ -117,7 +117,7 @@
             x:Name="NumberBox"
             Grid.Row="2"
             Grid.Column="1"            
-            Text="{Binding CustomerNumber, Mode=TwoWay}"
+            Text="{Binding CurrentCustomer.PhoneNumber, Mode=TwoWay}"
             />
 
         <TextBlock
@@ -125,7 +125,7 @@
             Grid.Row="2"
             Grid.Column="2"            
             Style="{StaticResource ErrorStyle}"
-            Text="{Binding NumberError}"
+            Text="{Binding CurrentCustomer.NumberError}"
             />
         
         <TextBlock
@@ -139,7 +139,7 @@
             x:Name="FlatBox"
             Grid.Row="3"
             Grid.Column="1"
-            Text="{Binding CustomerFlat, Mode=TwoWay}"
+            Text="{Binding CurrentCustomer.Flat, Mode=TwoWay}"
             Width="80"
             HorizontalAlignment="Left"            
             />
@@ -155,7 +155,7 @@
             x:Name="HouseBox"
             Grid.Row="3"
             Grid.Column="2"
-            Text="{Binding CustomerHouse, Mode=TwoWay}"
+            Text="{Binding CurrentCustomer.House, Mode=TwoWay}"
             Width="100"
             HorizontalAlignment="Left"             
             />
@@ -173,7 +173,7 @@
             Grid.Column="1"
             Grid.ColumnSpan="2"
             Margin="20,20,135,20"
-            Text="{Binding CustomerAddress, Mode=TwoWay}"
+            Text="{Binding CurrentCustomer.StreetAddress, Mode=TwoWay}"
             />
 
         <TextBlock
@@ -187,14 +187,14 @@
             x:Name="PostcodeBox"
             Grid.Row="5"
             Grid.Column="1"
-            Text="{Binding CustomerPostcode, Mode=TwoWay}"
+            Text="{Binding CurrentCustomer.Postcode, Mode=TwoWay}"
             />
 
         <TextBlock
             x:Name="PostcodeError"
             Grid.Row="5"
             Grid.Column="2"
-            Text="{Binding PostcodeError}"
+            Text="{Binding CurrentCustomer.PostcodeError}"
             Style="{StaticResource ErrorStyle}"
             />
 
@@ -211,7 +211,9 @@
             Grid.Column="1"
             Grid.ColumnSpan="2"
             Margin="20,20,135,20"
-            Text="{Binding CustomerDeliveryNote, Mode=TwoWay}"
+            VerticalContentAlignment="Top"
+            Padding="5,5"
+            Text="{Binding CurrentCustomer.DeliveryNotes, Mode=TwoWay}"
             />
 
         <Button
@@ -230,12 +232,21 @@
             Command="{Binding ClearCommand}"
             />
 
+        <TextBlock
+            x:Name="ErrorMessage"
+            Grid.Row="7"
+            Grid.Column="2"
+            Text="{Binding ErrorMessage}"
+            Style="{StaticResource ErrorStyle}"
+            />
+        
         <Button
             x:Name="Checkout"
             Grid.Row="7"
             Grid.Column="3"
             FontSize="30"
             Content="Checkout"
+            Command="{Binding CheckoutCommand}"
             />
     </Grid>
 </UserControl>
