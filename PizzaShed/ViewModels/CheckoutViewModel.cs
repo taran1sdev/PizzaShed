@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using PizzaShed.Services.Logging;
 using System.Data;
+using System.Windows;
 
 namespace PizzaShed.ViewModels
 {
@@ -130,11 +131,21 @@ namespace PizzaShed.ViewModels
 
         public string VATValue => $"£{_currentOrder?.VAT:N2}";
 
-        public string TotalPriceValue => $"£{_currentOrder?.TotalPrice:N2}";
+        public string TotalPriceValue 
+            => $"£{_currentOrder?.PriceAfterPayments:N2}";
+
+        public bool CardPayment = false;
+        public bool IsPaid 
+        {
+            get => _currentOrder?.PriceAfterPayments <= (decimal)0.00;
+        }
 
         public ICommand BackCommand { get; }
-
         public ICommand LogoutCommand { get; }
+        public ICommand CardCommand { get;  }
+        public ICommand CashCommand { get; }
+
+        public ICommand CompleteOrderCommand { get; }
 
         public CheckoutViewModel(IOrderRepository orderRepo, ISession session, int orderID)
         {
@@ -163,6 +174,9 @@ namespace PizzaShed.ViewModels
             SelectPhoneCommand = new RelayGenericCommand(SelectPhone);
             BackCommand = new RelayGenericCommand(OnBack);
             LogoutCommand = new RelayGenericCommand(OnLogout);
+            CardCommand = new RelayGenericCommand(OnCard);
+            CashCommand = new RelayGenericCommand(OnCash);
+            CompleteOrderCommand = new RelayGenericCommand(CompleteOrder);
         }
 
         private void SelectPromotion()
@@ -198,8 +212,53 @@ namespace PizzaShed.ViewModels
     
         private void OnLogout()
         {
+            CardPayment = false;
             OnBack(); // Calling this function deletes the current order on logout
             _session.Logout();
         }
+
+        private void OnCard()
+        {
+            CardPayment = true;
+            OnNavigate();
+        }
+
+        private void OnCash()
+        {
+            if (IsDelivery || IsPhone)
+            {
+                if (_currentOrder != null)
+                {
+                    _currentOrder.CashPayments.Add(_currentOrder.TotalPrice);
+                    OnNavigate();                    
+                }                    
+            }
+            else
+            {
+                CardPayment = false;
+                OnNavigate();
+            }                
+        }
+
+        public void MakePayment(decimal amount)
+        {
+            
+            if (CardPayment)
+            {                
+                _currentOrder?.CardPayments.Add(amount);                
+            }
+            else
+            {
+                _currentOrder?.CashPayments.Add(amount);                        
+            }
+
+            OnNavigate();
+
+            OnPropertyChanged(nameof(TotalPriceValue));                                                                
+            OnPropertyChanged(nameof(AcceptOrder));
+            OnPropertyChanged(nameof(IsPaid));
+        }
+
+        public void CompleteOrder() => OnNavigate();
     }
 }

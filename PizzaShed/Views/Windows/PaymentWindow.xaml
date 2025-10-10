@@ -1,0 +1,33 @@
+﻿<Window x:Class="PizzaShed.Views.Windows.PaymentWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PizzaShed"
+        xmlns:vm="clr-namespace:PizzaShed.ViewModels"   
+        xmlns:pages="clr-namespace:PizzaShed.Views.Pages"
+        xmlns:windows="clr-namespace:PizzaShed.Views.Windows"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        mc:Ignorable="d"
+        Title="PaymentWindow"         
+        Height="480" 
+        Width="450" 
+        FontFamily="{materialDesign:RobotoFont}"
+        ResizeMode="NoResize"
+        Style="{StaticResource MaterialDesignWindow}">  
+    
+        <Window.Resources>
+            <DataTemplate DataType="{x:Type vm:PaymentPresentViewModel}">
+                <pages:PaymentPresentView/>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type vm:PaymentNotPresentViewModel}">
+                <pages:PaymentNotPresentView/>
+            </DataTemplate>
+    </Window.Resources>
+
+    <ContentControl Content="{Binding PaymentViewModel}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch" />
+</Window>

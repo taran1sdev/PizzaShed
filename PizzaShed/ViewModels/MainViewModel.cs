@@ -1,6 +1,7 @@
 ﻿using PizzaShed.Model;
 using PizzaShed.Services.Data;
 using PizzaShed.Services.Logging;
+using PizzaShed.Views.Windows;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,6 +10,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Automation.Provider;
 
 namespace PizzaShed.ViewModels
@@ -23,6 +25,21 @@ namespace PizzaShed.ViewModels
         private readonly ICustomerRepository _customerRepository;
         
         private ViewModelBase _currentViewModel;
+        public ViewModelBase CurrentViewModel
+        {
+            get => _currentViewModel;
+            set => SetProperty(ref _currentViewModel, value);                
+            
+        }
+
+        private ViewModelBase _paymentViewModel;
+        public ViewModelBase PaymentViewModel
+        {
+            get => _paymentViewModel;
+            set => SetProperty(ref _paymentViewModel, value);
+        }
+
+        private PaymentWindow _paymentWindow;
 
         public MainViewModel(
             ISession session, 
@@ -41,19 +58,14 @@ namespace PizzaShed.ViewModels
             _customerRepository = customerRepository;
             _currentViewModel = this;
 
+            _paymentWindow = new PaymentWindow();
+            _paymentWindow.DataContext = this;
+            
+            _paymentViewModel = new ViewModelBase();            
+            
             _session.SessionChanged += OnSessionChanged;
 
             OnSessionChanged(this, EventArgs.Empty);
-        }
-
-        public ViewModelBase CurrentViewModel
-        {
-            get => _currentViewModel;
-            set
-            {
-                _currentViewModel = value;
-                OnPropertyChanged();
-            }
         }        
 
         // When the session is changed navigate to the view that matches the user's role
@@ -100,6 +112,7 @@ namespace PizzaShed.ViewModels
                     } else
                     {
                         CurrentViewModel = new CheckoutViewModel(_orderRepository, _session, cashierView.OrderID);
+                        CurrentViewModel.Navigate += ViewPayment;
                         CurrentViewModel.NavigateBack += OnCheckoutBack;
                     }                        
                 } 
@@ -107,6 +120,7 @@ namespace PizzaShed.ViewModels
                 {
                     CurrentViewModel.Navigate -= OnCheckout;
                     CurrentViewModel = new CheckoutViewModel(_orderRepository, _session, customerView.OrderID);
+                    CurrentViewModel.Navigate += ViewPayment;
                     CurrentViewModel.NavigateBack += OnCheckoutBack;                    
                 }                                                
             } 
@@ -146,6 +160,64 @@ namespace PizzaShed.ViewModels
             {
                 EventLogger.LogError("Error navigating from checkout to cashier view: " + ex.Message);
             }
+        }
+
+        private void ViewPayment(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (CurrentViewModel is CheckoutViewModel checkoutViewModel)
+                {
+                    if (checkoutViewModel.IsCollection && !checkoutViewModel.IsPhone)
+                    {                        
+                        _paymentWindow.Show();
+                        PaymentViewModel = new PaymentPresentViewModel(checkoutViewModel);
+                        checkoutViewModel.Navigate -= ViewPayment;
+                        checkoutViewModel.Navigate += OnPayment;
+                    }
+                    else
+                    {                        
+                        _paymentWindow.Show();
+                        PaymentViewModel = new PaymentNotPresentViewModel(checkoutViewModel);
+                        checkoutViewModel.Navigate -= ViewPayment;
+                        PaymentViewModel.Navigate += OnPayment;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Error occured displaying payment window " + ex.Message);
+            }            
+        }
+
+        private void OnPayment(object? sender, EventArgs e)
+        {            
+            _paymentWindow.Hide();
+                                  
+
+            if (CurrentViewModel is CheckoutViewModel checkoutViewModel)
+            {
+                if (checkoutViewModel.IsPaid)
+                {
+                    checkoutViewModel.AcceptOrder = false;
+                    CurrentViewModel.Navigate -= OnPayment;
+                    CurrentViewModel.Navigate += OnCompleteOrder;
+                } 
+                else
+                {
+                    CurrentViewModel.Navigate -= OnPayment;
+                    CurrentViewModel.Navigate += ViewPayment;                    
+                }
+                    
+                
+            }
+        }        
+
+        private void OnCompleteOrder(object? sender, EventArgs e)
+        {
+            CurrentViewModel.Navigate -= OnCompleteOrder;
+            CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, []);
+            CurrentViewModel.Navigate += OnCheckout;
         }
     }
 }

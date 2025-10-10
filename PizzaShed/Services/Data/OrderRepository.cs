@@ -630,10 +630,13 @@ namespace PizzaShed.Services.Data
         {
             OpeningTimes times = GetOpeningTimes();
 
-            TimeSpan now = DateTime.Now.TimeOfDay;            
+            TimeSpan now = DateTime.Now.TimeOfDay;
 
+            // Delivery time will be returned rounded up to the nearest 10 minute interval
+            TimeSpan deliverySlotInterval = new TimeSpan(00, 10, 00);
+            
+            // 2 drivers available during peak times
             int availableDrivers = now > times.PeakStart && now < times.PeakEnd ? 2 : 1;
-
             
             // It takes 2-5 minutes to drive 1 mile in a city
             // the maximum time for a round trip in a 4-mile radius should be 40 minutes
@@ -654,6 +657,16 @@ namespace PizzaShed.Services.Data
             else if (orderReady < times.Open.Add(prepTime))
             {
                 return (false, "Too early to order");
+            }
+
+            int remainder = orderReady.Minutes % deliverySlotInterval.Minutes;
+
+            if (remainder != 0)
+            {
+                // if our current slot isn't the correct interval subtract the remainder
+                orderReady = orderReady.Subtract(new TimeSpan(00, remainder, 00));
+                // and add the interval again for the next available collection time
+                orderReady = orderReady.Add(deliverySlotInterval);
             }
 
             return (true, orderReady.ToString(@"hh\:mm") + " PM");

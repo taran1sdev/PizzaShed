@@ -59,6 +59,25 @@ namespace PizzaShed.Model
             }
         }
 
+        public decimal PriceAfterPayments
+        {
+            get
+            {
+                decimal total = TotalPrice;
+
+                if (CardPayments.Count > 0)
+                {
+                    CardPayments.ForEach(p => total -= p);
+                }
+
+                if (CashPayments.Count > 0)
+                {
+                    CashPayments.ForEach(p => total -= p);
+                }
+                return total;
+            }
+        }
+
         // Return the total price excluding meal deal items (and their toppings)
         public decimal PriceExcludingDeals => OrderProducts.Where(p => p.ParentDealID == null)
                                                            .Sum(static p => p.Price + p.Toppings
@@ -70,8 +89,11 @@ namespace PizzaShed.Model
         public decimal VAT => TotalPrice * (decimal)0.2;
 
         public ObservableCollection<Product> OrderProducts { get; set; } = [];
-
         
-        public Promotion? Promo { get; set; }        
+        public Promotion? Promo { get; set; }
+
+        public List<decimal> CardPayments { get; set; } = [];
+
+        public List<decimal> CashPayments { get; set; } = [];
     }
 }

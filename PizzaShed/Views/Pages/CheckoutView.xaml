@@ -172,7 +172,24 @@
             SelectedItem="{Binding Path=SelectedCollectionTime}" 
             >
         </ComboBox>
-        
+
+        <TextBlock
+            x:Name="ExpectedDeliveryLabel"
+            Grid.Row="1"
+            Grid.Column="0"
+            HorizontalAlignment="Left"
+            Visibility="{Binding IsDelivery, Converter={StaticResource IsVisible}}"
+            Text="Delivery &#x0a;  Time"
+            />
+
+        <TextBlock
+            x:Name="ExpectedDeliveryValue"
+            Grid.Row="1"
+            Grid.Column="0"
+            HorizontalAlignment="Right"
+            Visibility="{Binding IsDelivery, Converter={StaticResource IsVisible}}"
+            Text="{Binding ExpectedDeliveryTime}"
+            />
         <TextBlock
             x:Name="PromotionTitle"
             Grid.Row="2"
@@ -242,7 +259,7 @@
             x:Name="DeliveryValue"
             Style="{StaticResource ReceiptValueStyle}"
             Text="{Binding DeliveryValue}"
-            Margin="20,0,0,75"
+            Margin="0,0,30,75"
             Visibility="{Binding IsDelivery, Converter={StaticResource IsVisible}}"
             />
         <TextBlock
@@ -308,6 +325,7 @@
             HorizontalAlignment="Left"
             Content="Card"
             Visibility="{Binding AcceptOrder, Converter={StaticResource IsVisible}}"
+            Command="{Binding CardCommand}"
             />
 
         <Button
@@ -317,6 +335,19 @@
             HorizontalAlignment="Right"
             Content="Cash"
             Visibility="{Binding AcceptOrder, Converter={StaticResource IsVisible}}"
+            Command="{Binding CashCommand}"
             />
+
+        <Button
+            x:Name="Complete"
+            FontSize="30"
+            Grid.Row="4"
+            Grid.Column="1"
+            HorizontalAlignment="Right"
+            Content="Complete"
+            Visibility="{Binding IsPaid, Converter={StaticResource IsVisible}}"
+            Command="{Binding CompleteOrderCommand}"
+            />
+
     </Grid>
 </UserControl>

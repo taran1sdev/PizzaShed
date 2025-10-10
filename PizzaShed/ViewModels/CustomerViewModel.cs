@@ -144,8 +144,15 @@ namespace PizzaShed.ViewModels
                     return;
                 }
             }
-            
-            if (!_orderRepository.UpdateDeliveryOrder(OrderID, CurrentCustomer.ID, GetDistanceInMiles()))
+
+            int distance = GetDistanceInMiles();
+            if (distance < 0 || distance > 4)
+            {
+                ErrorMessage = "Error calculating\n distance";
+                return;
+            }
+
+            if (!_orderRepository.UpdateDeliveryOrder(OrderID, CurrentCustomer.ID, distance))
             {
                 ErrorMessage = "Failed to update\n Order";
                 return;
@@ -174,7 +181,11 @@ namespace PizzaShed.ViewModels
                 {
                     distance /= -1;
                 }
-                
+
+                // If the postcode starts with 0 we still deliver at the higher rate
+                if (distance == 5)
+                    return distance - 1;
+
                 return distance;
             }
             return -1;

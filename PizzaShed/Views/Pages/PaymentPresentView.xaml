@@ -1,0 +1,238 @@
+﻿<UserControl x:Class="PizzaShed.Views.Pages.PaymentPresentView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PizzaShed.Views.Pages"
+             xmlns:vm="clr-namespace:PizzaShed.ViewModels"
+             d:DataContext="{d:DesignInstance Type=vm:PaymentPresentViewModel}"
+             mc:Ignorable="d"                                                     
+             Height="450" 
+             Width="450">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MaterialDesignTextBlock}">
+                <Setter Property="FontSize" Value="40" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="TextAlignment" Value="Center" />
+            </Style>
+
+            <!-- Sets default style for the keypad buttons -->
+            <Style                
+            TargetType="{x:Type Button}" 
+            BasedOn="{StaticResource MaterialDesignPaperLightButton}"
+            >
+                <Setter Property="Height" Value="50" />
+                <Setter Property="Width" Value="70" />
+                <Setter Property="Margin" Value="40,10,40,10" />
+                <Setter Property="FontSize" Value="24" />
+            </Style>
+
+            <!-- Alternate styling for the backspace and clear buttons -->
+            <Style 
+            x:Key="ClearButtonStyle" 
+            TargetType="{x:Type Button}" 
+            BasedOn="{StaticResource MaterialDesignOutlinedLightButton}">
+
+                <Setter Property="Height" Value="50" />
+                <Setter Property="Width" Value="70" />
+                <Setter Property="Margin" Value="40,0" />
+                <Setter Property="FontSize" Value="24" />
+            </Style>
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
+    <UserControl.Content>
+        <Grid TextElement.Foreground="FloralWhite" x:Name="GridContent">
+            <!-- Create rows and columns for page layout -->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.7*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="0.3*"></RowDefinition>
+                <RowDefinition Height="0.4*"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.2*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="0.2*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock
+                x:Name="TotalBox"
+                Grid.Row="0"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"                
+                Height="60"
+                Width="240"
+                PreviewKeyDown="HandleKeyboardInput"   
+                Text="{Binding Total, Mode=TwoWay}"
+                />
+
+            <TextBlock
+                x:Name="ErrorMessage"
+                Grid.Row="0"
+                Grid.Column="1"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Center"
+                Foreground="Red"
+                FontSize="20"
+                Margin="0,10"
+                Text="{Binding ErrorMessage}"
+            ></TextBlock>
+            
+            <!-- Keypad for the user to input the PIN -->
+            <Button                
+                x:Name="One" 
+                Content="1" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top"
+                Grid.Row="1"
+                Grid.Column="1"  
+                Command="{Binding ButtonCommand}"
+                CommandParameter="1"                
+                ></Button>
+            
+            <Button                 
+                x:Name="Two" 
+                Content="2" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Top"
+                Grid.Row="1"    
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="2"
+                ></Button>
+
+            <Button 
+                x:Name="Three" 
+                Content="3" 
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Top"
+                Grid.Row="1"    
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="3"
+                ></Button>
+
+            <Button 
+                x:Name="Four" 
+                Content="4" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Center"
+                Grid.Row="1"    
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="4"
+                ></Button>
+
+            <Button 
+                x:Name="Five" 
+                Content="5" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center"
+                Grid.Row="1"    
+                Grid.Column="1" 
+                Command="{Binding ButtonCommand}"
+                CommandParameter="5"
+                ></Button>
+            
+            <Button
+                x:Name="Six"
+                Content="6"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Grid.Row="1"
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="6"
+                ></Button>
+            
+            <Button 
+                x:Name="Seven" 
+                Content="7"     
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Bottom"
+                Grid.Row="1"    
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="7"
+                ></Button>
+            
+            <Button 
+                x:Name="Eight" 
+                Content="8" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Bottom"
+                Grid.Row="1"    
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="8"
+                ></Button>
+
+            <Button 
+                x:Name="Nine" 
+                Content="9" 
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Bottom"
+                Grid.Row="1"    
+                Grid.Column="1"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="9"
+                ></Button>
+            <Button
+                x:Name="Zero"
+                Content="0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Grid.Row="2"
+                Grid.Column="1"
+                Margin="0"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="0"
+                ></Button>
+
+            <Button
+                x:Name="Clear"
+                Content="CE"
+                Grid.Row="2"
+                Grid.Column="1"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Left"                              
+                Style="{StaticResource ClearButtonStyle}"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="Clear"
+                ></Button>
+
+            <Button                  
+                x:Name="Point"
+                Content="."
+                Grid.Row="2"
+                Grid.Column="1"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Right"                                              
+                Style="{StaticResource ClearButtonStyle}"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="Point"
+                ></Button>
+
+            <Button
+                x:Name="Submit"
+                Content="Submit"
+                Grid.Row="3"
+                Grid.Column="1"
+                Grid.ColumnSpan="2"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,10,20,0"
+                Width="120"
+                Command="{Binding MakePaymentCommand}"
+                CommandParameter="{Binding TotalValue}"
+                />
+        </Grid>
+    </UserControl.Content>
+</UserControl>
