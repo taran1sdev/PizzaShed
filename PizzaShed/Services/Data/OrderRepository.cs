@@ -251,6 +251,7 @@ namespace PizzaShed.Services.Data
         {
             DataTable productTable = new DataTable();
             productTable.Columns.Add("product_id", typeof(int));
+            productTable.Columns.Add("second_half_id", typeof(int));
             productTable.Columns.Add("size_name", typeof(string));
             productTable.Columns.Add("deal_id", typeof(int));
             productTable.Columns.Add("deal_instance_id", typeof(int));
@@ -270,6 +271,7 @@ namespace PizzaShed.Services.Data
                     productTable.Rows.Add(
                         (object)DBNull.Value,
                         (object)DBNull.Value,
+                        (object)DBNull.Value,
                         product.ID,
                         product.ParentDealID,
                         clientCounter
@@ -279,6 +281,7 @@ namespace PizzaShed.Services.Data
                 {
                     productTable.Rows.Add(
                         product.ID,
+                        product.SecondHalfID ?? (object)DBNull.Value,
                         product.SizeName,
                         (object)DBNull.Value,
                         product.ParentDealID ?? (object)DBNull.Value,
@@ -438,11 +441,21 @@ namespace PizzaShed.Services.Data
         private List<Product> GetOrderProducts(int orderId)
         {
             // To handle meal deals we switch out the product name / category when the query returns null values 
+            // if the product is a half and half pizza we grab the name of the second half
             string queryString = @"
                 SELECT 
 	                p.product_id, 
 	                op.order_product_id, 
-	                (SELECT ISNULL(p.product_name, md.deal_name)) AS product_name, 
+	                CASE
+                        WHEN op.second_half_id IS NULL
+                            THEN ISNULL(p.product_name, md.deal_name)
+                        ELSE 
+                            CONCAT(
+                                p.product_name,
+                                ' / ',
+                                (SELECT product_name FROM Products WHERE product_id = op.second_half_id)
+                            )
+                        END AS product_name,
                     (SELECT ISNULL(p.product_category,'Deal')) AS product_category,
 	                s.size_name, 
 	                (SELECT ISNULL(pp.price,md.price)) AS price,	
@@ -463,7 +476,7 @@ namespace PizzaShed.Services.Data
 				LEFT JOIN Allergens AS a
 					ON a.allergen_id = pa.allergen_id
                 WHERE op.order_id = @orderId
-				GROUP BY op.order_product_id, op.deal_id, op.deal_instance_id, s.size_name, 
+				GROUP BY op.order_product_id, op.deal_id, op.deal_instance_id, s.size_name, op.second_half_id, 
                 p.product_id, product_name, product_category, deal_name, md.price, pp.price";
 
             try

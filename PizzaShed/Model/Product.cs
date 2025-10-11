@@ -81,6 +81,8 @@ namespace PizzaShed.Model
             SetupEventHandlers();
         }
 
+        public int? SecondHalfID;
+
         public int? ParentDealID = null;
         
         public bool IsPlaceholder = false;

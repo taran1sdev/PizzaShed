@@ -23,3 +23,9 @@ DROP TABLE IF EXISTS Topping_Types;
 DROP TABLE IF EXISTS Opening_Times;
 DROP TABLE IF EXISTS Delivery_Fees;
 DROP TABLE IF EXISTS Payments;
+IF OBJECT_ID('dbo.CreateOrder', 'P') IS NOT NULL
+    DROP PROCEDURE CreateOrder
+GO
+
+DROP TYPE ProductListType;
+DROP TYPE ToppingListType;

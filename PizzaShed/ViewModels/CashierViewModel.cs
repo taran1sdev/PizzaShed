@@ -356,17 +356,35 @@ namespace PizzaShed.ViewModels
                 && secondHalf.SizeName == _tempFirstHalf.SizeName
                 && secondHalf.Name != _tempFirstHalf.Name // Check our halfs are unique
             )
-            {                
-                Product finalPizza = new Product
+            {
+                Product primaryHalf;
+                Product secondaryHalf;
+
+                // We want the primary half to be the more expensive half as that is the
+                // ID that will retrieve the price in the database
+                if (_tempFirstHalf.Price > secondHalf.Price)
                 {
-                    Name = $"{_tempFirstHalf.Name} / {secondHalf.Name}",
-                    Price = Math.Max(_tempFirstHalf.Price, secondHalf.Price),
-                    RequiredChoices = _tempFirstHalf.RequiredChoices,
-                    Category = _tempFirstHalf.Category,
-                    Allergens = [.. _tempFirstHalf.Allergens.Union(secondHalf.Allergens)],
-                    Toppings = [],
-                    SizeName = _tempFirstHalf.SizeName,
-                };
+                    primaryHalf = _tempFirstHalf;
+                    secondaryHalf = secondHalf;
+                }
+                else
+                {
+                    secondaryHalf = _tempFirstHalf;
+                    primaryHalf = secondHalf; 
+                }
+
+                    Product finalPizza = new Product
+                    {
+                        ID = primaryHalf.ID,
+                        Name = $"{primaryHalf.Name} / {secondaryHalf.Name}",
+                        SecondHalfID = secondaryHalf.ID,
+                        Price = primaryHalf.Price,
+                        RequiredChoices = primaryHalf.RequiredChoices,
+                        Category = primaryHalf.Category,
+                        Allergens = [.. primaryHalf.Allergens.Union(secondaryHalf.Allergens)],
+                        Toppings = [],
+                        SizeName = primaryHalf.SizeName,
+                    };
 
                 // We clone the object to create a unique instance and subscribe event handlers
                 finalPizza = (Product)finalPizza.Clone();

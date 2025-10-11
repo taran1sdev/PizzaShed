@@ -223,11 +223,13 @@ CREATE TABLE Order_Products (
   order_product_id int IDENTITY(1,1),
   order_id int NOT NULL,
   product_id int,
+  second_half_id int NULL,
   size_id int,
   deal_id int,
   deal_instance_id int,
   
   FOREIGN KEY(order_id) REFERENCES Orders (order_id),
+  FOREIGN KEY(product_id) REFERENCES Products (product_id),
   FOREIGN KEY(product_id) REFERENCES Products (product_id),
   FOREIGN KEY(size_id) REFERENCES Sizes(size_id),
   FOREIGN KEY(deal_id) REFERENCES Meal_Deals (deal_id),  
@@ -252,15 +254,16 @@ CREATE TABLE Opening_Times (
 	PRIMARY KEY(day_id)
 );
 
---CREATE TYPE ProductListType AS Table (
---	product_id INT,
---	size_name VARCHAR(30),
---	deal_id INT NULL,
---	deal_instance_id INT NULL,
---	client_product_id INT
---);
+CREATE TYPE ProductListType AS Table (
+	product_id INT,
+	second_half_id INT NULL,
+	size_name VARCHAR(30),
+	deal_id INT NULL,
+	deal_instance_id INT NULL,
+	client_product_id INT
+);
 
---CREATE TYPE ToppingListType AS TABLE (
---	client_product_id INT,
---	topping_id INT
---);
+CREATE TYPE ToppingListType AS TABLE (
+	client_product_id INT,
+	topping_id INT
+);
