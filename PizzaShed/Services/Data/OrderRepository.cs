@@ -669,10 +669,10 @@ namespace PizzaShed.Services.Data
         // We create a dictionary to hold our query strings when retrieving orders by role
         private readonly Dictionary<string, string> roleQueryDict = new Dictionary<string, string>()
         {
-            { "Cashier", "WHERE order_type = 'Collection' AND order_status = 'Order Ready'" },
+            { "Cashier", "WHERE order_type = 'Collection'" },
             { "Pizzaiolo", "WHERE order_status = 'Ready For Prep' OR order_status = 'Grill Ready'" },
             { "Grill Cook", "WHERE order_status = 'Ready For Prep' OR order_status = 'Pizza Ready'" },
-            { "Driver", "WHERE order_type = 'Delivery' AND order_status = 'Order ready'" },
+            { "Driver", "WHERE order_type = 'Delivery' AND order_status = 'Order Ready'" },
             { "Manager", "WHERE order_status NOT IN ('Cancelled', 'Refunded')" }
         };
 

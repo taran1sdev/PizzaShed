@@ -110,7 +110,24 @@ namespace PizzaShed.Model
                     _ => $"{Name}\n({SizeName})",                
                 };
             }
-        }        
+        }
+
+        public string TicketName
+        {
+            get
+            {
+                // Return the value that will be displayed on order info / recipts
+                // If applicable display the size, toppings and allergens in the product
+                return Category.ToLower() switch
+                {
+                    "pizza" or "kebab" => $"{Name} ({SizeName?[..1].ToUpper()})" +
+                        $"\n{(Category.ToLower() == "pizza" ? "Base: " : "Bread: ")}{RequiredChoices.FirstOrDefault()?.Name}" +
+                        $"{string.Join("", Toppings.SelectMany(t => t.DisplayName))}",                                                                    
+                    "side" => $"{Name} ({SizeName})",                               
+                    _ => $"{Name}"                                                  
+                };
+            }
+        }
 
         public string ReceiptName
         {

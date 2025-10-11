@@ -75,10 +75,12 @@ namespace PizzaShed.ViewModels
             {
                 switch (_session.UserRole.ToLower())
                 {
-                    case "cashier" or "manager":
-                        
+                    case "cashier" or "manager":                        
                         CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, []);
                         CurrentViewModel.Navigate += OnCheckout;
+                        break;
+                    case "pizzaiolo" or "grill cook" or "driver":
+                        CurrentViewModel = new OrderViewModel(_session, _orderRepository);                        
                         break;
                     default:
                         CurrentViewModel = new LoginViewModel(_userRepository, _session);
