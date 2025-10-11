@@ -189,8 +189,7 @@ CREATE TABLE Orders (
   order_notes varchar(255),
   order_type varchar(16) NOT NULL,
   driver_id int,
-  paid bit NOT NULL,
-  payment_type varchar(32),
+  paid bit NOT NULL,  
   total_price smallmoney NOT NULL,
   delivery_fee smallmoney,
   promo_id int,
@@ -201,6 +200,23 @@ CREATE TABLE Orders (
   FOREIGN KEY(driver_id) REFERENCES Drivers (driver_id),
   FOREIGN KEY(promo_id) REFERENCES Promotions (promo_id),
   PRIMARY KEY(order_id)
+);
+
+CREATE TABLE Payments (
+	payment_id int IDENTITY(1,1),
+	payment_type varchar(50),
+	amount smallmoney,
+
+	PRIMARY KEY(payment_id)
+);
+
+CREATE TABLE Order_Payments (
+	payment_id int,
+	order_id int,
+
+	FOREIGN KEY(payment_id) REFERENCES Payments (payment_id),
+	FOREIGN KEY(order_id) REFERENCES Orders (order_id),
+	PRIMARY KEY(payment_id, order_id)
 );
 
 CREATE TABLE Order_Products (

@@ -18,9 +18,9 @@ namespace PizzaShed.ViewModels
     {
         private ISession _session;
         private IOrderRepository _orderRepository;
-        private readonly Order? _currentOrder;
+        private readonly Order _currentOrder;
         
-        public ObservableCollection<Product> CurrentOrder => _currentOrder?.OrderProducts ?? [];
+        public ObservableCollection<Product> CurrentOrder => _currentOrder.OrderProducts ?? [];
         
         public ObservableCollection<Product> OrderProducts 
         {
@@ -35,7 +35,7 @@ namespace PizzaShed.ViewModels
             }
         }
         //------    View    ------//        
-        public bool IsCollection => _currentOrder?.OrderType == "Collection";
+        public bool IsCollection => _currentOrder.OrderType == "Collection";
         
         public bool IsDelivery => !IsCollection;
 
@@ -76,7 +76,12 @@ namespace PizzaShed.ViewModels
         }
 
         // Toggles the payment button visibility 
-        public bool AcceptOrder { get; set; } = false;
+        private bool _acceptOrder;
+        public bool AcceptOrder
+        {
+            get => _acceptOrder && !IsPaid;
+            set => SetProperty(ref _acceptOrder, value);
+        }
 
         private ObservableCollection<Promotion> _promotions = [];
         public ObservableCollection<Promotion> Promotions
@@ -129,15 +134,29 @@ namespace PizzaShed.ViewModels
             }
         }
 
-        public string VATValue => $"£{_currentOrder?.VAT:N2}";
+        public string VATValue => $"£{_currentOrder.VAT:N2}";
 
         public string TotalPriceValue 
-            => $"£{_currentOrder?.PriceAfterPayments:N2}";
+            => $"£{_currentOrder.PriceAfterPayments:N2}";
 
-        public bool CardPayment = false;
+        private bool CardPayment = false;
+
+        private string PaymentType => CardPayment ? "Card" : "Cash";
+
         public bool IsPaid 
         {
-            get => _currentOrder?.PriceAfterPayments <= (decimal)0.00;
+            get => _currentOrder.PriceAfterPayments <= (decimal)0.00;
+        }
+
+        public string OrderSource
+        {
+            set => _currentOrder.OrderSource = value;
+        }
+
+        public string? OrderNotes
+        {
+            get => _currentOrder.OrderNotes;
+            set => _currentOrder.OrderNotes = value;
         }
 
         public ICommand BackCommand { get; }
@@ -152,24 +171,30 @@ namespace PizzaShed.ViewModels
             _orderRepository = orderRepo;
             _session = session;            
 
-            if (orderID > 0)
-            {
-                _currentOrder = _orderRepository.GetOrderByOrderNumber(orderID);
+            _currentOrder = _orderRepository.GetOrderByOrderNumber(orderID) 
+                ?? new Order{
+                OrderStatus = "Error"
+                }; 
                 
-                if (_currentOrder != null)
-                {
-                    Promotions = _orderRepository.FetchEligiblePromotions(_currentOrder.PriceExcludingDeals);
-                    if (IsCollection)
-                    {
-                        (AcceptOrder, CollectionTimes) = _orderRepository.GetCollectionTimes();
-                        SelectedCollectionTime = CollectionTimes.FirstOrDefault();
-                    } else
-                    {
-                        (AcceptOrder, ExpectedDeliveryTime) = _orderRepository.GetDeliveryTime();
-                    }
-                } 
-                    
+            if (_currentOrder.OrderStatus == "Error")
+            {                    
+                OnNavigateBack();
+            }                 
+              
+            Promotions = _orderRepository.FetchEligiblePromotions(_currentOrder.PriceExcludingDeals);
+                
+            if (IsCollection)
+            {
+                (AcceptOrder, CollectionTimes) = _orderRepository.GetCollectionTimes();
+                SelectedCollectionTime = CollectionTimes.FirstOrDefault();
             }
+            else
+            {
+                (AcceptOrder, ExpectedDeliveryTime) = _orderRepository.GetDeliveryTime();
+            }
+
+            _currentOrder.Payments.Add("Cash", []);
+            _currentOrder.Payments.Add("Card", []);
 
             SelectPhoneCommand = new RelayGenericCommand(SelectPhone);
             BackCommand = new RelayGenericCommand(OnBack);
@@ -189,7 +214,7 @@ namespace PizzaShed.ViewModels
 
         private void SelectCollectionTime()
         {
-            if (!AcceptOrder || _currentOrder == null || SelectedCollectionTime == null)
+            if (!AcceptOrder || SelectedCollectionTime == null)
                 return;
 
             _currentOrder.CollectionTime = Convert.ToDateTime(SelectedCollectionTime);
@@ -201,18 +226,13 @@ namespace PizzaShed.ViewModels
         }
 
         private void OnBack()
-        {
-            if (_currentOrder == null)
-                return;
-                        
-                
+        {                                        
             if (_orderRepository.DeleteOrder(_currentOrder.ID))
                 OnNavigateBack();
         }
     
         private void OnLogout()
-        {
-            CardPayment = false;
+        {            
             OnBack(); // Calling this function deletes the current order on logout
             _session.Logout();
         }
@@ -225,40 +245,48 @@ namespace PizzaShed.ViewModels
 
         private void OnCash()
         {
+            CardPayment = false;
+
             if (IsDelivery || IsPhone)
             {
-                if (_currentOrder != null)
-                {
-                    _currentOrder.CashPayments.Add(_currentOrder.TotalPrice);
-                    OnNavigate();                    
-                }                    
+
+                // We add this to the payments just to trigger our navigation logic
+                // But we do not update the database until an actual payment is made                                    
+                _currentOrder.Payments["Cash"].Add(_currentOrder.TotalPrice);
+
+
+                OnPropertyChanged(nameof(TotalPriceValue));
+                OnPropertyChanged(nameof(AcceptOrder));
+                OnPropertyChanged(nameof(IsPaid));                
             }
-            else
-            {
-                CardPayment = false;
-                OnNavigate();
-            }                
+
+            OnNavigate();
         }
 
         public void MakePayment(decimal amount)
         {
-            
-            if (CardPayment)
-            {                
-                _currentOrder?.CardPayments.Add(amount);                
-            }
-            else
+            // Make sure the payment has been recorded successfully in the database before doing anything else
+            if (_orderRepository.CreatePayment(_currentOrder.ID, amount, PaymentType))
             {
-                _currentOrder?.CashPayments.Add(amount);                        
+                _currentOrder.Payments[PaymentType].Add(amount);
+
+                OnPropertyChanged(nameof(TotalPriceValue));
+                OnPropertyChanged(nameof(AcceptOrder));
+                OnPropertyChanged(nameof(IsPaid));
+
+                OnNavigate();                
             }
 
-            OnNavigate();
-
-            OnPropertyChanged(nameof(TotalPriceValue));                                                                
-            OnPropertyChanged(nameof(AcceptOrder));
-            OnPropertyChanged(nameof(IsPaid));
+            
         }
 
-        public void CompleteOrder() => OnNavigate();
+        public void CancelPayment() => OnNavigate();
+
+        // We can use this for completing the order and cancelling a current payment method
+        private void CompleteOrder()
+        {
+            if (_orderRepository.UpdatePaidOrder(_currentOrder))
+                OnNavigate();
+        }
     }
 }

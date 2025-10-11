@@ -109,7 +109,8 @@ namespace PizzaShed.ViewModels
                         // We still want to navigate to checkout once we get customer info
                         CurrentViewModel.Navigate += OnCheckout;
                         CurrentViewModel.NavigateBack += OnCheckoutBack;
-                    } else
+                    } 
+                    else
                     {
                         CurrentViewModel = new CheckoutViewModel(_orderRepository, _session, cashierView.OrderID);
                         CurrentViewModel.Navigate += ViewPayment;
@@ -162,15 +163,27 @@ namespace PizzaShed.ViewModels
             }
         }
 
+        // This function will display our payment popup window
         private void ViewPayment(object? sender, EventArgs e)
         {
             try
             {
                 if (CurrentViewModel is CheckoutViewModel checkoutViewModel)
                 {
+                    // Handle cash on delivery / collection
+                    if (checkoutViewModel.IsPaid)
+                    {
+                        checkoutViewModel.OrderSource = "Phone";
+                        checkoutViewModel.AcceptOrder = false;
+                        CurrentViewModel.Navigate -= ViewPayment;
+                        CurrentViewModel.Navigate += OnCompleteOrder;
+                        return;
+                    }
+
                     if (checkoutViewModel.IsCollection && !checkoutViewModel.IsPhone)
                     {                        
                         _paymentWindow.Show();
+                        checkoutViewModel.OrderSource = "Counter";
                         PaymentViewModel = new PaymentPresentViewModel(checkoutViewModel);
                         checkoutViewModel.Navigate -= ViewPayment;
                         checkoutViewModel.Navigate += OnPayment;
@@ -178,9 +191,10 @@ namespace PizzaShed.ViewModels
                     else
                     {                        
                         _paymentWindow.Show();
+                        checkoutViewModel.OrderSource = "Phone";
                         PaymentViewModel = new PaymentNotPresentViewModel(checkoutViewModel);
                         checkoutViewModel.Navigate -= ViewPayment;
-                        PaymentViewModel.Navigate += OnPayment;
+                        checkoutViewModel.Navigate += OnPayment;
                     }
                 }
             }
@@ -192,30 +206,41 @@ namespace PizzaShed.ViewModels
 
         private void OnPayment(object? sender, EventArgs e)
         {            
-            _paymentWindow.Hide();
-                                  
-
-            if (CurrentViewModel is CheckoutViewModel checkoutViewModel)
+            try
             {
-                if (checkoutViewModel.IsPaid)
+                _paymentWindow.Hide();
+
+
+                if (CurrentViewModel is CheckoutViewModel checkoutViewModel)
                 {
-                    checkoutViewModel.AcceptOrder = false;
-                    CurrentViewModel.Navigate -= OnPayment;
-                    CurrentViewModel.Navigate += OnCompleteOrder;
-                } 
-                else
-                {
-                    CurrentViewModel.Navigate -= OnPayment;
-                    CurrentViewModel.Navigate += ViewPayment;                    
+                    if (checkoutViewModel.IsPaid)
+                    {
+                        checkoutViewModel.AcceptOrder = false;
+                        CurrentViewModel.Navigate -= OnPayment;
+                        CurrentViewModel.NavigateBack -= OnCheckoutBack;
+
+                        CurrentViewModel.Navigate += OnCompleteOrder;
+                        CurrentViewModel.NavigateBack += OnCompleteOrder;                        
+                    }
+                    else
+                    {
+                        CurrentViewModel.Navigate -= OnPayment;
+                        CurrentViewModel.Navigate += ViewPayment;
+                    }
+
+
                 }
-                    
-                
+            }    
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Error occured during payment navigation " + ex.Message);
             }
         }        
 
         private void OnCompleteOrder(object? sender, EventArgs e)
-        {
+        {            
             CurrentViewModel.Navigate -= OnCompleteOrder;
+            CurrentViewModel.NavigateBack -= OnCheckoutBack;
             CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, []);
             CurrentViewModel.Navigate += OnCheckout;
         }

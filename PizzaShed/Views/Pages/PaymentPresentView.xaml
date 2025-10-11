@@ -73,19 +73,7 @@
                 Text="{Binding Total, Mode=TwoWay}"
                 />
 
-            <TextBlock
-                x:Name="ErrorMessage"
-                Grid.Row="0"
-                Grid.Column="1"
-                VerticalAlignment="Bottom"
-                HorizontalAlignment="Center"
-                Foreground="Red"
-                FontSize="20"
-                Margin="0,10"
-                Text="{Binding ErrorMessage}"
-            ></TextBlock>
-            
-            <!-- Keypad for the user to input the PIN -->
+            <!-- Keypad for the user to input the payment amount -->
             <Button                
                 x:Name="One" 
                 Content="1" 
@@ -221,7 +209,7 @@
                 ></Button>
 
             <Button
-                x:Name="Submit"
+                x:Name="SubmitButton"
                 Content="Submit"
                 Grid.Row="3"
                 Grid.Column="1"
@@ -232,6 +220,19 @@
                 Width="120"
                 Command="{Binding MakePaymentCommand}"
                 CommandParameter="{Binding TotalValue}"
+                />
+
+            <Button
+                x:Name="CancelButton"
+                Content="Cancel"
+                Grid.Row="3"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="20,10,20,0"
+                Width="120"
+                Command="{Binding CancelPaymentCommand}"               
                 />
         </Grid>
     </UserControl.Content>

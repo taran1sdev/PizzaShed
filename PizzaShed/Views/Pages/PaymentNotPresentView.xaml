@@ -4,9 +4,186 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PizzaShed.Views.Pages"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+             xmlns:vm="clr-namespace:PizzaShed.ViewModels"
+             d:DataContext="{d:DesignInstance Type=vm:PaymentNotPresentViewModel}"
+             mc:Ignorable="d"                                                     
+             Height="450" 
+             Width="450">
+    
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MaterialDesignTextBlock}">
+                <Setter Property="FontSize" Value="40" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Foreground" Value="AntiqueWhite" />
+                <Setter Property="TextAlignment" Value="Center" />
+            </Style>
+
+            <Style 
+                x:Key="LabelStyle"
+                TargetType="{x:Type TextBlock}" 
+                BasedOn="{StaticResource MaterialDesignTextBlock}">
+                <Setter Property="Foreground" Value="AntiqueWhite" />
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style
+                x:Key="ErrorStyle"
+                TargetType="{x:Type TextBlock}"
+                BasedOn="{StaticResource MaterialDesignTextBlock}">
+                <Setter Property="Foreground" Value="OrangeRed" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="FontSize" Value="16" />
+            </Style>                
+
+            <Style
+                x:Key="BoxStyle"
+                TargetType="{x:Type TextBox}"
+                BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="30,25,83,25" />
+            </Style>
             
+            <Style                
+                TargetType="{x:Type Button}" 
+                BasedOn="{StaticResource MaterialDesignPaperLightButton}">
+                <Setter Property="Height" Value="45" />
+                <Setter Property="Width" Value="110" />
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="Margin" Value="20,0,35,0" />
+            </Style>
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.25*" />
+            <RowDefinition Height="0.2*" />
+            <RowDefinition Height="0.2*" />
+            <RowDefinition Height="0.2*" />
+            <RowDefinition Height="0.2*" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.6*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock
+            x:Name="Total"
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            Text="{Binding Total}"
+            />
+
+
+        <TextBlock
+            x:Name="CardNoLabel"
+            Style="{StaticResource LabelStyle}"
+            Grid.Row="1"
+            Grid.Column="0"
+            Text="Card No:"
+            />
+
+        <TextBox
+            x:Name="CardNoBox"
+            Style="{StaticResource BoxStyle}"
+            Grid.Row="1"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            Text="{Binding CardNo, Mode=TwoWay}"
+            />
+
+        <TextBlock
+            x:Name="ExpMonthLabel"
+            Style="{StaticResource LabelStyle}"
+            Grid.Row="2"
+            Grid.Column="0"
+            Text="Expiry&#x0a;Month:"
+            />
+
+        <TextBox
+            x:Name="ExpMonthBox"
+            Style="{StaticResource BoxStyle}"
+            Grid.Row="2"
+            Grid.Column="1"
+            Text="{Binding ExpMonth, Mode=TwoWay}"
+            Width="60"
+            HorizontalAlignment="Left"
+            />
+
+        <TextBlock
+            x:Name="ExpYearLabel"
+            Style="{StaticResource LabelStyle}"
+            Grid.Row="2"
+            Grid.Column="1"
+            Text="Expiry&#x0a; Year:"
+            />
+
+        <TextBox
+            x:Name="ExpYearBox"
+            Style="{StaticResource BoxStyle}"
+            Grid.Row="2"
+            Grid.Column="2"
+            Text="{Binding ExpYear, Mode=TwoWay}"
+            Width="60"
+            HorizontalAlignment="Left"
+            />
+
+        <TextBlock
+            x:Name="CCVLabel"
+            Style="{StaticResource LabelStyle}"
+            Grid.Row="3"
+            Grid.Column="0"
+            Text="CCV:"
+            />
+
+        <TextBox
+            x:Name="CCVBox"
+            Style="{StaticResource BoxStyle}"
+            Grid.Row="3"
+            Grid.Column="1"
+            Text="{Binding CCV, Mode=TwoWay}"
+            Width="60"
+            />
+
+        <TextBlock
+            x:Name="ErrorLabel"
+            Style="{StaticResource ErrorStyle}"
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            TextWrapping="WrapWithOverflow"
+            TextAlignment="Center"
+            Text="{Binding ErrorMessage}"
+            />
+
+        <Button
+            x:Name="CancelButton"
+            Grid.Row="4"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            HorizontalAlignment="Left"
+            Command="{Binding CancelPaymentCommand}"
+            Content="Cancel"
+            />
+
+        <Button
+            x:Name="ConfirmButton"
+            Grid.Row="4"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            HorizontalAlignment="Right"
+            Command="{Binding MakePaymentCommand}"
+            CommandParameter="{Binding TotalValue}"
+            Content="Confirm"
+            />
     </Grid>
 </UserControl>

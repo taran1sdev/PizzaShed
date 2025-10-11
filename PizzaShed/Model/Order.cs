@@ -10,8 +10,14 @@ using System.Threading.Tasks;
 
 namespace PizzaShed.Model
 {
-    public class Order 
+    public class Order : INotifyPropertyChanged
     {
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
 
         public int ID { get; set; } = 0;
 
@@ -33,9 +39,7 @@ namespace PizzaShed.Model
 
         public int? DriverID { get; set; }
 
-        public bool Paid = false;
-
-        public string? PaymentType { get; set; }
+        public bool Paid = false;        
 
         public decimal? DeliveryFee { get; set; }
 
@@ -49,13 +53,15 @@ namespace PizzaShed.Model
                                 .Sum(static t => t.Price));
                 
                 if (Promo != null) 
-                    total = total - (total * Promo.DiscountValue);
+                    total -= (total * Promo.DiscountValue);
 
                 // Add the delivery fee after calculating discounts
                 if (DeliveryFee != null)
                     total += (decimal)DeliveryFee;
-                
-                return total;
+
+                // We have to round here - promotion calculation results in a tiny fraction
+                // that breaks payment logic
+                return Math.Round(total, 2);
             }
         }
 
@@ -65,15 +71,14 @@ namespace PizzaShed.Model
             {
                 decimal total = TotalPrice;
 
-                if (CardPayments.Count > 0)
+                // Check first for existing keys
+                foreach (string key in Payments.Keys)
                 {
-                    CardPayments.ForEach(p => total -= p);
+                    // Subtract the payment values from the displayed total
+                    Payments[key].ForEach(p => total -= p);
                 }
-
-                if (CashPayments.Count > 0)
-                {
-                    CashPayments.ForEach(p => total -= p);
-                }
+                
+                
                 return total;
             }
         }
@@ -92,8 +97,7 @@ namespace PizzaShed.Model
         
         public Promotion? Promo { get; set; }
 
-        public List<decimal> CardPayments { get; set; } = [];
-
-        public List<decimal> CashPayments { get; set; } = [];
+        // We use a dictionary to track payments that are made so we can support split payments
+        public Dictionary<string, List<decimal>> Payments { get; set; } = [];
     }
 }

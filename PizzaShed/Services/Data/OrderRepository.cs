@@ -82,7 +82,7 @@ namespace PizzaShed.Services.Data
             return [];
         }
 
-        // Funciton to update a delivery order once we have customer information
+        // Function to update a delivery order once we have customer information
         public bool UpdateDeliveryOrder(int orderId, int customerId, int distance)
         {
             // This query creates a variable to hold the delivery fee then updates the 
@@ -127,6 +127,122 @@ namespace PizzaShed.Services.Data
             }
             return false;
         }        
+
+        // Function to update an order once payment has been made
+        public bool UpdatePaidOrder(Order order)
+        {            
+            string queryString = @"
+                UPDATE Orders
+                SET order_status_id = (SELECT order_status_id FROM Order_Status WHERE status_name LIKE @status), 
+                collection_time = @collectionTime,
+                order_source = @orderSource,
+                order_notes = @orderNotes,                
+                paid = @orderPaid,
+                promo_id = @promoId,
+                total_price = @totalPrice
+                WHERE order_id = @orderId;                
+            ";
+
+
+            try
+            {
+                return _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        // We add the parameters we definitely know
+                        query.Parameters.AddWithValue("@orderId", order.ID);
+                        query.Parameters.AddWithValue("@orderSource", order.OrderSource);
+                        query.Parameters.AddWithValue("@totalPrice", order.TotalPrice);
+
+                        if (order.OrderNotes == null)
+                        {
+                            query.Parameters.AddWithValue("@orderNotes", DBNull.Value);
+                        } 
+                        else
+                        {
+                            query.Parameters.AddWithValue("@orderNotes", order.OrderNotes);
+                        }
+
+                        // If the order has no pizzas or no grill items we use a different status
+                        int pizzaCount;
+                        int grillCount;
+
+                        pizzaCount = order.OrderProducts
+                                            .ToList()
+                                            .Count(p => p.Category == "Pizza");
+                        
+                        grillCount = order.OrderProducts
+                                            .ToList()
+                                            .Count(p =>
+                                            p.Category == "Kebab"
+                                            || p.Category == "Side"
+                                            || p.Category == "Wrap"
+                                            || p.Category == "Burger");
+
+                        if (pizzaCount == 0 && grillCount == 0)
+                        {
+                            // We might have an order with just drinks and dips
+                            query.Parameters.AddWithValue("@status", "Order Ready");
+                        } 
+                        else if (pizzaCount == 0)
+                        {
+                            query.Parameters.AddWithValue("@status", "Pizza Ready");
+                        }
+                        else if (grillCount == 0)
+                        {
+                            query.Parameters.AddWithValue("@status", "Grill Ready");
+                        }
+                        else
+                        {
+                            query.Parameters.AddWithValue("@status", "Preparing");
+                        }
+
+                        // Here we check if we need to update the collection_time column
+                        if (order.OrderType == "Collection")
+                        {
+                            query.Parameters.AddWithValue("@collectionTime", order.CollectionTime);
+                        }
+                        else
+                        {
+                            query.Parameters.AddWithValue("@collectionTime", DBNull.Value);
+                        }
+
+                        // Here we handle the case of cash on delivery
+                        if (order.OrderType == "Delivery" && order.Payments["Cash"].Count > 0)
+                        {
+                            query.Parameters.AddWithValue("@orderPaid", false);
+                        }
+                        else
+                        {
+                            query.Parameters.AddWithValue("@orderPaid", true);
+                        }
+
+                        // Check if the order has a promotion
+                        if (order.Promo != null)
+                        {
+                            query.Parameters.AddWithValue("@promoId", order.Promo.ID);
+                        } 
+                        else
+                        {
+                            query.Parameters.AddWithValue("@promoId", DBNull.Value);
+                        }
+
+                        if (query.ExecuteNonQuery() > 0)
+                        {
+                            EventLogger.LogInfo("Successfully completed checkout process");
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Error occured updating order: " + ex.Message);
+            }
+            return false;
+        }
 
         // We create a stored procedure in MSSQL to handle order creation
         // this allows us to create tables containing orders / toppings
@@ -533,9 +649,61 @@ namespace PizzaShed.Services.Data
             return [];
         }
 
+        // We create a dictionary to hold our query strings when retrieving orders by role
+        private readonly Dictionary<string, string> roleQueryDict = new Dictionary<string, string>()
+        {
+            { "Cashier", "WHERE order_type = 'Collection' AND order_status = 'Order Ready'" },
+            { "Pizzaiolo", "WHERE order_status = 'Ready For Prep' OR order_status = 'Grill Ready'" },
+            { "Grill Cook", "WHERE order_status = 'Ready For Prep' OR order_status = 'Pizza Ready'" },
+            { "Driver", "WHERE order_type = 'Delivery' AND order_status = 'Order ready'" },
+            { "Manager", "WHERE order_status NOT IN ('Cancelled', 'Refunded')" }
+        };
+
         public ObservableCollection<Order> GetOrdersByRole(string role)
         {
             return null;
+        }
+
+        // Update the database whenever a payment is made
+        public bool CreatePayment(int orderId, decimal amount, string paymentType)
+        {
+            string queryString = @"
+                DECLARE @payment_id INT;
+
+                INSERT INTO Payments
+                VALUES (@paymentType, @amount);
+
+                SELECT @payment_id = SCOPE_IDENTITY();
+
+                INSERT INTO Order_Payments
+                VALUES (@payment_id, @orderId);";
+
+            try
+            {
+                return _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@paymentType", paymentType);
+                        query.Parameters.AddWithValue("@amount", amount);
+                        query.Parameters.AddWithValue("@orderId", orderId);
+
+                        if (query.ExecuteNonQuery() > 0)
+                        {
+                            EventLogger.LogInfo($"Payment for order {orderId} successful.");
+                            return true;
+                        }
+                        EventLogger.LogError($"Unable to process payment for order {orderId}");
+                        return false;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Error occured during payment: " + ex.Message);
+            }
+
+            return false;
         }
 
         // We could write a procedure to update the existing order when changes are made before payment
@@ -652,11 +820,12 @@ namespace PizzaShed.Services.Data
             // If the shop closes before the time it takes to make / deliver the order we reject it
             if (orderReady > times.Close.Subtract(expectedRoundTrip))
             {
-                return (false, "Too late to order");
+                return (false, "Too late\n to order");
             } // If the order is before the shop opens also reject it 
             else if (orderReady < times.Open.Add(prepTime))
             {
-                return (false, "Too early to order");
+                // Changed while testing
+                return (true, "Too early\n to order");
             }
 
             int remainder = orderReady.Minutes % deliverySlotInterval.Minutes;

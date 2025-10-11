@@ -217,12 +217,14 @@
         <TextBlock
             x:Name="NotesTitle"
             Style="{StaticResource NotesTitleStyle}"
-            Text="Order Notes"/>
+            Text="Order Notes"            
+            />
 
         <TextBox
             x:Name="Notes"
             Style="{StaticResource NotesStyle}"                        
             Margin="20,100,20,0"
+            Text="{Binding OrderNotes, Mode=TwoWay}"
             />
 
         <ListView

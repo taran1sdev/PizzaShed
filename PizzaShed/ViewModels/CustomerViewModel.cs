@@ -176,17 +176,13 @@ namespace PizzaShed.ViewModels
             {
                 // Get the difference
                 int distance = 5 - digit;
-                // If we get a negative value divide by -1 to convert to positive
-                if (digit < 0)
-                {
-                    distance /= -1;
-                }
 
                 // If the postcode starts with 0 we still deliver at the higher rate
                 if (distance == 5)
                     return distance - 1;
 
-                return distance;
+                // If we have a negative integer we convert it to a positive integer here
+                return Math.Abs(distance);
             }
             return -1;
         }

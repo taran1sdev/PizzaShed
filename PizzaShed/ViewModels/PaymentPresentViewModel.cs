@@ -38,6 +38,7 @@ namespace PizzaShed.ViewModels
 
         public ICommand ButtonCommand { get; }
         public ICommand MakePaymentCommand { get; }
+        public ICommand CancelPaymentCommand { get; }
 
         public PaymentPresentViewModel(CheckoutViewModel checkoutViewModel)
         {
@@ -45,7 +46,8 @@ namespace PizzaShed.ViewModels
             _total = _checkoutViewModel.TotalPriceValue.Replace("£", "");
 
             ButtonCommand = new RelayCommand<string>(ExecuteButtonCommand);
-            MakePaymentCommand = new RelayCommand<decimal>(_checkoutViewModel.MakePayment);
+            MakePaymentCommand = new RelayGenericCommand(CheckValidAmount);
+            CancelPaymentCommand = new RelayGenericCommand(_checkoutViewModel.CancelPayment);
         }
 
         private void ExecuteButtonCommand(object? parameter)
@@ -58,7 +60,7 @@ namespace PizzaShed.ViewModels
                         Total = "";
                         break;
                     case "Point":
-                        if (!Total.Contains('.'))                        
+                        if (!Total.Contains('.') && Total.Length > 0)                        
                             Total += ".";
                         break;
                     case "0":
@@ -87,6 +89,12 @@ namespace PizzaShed.ViewModels
                         break;
                 }
             }
+        }
+
+        private void CheckValidAmount()
+        {
+            if (TotalValue != 0)
+                _checkoutViewModel.MakePayment(TotalValue);
         }
     }
 }
