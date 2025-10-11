@@ -172,8 +172,7 @@ namespace PizzaShed.ViewModels
                 {
                     // Handle cash on delivery / collection
                     if (checkoutViewModel.IsPaid)
-                    {
-                        checkoutViewModel.OrderSource = "Phone";
+                    {                        
                         checkoutViewModel.AcceptOrder = false;
                         CurrentViewModel.Navigate -= ViewPayment;
                         CurrentViewModel.Navigate += OnCompleteOrder;
@@ -182,16 +181,14 @@ namespace PizzaShed.ViewModels
 
                     if (checkoutViewModel.IsCollection && !checkoutViewModel.IsPhone)
                     {                        
-                        _paymentWindow.Show();
-                        checkoutViewModel.OrderSource = "Counter";
+                        _paymentWindow.Show();                        
                         PaymentViewModel = new PaymentPresentViewModel(checkoutViewModel);
                         checkoutViewModel.Navigate -= ViewPayment;
                         checkoutViewModel.Navigate += OnPayment;
                     }
                     else
                     {                        
-                        _paymentWindow.Show();
-                        checkoutViewModel.OrderSource = "Phone";
+                        _paymentWindow.Show();                     
                         PaymentViewModel = new PaymentNotPresentViewModel(checkoutViewModel);
                         checkoutViewModel.Navigate -= ViewPayment;
                         checkoutViewModel.Navigate += OnPayment;

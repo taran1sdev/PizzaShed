@@ -148,9 +148,11 @@ namespace PizzaShed.ViewModels
             get => _currentOrder.PriceAfterPayments <= (decimal)0.00;
         }
 
+        private string _orderSource;
         public string OrderSource
         {
-            set => _currentOrder.OrderSource = value;
+            get => _orderSource;
+            set => SetProperty(ref _orderSource, value);
         }
 
         public string? OrderNotes
@@ -185,11 +187,13 @@ namespace PizzaShed.ViewModels
                 
             if (IsCollection)
             {
+                OrderSource = "Counter";
                 (AcceptOrder, CollectionTimes) = _orderRepository.GetCollectionTimes();
                 SelectedCollectionTime = CollectionTimes.FirstOrDefault();
             }
             else
             {
+                OrderSource = "Phone";
                 (AcceptOrder, ExpectedDeliveryTime) = _orderRepository.GetDeliveryTime();
             }
 
@@ -222,7 +226,15 @@ namespace PizzaShed.ViewModels
 
         private void SelectPhone()
         {
-            IsPhone = !IsPhone;            
+            IsPhone = !IsPhone;     
+            if (IsPhone)
+            {
+                OrderSource = "Phone";
+            }
+            else
+            {
+                OrderSource = "Counter";
+            }
         }
 
         private void OnBack()
@@ -285,6 +297,7 @@ namespace PizzaShed.ViewModels
         // We can use this for completing the order and cancelling a current payment method
         private void CompleteOrder()
         {
+            _currentOrder.OrderSource = OrderSource;
             if (_orderRepository.UpdatePaidOrder(_currentOrder))
                 OnNavigate();
         }

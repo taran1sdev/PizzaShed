@@ -213,6 +213,10 @@ namespace PizzaShed.Services.Data
                         {
                             query.Parameters.AddWithValue("@orderPaid", false);
                         }
+                        else if (order.OrderType == "Collection" && order.Payments["Cash"].Count > 0)
+                        {
+                            query.Parameters.AddWithValue("@orderPaid", false);
+                        }
                         else
                         {
                             query.Parameters.AddWithValue("@orderPaid", true);
