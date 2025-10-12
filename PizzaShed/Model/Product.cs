@@ -123,8 +123,8 @@ namespace PizzaShed.Model
                     "pizza" or "kebab" => $"{Name} ({SizeName?[..1].ToUpper()})" +
                         $"\n{(Category.ToLower() == "pizza" ? "Base: " : "Bread: ")}{RequiredChoices.FirstOrDefault()?.Name}" +
                         $"{string.Join("", Toppings.SelectMany(t => t.DisplayName))}",                                                                    
-                    "side" => $"{Name} ({SizeName})",                               
-                    _ => $"{Name}"                                                  
+                    _ => $"{Name} ({SizeName})"
+                    
                 };
             }
         }

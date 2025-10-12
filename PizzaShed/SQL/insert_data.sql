@@ -562,7 +562,7 @@ FROM Meal_Deals AS MD
 WHERE MD.deal_name LIKE 'Kebab%';
 
 INSERT INTO Order_Status (status_name)
-VALUES ('New'), ('Preparing'), ('Pizza Ready'), ('Grill Ready'), ('Order Ready'), ('Out for delivery'), ('Completed'), ('Cancelled'), ('Refunded')
+VALUES ('New'), ('Preparing'), ('Order Ready'), ('Out For Delivery'), ('Completed'), ('Cancelled'), ('Refunded')
 
 INSERT INTO Opening_Times (day_id, day_name, open_time, close_time)
 VALUES 

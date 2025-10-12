@@ -1,9 +1,10 @@
-IF OBJECT_ID('dbo.CreateCollectionOrder', 'P') IS NOT NULL
-    DROP PROCEDURE CreateCollectionOrder
+IF OBJECT_ID('dbo.CreateOrder', 'P') IS NOT NULL
+    DROP PROCEDURE CreateOrder
 GO
 
-CREATE PROCEDURE CreateCollectionOrder
+CREATE PROCEDURE CreateOrder
     @userID INT,
+    @orderType VARCHAR(12),
     @price SMALLMONEY,
     @ProductList AS ProductListType READONLY,
     @ToppingList AS ToppingListType READONLY
@@ -22,7 +23,7 @@ BEGIN
         @userID,
         @statusID,
         GETDATE(),
-        'Collection',
+        @orderType,
         0,
         @price);
 
@@ -46,6 +47,7 @@ BEGIN
     USING (
         SELECT 
             NULLIF(p.product_id,0) AS product_id,
+            NULLIF(p.second_half_id,0) AS second_half_id,
             (SELECT s.size_id FROM Sizes AS s WHERE s.size_name = p.size_name) AS size_id,
             NULLIF(p.deal_id,0) AS deal_id,
             p.deal_instance_id,
@@ -54,10 +56,11 @@ BEGIN
     ) AS Source 
     ON 1 = 0 
     WHEN NOT MATCHED BY TARGET THEN
-        INSERT (order_id, product_id, size_id, deal_id, deal_instance_id)
+        INSERT (order_id, product_id, second_half_id, size_id, deal_id, deal_instance_id)
         VALUES (
             @orderID, 
             Source.product_id, 
+            Source.second_half_id,
             Source.size_id, 
             Source.deal_id, 
             Source.deal_instance_id

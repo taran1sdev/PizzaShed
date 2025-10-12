@@ -4,18 +4,18 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:PizzaShed.ViewModels"             
+             xmlns:model="clr-namespace:PizzaShed.Model" 
+             d:DataContext="{d:DesignInstance Type=model:Order}"        
              mc:Ignorable="d"  
-            d:DesignHeight="400" d:DesignWidth="300">
+            d:DesignHeight="400" d:DesignWidth="320">
 
-    <Border BorderBrush="{DynamicResource MaterialDesignDarkForeground}"
-            BorderThickness="2" 
-            CornerRadius="8" 
-            Background="{DynamicResource MaterialDesignDarkSeparatorBackground}"
-            Margin="10" 
-            Padding="10"
-            Width="300" 
-            Height="400">
+    <Border BorderBrush="{DynamicResource MaterialDesignLightSeparatorBackground}"
+        BorderThickness="2" 
+        CornerRadius="8" 
+        Background="{DynamicResource MaterialDesignDarkSeparatorBackground}"
+        Margin="10"             
+        Width="300" 
+        Height="270">
 
         <Grid>
             <Grid.RowDefinitions>
@@ -26,14 +26,48 @@
 
             <StackPanel Grid.Row="0" Margin="0,0,0,10">
 
-                <TextBlock Text="{Binding ID, StringFormat='Order # {0:0000}'}" 
-                           FontSize="36" FontWeight="Bold" 
-                           HorizontalAlignment="Center" 
-                           Foreground="{DynamicResource MaterialDesignDarkSeparatorBackground}"/>
-                <TextBlock Text="{Binding CollectionTime, StringFormat='Order # {0000}'}" 
-                           FontSize="36" FontWeight="Bold" 
-                           HorizontalAlignment="Center" Foreground="{DynamicResource MaterialDesignDarkSeparatorBackground}"/>
+                <TextBlock Text="{Binding ID, StringFormat='Order #{0:0000}'}" 
+                       FontSize="28" FontWeight="Bold" 
+                       HorizontalAlignment="Center" 
+                       Foreground="AntiqueWhite"/>
+                
+                
+            </StackPanel>
 
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+
+                <ItemsControl ItemsSource="{Binding OrderProducts}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+
+                                <TextBlock Text="{Binding Path=TicketName}" 
+                                    FontSize="18"                                            
+                                    TextWrapping="Wrap"
+                                    Foreground="AntiqueWhite"/>
+                                <Separator />
+                                
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Margin="0,0,0,0">
+                <TextBlock FontSize="22"  
+                           HorizontalAlignment="Left" 
+                           Foreground="AntiqueWhite">
+                    <Run Text="Status: "/>
+                    <Run Text="{Binding OrderStatus}" />
+                </TextBlock>
+                
+                <TextBlock FontSize="22"  
+                           HorizontalAlignment="Left" 
+                           Foreground="AntiqueWhite">
+                            <Run Text="Collection Time :"/>
+                            <Run Text="{Binding CollectionTime, StringFormat='{}{0:hh:mm} PM'}" />
+                </TextBlock>
             </StackPanel>
         </Grid>
     </Border>

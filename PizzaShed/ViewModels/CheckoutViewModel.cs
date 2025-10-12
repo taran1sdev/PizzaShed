@@ -83,6 +83,18 @@ namespace PizzaShed.ViewModels
             set => SetProperty(ref _acceptOrder, value);
         }
 
+        // We use this property for the cash button as the driver needs
+        // to make cash payments on return
+        private bool _isDriverCash;
+        public bool IsDriverCash
+        {
+            get => AcceptOrder || _session.UserRole == "Driver" && !IsPaid;
+            set => SetProperty(ref _isDriverCash, value);
+        }
+
+        // We hide the order notes for orders that have been completed
+        public bool NotesVisible => _currentOrder.OrderStatus == "New"; 
+
         private ObservableCollection<Promotion> _promotions = [];
         public ObservableCollection<Promotion> Promotions
         {
@@ -148,7 +160,7 @@ namespace PizzaShed.ViewModels
             get => _currentOrder.PriceAfterPayments <= (decimal)0.00;
         }
 
-        private string _orderSource;
+        private string _orderSource = "";
         public string OrderSource
         {
             get => _orderSource;
@@ -184,14 +196,30 @@ namespace PizzaShed.ViewModels
             }                 
               
             Promotions = _orderRepository.FetchEligiblePromotions(_currentOrder.PriceExcludingDeals);
-                
-            if (IsCollection)
+
+            CompleteOrderCommand = new RelayGenericCommand(UpdateOrder);
+
+            if (IsCollection && _currentOrder.OrderStatus == "New")
             {
                 OrderSource = "Counter";
                 (AcceptOrder, CollectionTimes) = _orderRepository.GetCollectionTimes();
                 SelectedCollectionTime = CollectionTimes.FirstOrDefault();
             }
-            else
+            else if (_currentOrder.OrderStatus == "Out For Delivery")
+            {
+                AcceptOrder = false;
+                ExpectedDeliveryTime = "Delivered";
+                Promotions = [];
+                CompleteOrderCommand = new RelayGenericCommand(CompleteOrder);
+            }
+            else if (_currentOrder.OrderStatus == "Order Ready")
+            {
+                AcceptOrder = true;
+                Promotions = [];
+                CollectionTimes = [];
+                CompleteOrderCommand = new RelayGenericCommand(CompleteOrder);
+            }
+            else 
             {
                 OrderSource = "Phone";
                 (AcceptOrder, ExpectedDeliveryTime) = _orderRepository.GetDeliveryTime();
@@ -205,7 +233,7 @@ namespace PizzaShed.ViewModels
             LogoutCommand = new RelayGenericCommand(OnLogout);
             CardCommand = new RelayGenericCommand(OnCard);
             CashCommand = new RelayGenericCommand(OnCash);
-            CompleteOrderCommand = new RelayGenericCommand(CompleteOrder);
+            
         }
 
         private void SelectPromotion()
@@ -295,11 +323,17 @@ namespace PizzaShed.ViewModels
         public void CancelPayment() => OnNavigate();
 
         // We can use this for completing the order and cancelling a current payment method
-        private void CompleteOrder()
+        private void UpdateOrder()
         {
             _currentOrder.OrderSource = OrderSource;
             if (_orderRepository.UpdatePaidOrder(_currentOrder))
                 OnNavigate();
+        }
+
+        private void CompleteOrder()
+        {
+            _orderRepository.CompleteOrder(_currentOrder.ID);
+            OnNavigate();
         }
     }
 }

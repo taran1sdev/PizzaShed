@@ -183,6 +183,8 @@ CREATE TABLE Orders (
   user_id  int NOT NULL,
   customer_id int,
   order_status_id int NOT NULL,
+  pizza_ready bit,
+  grill_ready bit,
   order_date datetime NOT NULL,
   collection_time datetime,
   order_source varchar(8),
@@ -254,16 +256,16 @@ CREATE TABLE Opening_Times (
 	PRIMARY KEY(day_id)
 );
 
-CREATE TYPE ProductListType AS Table (
-	product_id INT,
-	second_half_id INT NULL,
-	size_name VARCHAR(30),
-	deal_id INT NULL,
-	deal_instance_id INT NULL,
-	client_product_id INT
-);
+--CREATE TYPE ProductListType AS Table (
+--	product_id INT,
+--	second_half_id INT NULL,
+--	size_name VARCHAR(30),
+--	deal_id INT NULL,
+--	deal_instance_id INT NULL,
+--	client_product_id INT
+--);
 
-CREATE TYPE ToppingListType AS TABLE (
-	client_product_id INT,
-	topping_id INT
-);
+--CREATE TYPE ToppingListType AS TABLE (
+--	client_product_id INT,
+--	topping_id INT
+--);

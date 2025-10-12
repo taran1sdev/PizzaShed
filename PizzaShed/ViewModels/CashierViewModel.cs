@@ -242,7 +242,8 @@ namespace PizzaShed.ViewModels
             set => SetProperty(ref _isError, value);
         }
 
-        //------        SESSION        ------//        
+        //------        SESSION/NAVIGATION        ------//        
+        public ICommand CollectionCommand { get; }
         public ICommand LogoutCommand { get; }        
 
         //------        CONSTRUCTOR     ------//
@@ -281,6 +282,8 @@ namespace PizzaShed.ViewModels
             SelectCategoryCommand = new RelayCommand<string>(SelectCategory);
             SelectSizeCommand = new RelayCommand<string>(SelectSize);
 
+            // This binds to the Collections button
+            CollectionCommand = new RelayGenericCommand(Collection);
             // This binds to the logout button
             LogoutCommand = new RelayGenericCommand(Logout);
 
@@ -825,13 +828,8 @@ namespace PizzaShed.ViewModels
             }
         }
 
-        //------        SESSION        -------//
-        private void Logout()
-        {
-            if (_session.IsLoggedIn)
-            {
-                _session.Logout();
-            }
-        }
+        //------        SESSION/NAVIGATION        -------//
+        private void Collection() => OnNavigateBack();        
+        private void Logout() => _session.Logout();                    
     }
 }

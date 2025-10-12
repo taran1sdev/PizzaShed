@@ -134,14 +134,15 @@ namespace PizzaShed.Services.Data
             string queryString = @"
                 UPDATE Orders
                 SET order_status_id = (SELECT order_status_id FROM Order_Status WHERE status_name LIKE @status), 
+                pizza_ready = @pizzaReady,
+                grill_ready = @grillReady,
                 collection_time = @collectionTime,
                 order_source = @orderSource,
                 order_notes = @orderNotes,                
                 paid = @orderPaid,
                 promo_id = @promoId,
                 total_price = @totalPrice
-                WHERE order_id = @orderId;                
-            ";
+                WHERE order_id = @orderId;";
 
 
             try
@@ -184,18 +185,26 @@ namespace PizzaShed.Services.Data
                         {
                             // We might have an order with just drinks and dips
                             query.Parameters.AddWithValue("@status", "Order Ready");
+                            query.Parameters.AddWithValue("@pizzaReady", true);
+                            query.Parameters.AddWithValue("@grillReady", true);
                         } 
                         else if (pizzaCount == 0)
                         {
-                            query.Parameters.AddWithValue("@status", "Pizza Ready");
+                            query.Parameters.AddWithValue("@status", "New");
+                            query.Parameters.AddWithValue("@pizzaReady", true);
+                            query.Parameters.AddWithValue("@grillReady", false);
                         }
                         else if (grillCount == 0)
                         {
-                            query.Parameters.AddWithValue("@status", "Grill Ready");
+                            query.Parameters.AddWithValue("@status", "New");
+                            query.Parameters.AddWithValue("@pizzaReady", false);
+                            query.Parameters.AddWithValue("@grillReady", true);
                         }
                         else
                         {
-                            query.Parameters.AddWithValue("@status", "Preparing");
+                            query.Parameters.AddWithValue("@status", "New");
+                            query.Parameters.AddWithValue("@pizzaReady", false);
+                            query.Parameters.AddWithValue("@grillReady", false);
                         }
 
                         // Here we check if we need to update the collection_time column
@@ -213,7 +222,7 @@ namespace PizzaShed.Services.Data
                         {
                             query.Parameters.AddWithValue("@orderPaid", false);
                         }
-                        else if (order.OrderType == "Collection" && order.Payments["Cash"].Count > 0)
+                        else if (order.OrderType == "Collection" && order.OrderSource == "Phone" && order.Payments["Cash"].Count > 0)
                         {
                             query.Parameters.AddWithValue("@orderPaid", false);
                         }
@@ -666,19 +675,228 @@ namespace PizzaShed.Services.Data
             return [];
         }
 
-        // We create a dictionary to hold our query strings when retrieving orders by role
-        private readonly Dictionary<string, string> roleQueryDict = new Dictionary<string, string>()
+        public ObservableCollection<Order> GetKitchenOrders(bool pizzas)
         {
-            { "Cashier", "WHERE order_type = 'Collection'" },
-            { "Pizzaiolo", "WHERE order_status = 'Ready For Prep' OR order_status = 'Grill Ready'" },
-            { "Grill Cook", "WHERE order_status = 'Ready For Prep' OR order_status = 'Pizza Ready'" },
-            { "Driver", "WHERE order_type = 'Delivery' AND order_status = 'Order Ready'" },
-            { "Manager", "WHERE order_status NOT IN ('Cancelled', 'Refunded')" }
-        };
+            // We get all orders for each station
+            string queryString = @$"
+                SELECT
+                    o.order_id,
+                    o.paid,
+                    o.grill_ready,
+                    o.pizza_ready,
+                    os.status_name
+                FROM Orders AS o
+                INNER JOIN Order_Status AS os
+                ON o.order_status_id = os.order_status_id
+                WHERE os.status_name IN ('New', 'Preparing')
+                AND {(pizzas ? "o.pizza_ready" : "o.grill_ready")} = 0;";
 
-        public ObservableCollection<Order> GetOrdersByRole(string role)
+            try
+            {
+                ObservableCollection<Order> orders = _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        using (SqlDataReader reader = query.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                ObservableCollection<Order> orders = []; 
+                                while (reader.Read())
+                                {
+                                    int orderId = reader.IsDBNull(reader.GetOrdinal("order_id")) ? 0 : Convert.ToInt32(reader["order_id"]);
+                                    bool? paid = reader.IsDBNull(reader.GetOrdinal("paid")) ? null : Convert.ToBoolean(reader["paid"]);
+                                    bool? grillReady = reader.IsDBNull(reader.GetOrdinal("grill_ready")) ? null : Convert.ToBoolean(reader["grill_ready"]);
+                                    bool? pizzaReady = reader.IsDBNull(reader.GetOrdinal("pizza_ready")) ? null : Convert.ToBoolean(reader["pizza_ready"]);
+                                    string? statusName = reader.IsDBNull(reader.GetOrdinal("status_name")) ? null : reader["status_name"].ToString();
+
+                                    if (
+                                        orderId != 0
+                                        && paid != null 
+                                        && statusName != null
+                                        && grillReady != null
+                                        && pizzaReady != null
+                                    )
+                                    {
+                                        orders.Add(new Order
+                                        {
+                                            ID = orderId,
+                                            Paid = (bool)paid,
+                                            GrillReady = (bool)grillReady,
+                                            PizzaReady = (bool)pizzaReady,
+                                            OrderStatus = statusName
+                                        });
+                                    }
+                                }
+                                return orders;
+                            }
+                            return [];
+                        }
+                    }
+                });
+
+                // Here we filter the products to retrieve for each order depending on the station
+                foreach (Order o in orders)
+                {
+                    if (pizzas)
+                    {
+                        GetOrderProducts(o.ID).ForEach(p => {
+                            if (p.Category == "Pizza")
+                                o.OrderProducts.Add(p);
+                        });
+                    } 
+                    else
+                    {
+                        GetOrderProducts(o.ID).ForEach(p =>
+                        {
+                            if (p.Category != "Pizza" && p.Category != "Drink" && p.Category != "Dip")
+                                o.OrderProducts.Add(p);
+                        });
+                    }
+                        
+                }
+
+                return orders;
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to fetch kitchen orders: " + ex.Message);
+            }
+
+            return [];
+        }
+
+        public ObservableCollection<Order> GetCollectionOrders()
         {
-            return null;
+            // We get all orders and sort by status in the viewmodel
+            string queryString = @"
+                SELECT
+                    o.order_id,
+                    o.paid,
+                    o.collection_time,
+                    os.status_name
+                FROM Orders AS o
+                INNER JOIN Order_Status AS os
+                ON o.order_status_id = os.order_status_id
+                WHERE o.order_type = 'Collection' AND os.status_name != 'Completed'";
+            
+            try
+            {
+                ObservableCollection<Order> orders = _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        using (SqlDataReader reader = query.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                ObservableCollection<Order> orders = [];
+                                while (reader.Read())
+                                {
+                                    int orderId = reader.IsDBNull(reader.GetOrdinal("order_id")) ? 0 : Convert.ToInt32(reader["order_id"]);
+                                    bool? paid = reader.IsDBNull(reader.GetOrdinal("paid")) ? null : Convert.ToBoolean(reader["paid"]);
+                                    DateTime? collectionTime = reader.IsDBNull(reader.GetOrdinal("collection_time")) ? null : Convert.ToDateTime(reader["collection_time"]);
+                                    string? statusName = reader.IsDBNull(reader.GetOrdinal("status_name")) ? null : reader["status_name"].ToString();
+
+                                    if (
+                                        orderId != 0
+                                        && paid != null
+                                        && statusName != null
+                                    )
+                                    {
+                                        orders.Add(new Order { 
+                                            ID = orderId,
+                                            Paid = (bool)paid,
+                                            CollectionTime = collectionTime,
+                                            OrderStatus = statusName
+                                        });
+                                    }
+                                }
+                                return orders;
+                            }
+                            return [];
+                        }
+                    }
+                });
+
+                foreach (Order o in orders)
+                {
+                    GetOrderProducts(o.ID).ForEach(p =>
+                    {
+                        // We only need to add the items the cashier is responsible for
+                        if (p.Category == "Dip" || p.Category == "Drink")
+                            o.OrderProducts.Add(p);
+                    });
+                }
+
+                return orders;
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to fetch collection orders: " + ex.Message);
+            }
+            return [];
+        }
+
+        public ObservableCollection<Order> GetDeliveryOrders()
+        {
+            string queryString = @"
+                SELECT
+                    o.order_id,
+                    o.customer_id,
+                    o.paid,
+                    os.status_name
+                FROM Orders AS o
+                INNER JOIN Order_Status AS os
+                ON o.order_status_id = os.order_status_id
+                WHERE o.order_type = 'Delivery' AND os.status_name IN ('Order Ready','Out For Delivery')";
+
+            try
+            {
+                // We will get the customer info in the view model
+                return _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        using (SqlDataReader reader = query.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                ObservableCollection<Order> orders = [];
+                                while (reader.Read())
+                                {
+                                    int orderId = reader.IsDBNull(reader.GetOrdinal("order_id")) ? 0 : Convert.ToInt32(reader["order_id"]);
+                                    int customerID = reader.IsDBNull(reader.GetOrdinal("customer_id")) ? 0 : Convert.ToInt32(reader["customer_id"]);
+                                    bool? paid = reader.IsDBNull(reader.GetOrdinal("paid")) ? null : Convert.ToBoolean(reader["paid"]);
+                                    string? statusName = reader.IsDBNull(reader.GetOrdinal("status_name")) ? null : reader["status_name"].ToString();
+
+                                    if (
+                                        orderId != 0
+                                        && customerID != 0 
+                                        && paid != null
+                                        && statusName != null
+                                    )
+                                    {
+                                        orders.Add(new Order { 
+                                            ID = orderId,
+                                            CustomerID = customerID,
+                                            Paid = (bool)paid,
+                                            OrderStatus = statusName
+                                        });
+                                    }
+                                }
+                                return orders;
+                            }
+                            return [];
+                        }
+                    }
+                });                
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to fetch delivery orders: " + ex.Message);
+            }
+            return [];
         }
 
         // Update the database whenever a payment is made
@@ -895,6 +1113,132 @@ namespace PizzaShed.Services.Data
                     }
                 }
             });            
+        }
+
+        public bool PrepareOrder(int orderNumber)
+        {
+            string queryString = @"
+                UPDATE Orders
+                SET order_status_id = (SELECT order_status_id FROM Order_Status WHERE status_name = 'Preparing')
+                WHERE order_id = @orderNumber;";
+
+            try
+            {
+                return _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@orderNumber", orderNumber);
+
+                        if (query.ExecuteNonQuery() > 0)
+                        {
+                            EventLogger.LogInfo("Successfully updated order prep");
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to update order prep: " + ex.Message);
+            }
+            return false;
+        }
+
+        public bool CompleteOrderStation(int orderNumber, bool pizza)
+        {
+            string queryString = $@"
+                UPDATE Orders
+                SET {(pizza ? "pizza_ready" : "grill_ready")} = 1
+                WHERE order_id = @orderNumber";
+
+            try
+            {
+                return _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@orderNumber", orderNumber);
+
+                        if (query.ExecuteNonQuery() > 0)
+                        {
+                            EventLogger.LogInfo("Successfully updated station completion");
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to update station completion " + ex.Message);
+            }
+            return false;
+        }
+
+        public bool OrderReady(int orderNumber)
+        {
+            string queryString = @"
+                UPDATE Orders
+                SET grill_ready = 1,
+                pizza_ready = 1,
+                order_status_id = (SELECT order_status_id FROM Order_Status WHERE status_name = 'Order Ready')
+                WHERE order_id = @orderNumber;";
+
+            try
+            {
+                return _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@orderNumber", orderNumber);
+
+                        if (query.ExecuteNonQuery() > 0)
+                        {
+                            EventLogger.LogInfo("Successfully completed order");
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to complete order " + ex.Message);
+            }
+            return false;
+        }
+
+        public bool CompleteOrder(int orderNumber)
+        {
+            string queryString = @"
+                UPDATE Orders
+                SET order_status_id = (SELECT order_status_id FROM Order_Status WHERE status_name = 'Completed')
+                WHERE order_id = @orderNumber;";
+
+            try
+            {
+                return _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@orderNumber", orderNumber);
+
+                        if (query.ExecuteNonQuery() > 0)
+                        {
+                            EventLogger.LogInfo("Successfully completed order");
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to complete order " + ex.Message);
+            }
+            return false;            
         }
     }
     

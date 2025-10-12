@@ -78,9 +78,14 @@ namespace PizzaShed.ViewModels
                     case "cashier" or "manager":                        
                         CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, []);
                         CurrentViewModel.Navigate += OnCheckout;
+                        CurrentViewModel.NavigateBack += OnCollection;
                         break;
-                    case "pizzaiolo" or "grill cook" or "driver":
-                        CurrentViewModel = new OrderViewModel(_session, _orderRepository);                        
+                    case "pizzaiolo" or "grill cook":
+                        CurrentViewModel = new OrderViewModel(_session, _orderRepository, _customerRepository);                        
+                        break;
+                    case "driver": // We handle driver seperately as they may need to navigate to checkout view
+                        CurrentViewModel = new OrderViewModel(_session, _orderRepository, _customerRepository);
+                        CurrentViewModel.Navigate += OnCheckout;
                         break;
                     default:
                         CurrentViewModel = new LoginViewModel(_userRepository, _session);
@@ -99,11 +104,12 @@ namespace PizzaShed.ViewModels
             try
             {
                 // Unsubscribe the event to avoid memory leaks
-                CurrentViewModel.Navigate -= OnCheckout;
+                CurrentViewModel.Navigate -= OnCheckout;                
 
                 // We need to convert to the class type to access the OrderID Property
                 if (CurrentViewModel is CashierViewModel cashierView)
-                {                                        
+                {
+                    CurrentViewModel.NavigateBack -= OnCollection;
                     // If we have a delivery order get the customer info before checkout
                     if (cashierView.IsDelivery)
                     {
@@ -125,12 +131,53 @@ namespace PizzaShed.ViewModels
                     CurrentViewModel = new CheckoutViewModel(_orderRepository, _session, customerView.OrderID);
                     CurrentViewModel.Navigate += ViewPayment;
                     CurrentViewModel.NavigateBack += OnCheckoutBack;                    
+                } 
+                else if (CurrentViewModel is OrderViewModel orderView)
+                {
+                    if (_session.UserRole == "Cashier")
+                        CurrentViewModel.NavigateBack -= OnCollection;
+
+                    CurrentViewModel = new CheckoutViewModel(_orderRepository, _session, orderView.OrderID);
+                    CurrentViewModel.Navigate += ViewPayment;
+                    CurrentViewModel.NavigateBack += OnCollection;
                 }                                                
             } 
             catch (Exception ex)
             {
                 EventLogger.LogError("Error navigating to checkout " + ex.Message);
             }
+        }
+
+        private void OnCollection(object? sender, EventArgs e)
+        {
+            if (CurrentViewModel is CashierViewModel cashierViewModel)
+            {
+                CurrentViewModel.Navigate -= OnCheckout;
+                CurrentViewModel.NavigateBack -= OnCollection;
+                CurrentViewModel = new OrderViewModel(_session, _orderRepository, _customerRepository);
+                CurrentViewModel.Navigate += OnCheckout;
+                CurrentViewModel.NavigateBack += OnCollectionBack;
+            }
+            else if (CurrentViewModel is CheckoutViewModel checkoutViewModel)
+            {
+                CurrentViewModel.Navigate -= ViewPayment;
+                CurrentViewModel.NavigateBack -= OnCollection;
+                CurrentViewModel = new OrderViewModel(_session, _orderRepository, _customerRepository);
+                CurrentViewModel.Navigate += OnCheckout;
+                if (_session.UserRole == "Cashier")
+                    CurrentViewModel.NavigateBack += OnCollectionBack;
+            }
+        }
+
+        private void OnCollectionBack(object? sender, EventArgs e)
+        {
+            if (CurrentViewModel is OrderViewModel orderViewModel)
+            {
+                CurrentViewModel.NavigateBack -= OnCollectionBack;
+                CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, []);
+                CurrentViewModel.Navigate += OnCheckout;
+                CurrentViewModel.NavigateBack += OnCollection;
+            } 
         }
 
         // This function will handle navigation from Checkout / Customer view back to cashier
@@ -240,8 +287,11 @@ namespace PizzaShed.ViewModels
         {            
             CurrentViewModel.Navigate -= OnCompleteOrder;
             CurrentViewModel.NavigateBack -= OnCheckoutBack;
+            
+            
             CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, []);
             CurrentViewModel.Navigate += OnCheckout;
+            CurrentViewModel.NavigateBack += OnCollection;
         }
     }
 }

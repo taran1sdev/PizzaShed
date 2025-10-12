@@ -17,9 +17,13 @@ namespace PizzaShed.Services.Data
 
         public bool UpdatePaidOrder(Order order);
 
-        public Order? GetOrderByOrderNumber(int orderNumber);
+        public Order? GetOrderByOrderNumber(int orderNumber);        
 
-        public ObservableCollection<Order> GetOrdersByRole(string role);
+        public ObservableCollection<Order> GetKitchenOrders(bool pizzas);
+
+        public ObservableCollection<Order> GetCollectionOrders();
+
+        public ObservableCollection<Order> GetDeliveryOrders();
 
         public bool CreatePayment(int orderId, decimal amount, string paymentType);
 
@@ -28,5 +32,12 @@ namespace PizzaShed.Services.Data
         public (bool, ObservableCollection<string>) GetCollectionTimes();
 
         public (bool, string) GetDeliveryTime();
+
+        public bool PrepareOrder(int orderNumber);
+
+        public bool CompleteOrderStation(int orderNumber, bool pizza);
+
+        public bool OrderReady(int orderNumber);
+        public bool CompleteOrder(int orderNumber);
     }
 }

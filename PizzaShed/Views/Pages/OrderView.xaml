@@ -55,13 +55,16 @@
             Grid.Row="0"
             HorizontalAlignment="Left"
             Content="Logout"
+            Command="{Binding LogoutCommand}"
             />
 
         <Button
-            x:Name="CompleteButton"
+            x:Name="BackButton"
             Grid.Row="0"
             HorizontalAlignment="Right"
-            Content="Complete"
+            Content="Back"
+            Visibility="{Binding IsCashier, Converter={StaticResource IsVisible}}"
+            Command="{Binding BackCommand}"
             />
 
         <TextBlock
@@ -81,20 +84,79 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <ContentControl Content="{Binding .}">
+                            <ContentControl.Style>
+                                <Style TargetType="{x:Type ContentControl}">
+                                    <Setter Property="ContentTemplate">
+                                        <Setter.Value>
+                                            <DataTemplate>
+                                                <cards:CashierCardUserControl />
+                                            </DataTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.IsCook, 
+                                        RelativeSource={RelativeSource FindAncestor, 
+                                        AncestorType={x:Type UserControl}}}" Value="True">
+                                            <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <cards:KitchenCardUserControl/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding DataContext.IsDriver, 
+                                        RelativeSource={RelativeSource FindAncestor, 
+                                        AncestorType={x:Type UserControl}}}" Value="True">
+                                            <Setter Property="ContentTemplate">
+                                                <Setter.Value>
+                                                    <DataTemplate>
+                                                        <cards:DriverCardUserControl/>
+                                                    </DataTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ContentControl.Style>
+                        </ContentControl>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <TextBlock
+            x:Name="ReadyLabel"
+            Grid.Row="3"
+            HorizontalAlignment="Left"
+            Text="{Binding ReadyLabel}"
+            />
+
+        <ItemsControl Grid.Row="4" ItemsSource="{Binding ReadyOrders}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <ContentControl Content="{Binding .}">
                         <ContentControl.Style>
                             <Style TargetType="{x:Type ContentControl}">
                                 <Setter Property="ContentTemplate">
                                     <Setter.Value>
                                         <DataTemplate>
-                                            <cards:CashierCardUserControl />
+                                            <cards:CashierCardConfirmUserControl/>
                                         </DataTemplate>
                                     </Setter.Value>
                                 </Setter>
 
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding DataContext.IsCook, 
-                                        RelativeSource={RelativeSource FindAncestor, 
-                                        AncestorType={x:Type UserControl}}}" Value="True">
+                                RelativeSource={RelativeSource FindAncestor, 
+                                AncestorType={x:Type UserControl}}}" Value="True">
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
                                                 <DataTemplate>
@@ -105,8 +167,8 @@
                                     </DataTrigger>
 
                                     <DataTrigger Binding="{Binding DataContext.IsDriver, 
-                                        RelativeSource={RelativeSource FindAncestor, 
-                                        AncestorType={x:Type UserControl}}}" Value="True">
+                                RelativeSource={RelativeSource FindAncestor, 
+                                AncestorType={x:Type UserControl}}}" Value="True">
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
                                                 <DataTemplate>
@@ -122,12 +184,5 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-
-        <TextBlock
-            x:Name="ReadyLabel"
-            Grid.Row="3"
-            HorizontalAlignment="Left"
-            Text="{Binding ReadyLabel}"
-            />
     </Grid>
 </UserControl>

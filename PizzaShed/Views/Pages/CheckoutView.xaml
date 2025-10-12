@@ -217,7 +217,8 @@
         <TextBlock
             x:Name="NotesTitle"
             Style="{StaticResource NotesTitleStyle}"
-            Text="Order Notes"            
+            Text="Order Notes"  
+            Visibility="{Binding NotesVisible, Converter={StaticResource IsVisible}}"
             />
 
         <TextBox
@@ -225,6 +226,7 @@
             Style="{StaticResource NotesStyle}"                        
             Margin="20,100,20,0"
             Text="{Binding OrderNotes, Mode=TwoWay}"
+            Visibility="{Binding NotesVisible, Converter={StaticResource IsVisible}}"
             />
 
         <ListView
@@ -336,7 +338,7 @@
             Grid.Column="1"
             HorizontalAlignment="Right"
             Content="Cash"
-            Visibility="{Binding AcceptOrder, Converter={StaticResource IsVisible}}"
+            Visibility="{Binding IsDriverCash, Converter={StaticResource IsVisible}}"
             Command="{Binding CashCommand}"
             />
 

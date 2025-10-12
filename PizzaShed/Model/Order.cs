@@ -25,6 +25,8 @@ namespace PizzaShed.Model
 
         public int? CustomerID { get; set; }
 
+        public Customer? Customer { get; set; } 
+
         public string? OrderSource { get; set; }
 
         public string? OrderNotes { get; set; }
@@ -37,7 +39,7 @@ namespace PizzaShed.Model
 
         public DateTime? CollectionTime { get; set; }
 
-        public int? DriverID { get; set; }
+        public int? DriverID { get; set; }        
 
         public bool Paid = false;        
 
@@ -99,5 +101,9 @@ namespace PizzaShed.Model
 
         // We use a dictionary to track payments that are made so we can support split payments
         public Dictionary<string, List<decimal>> Payments { get; set; } = [];
+
+        public bool GrillReady { get; set; }
+
+        public bool PizzaReady { get; set; }
     }
 }

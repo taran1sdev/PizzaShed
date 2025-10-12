@@ -365,6 +365,7 @@
             HorizontalAlignment="Left"
             Content="Collections"
             Width="240"
+            Command="{Binding CollectionCommand}"
             />
 
         <TextBlock

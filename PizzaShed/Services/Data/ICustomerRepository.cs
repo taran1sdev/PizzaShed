@@ -12,6 +12,8 @@ namespace PizzaShed.Services.Data
     {
         public ObservableCollection<Customer> GetCustomerByPartialName(string partialName);
 
+        public Customer? GetCustomerByID(int id);
+
         public bool UpdateCustomer(Customer customer);
 
         public int CreateNewCustomer(Customer customer);
