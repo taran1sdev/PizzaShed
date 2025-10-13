@@ -684,6 +684,7 @@ namespace PizzaShed.Services.Data
                     o.paid,
                     o.grill_ready,
                     o.pizza_ready,
+                    o.collection_time,
                     os.status_name
                 FROM Orders AS o
                 INNER JOIN Order_Status AS os
@@ -709,6 +710,22 @@ namespace PizzaShed.Services.Data
                                     bool? grillReady = reader.IsDBNull(reader.GetOrdinal("grill_ready")) ? null : Convert.ToBoolean(reader["grill_ready"]);
                                     bool? pizzaReady = reader.IsDBNull(reader.GetOrdinal("pizza_ready")) ? null : Convert.ToBoolean(reader["pizza_ready"]);
                                     string? statusName = reader.IsDBNull(reader.GetOrdinal("status_name")) ? null : reader["status_name"].ToString();
+                                    DateTime? collectionTime = reader.IsDBNull(reader.GetOrdinal("collection_time")) ? null : Convert.ToDateTime(reader["collection_time"]);
+
+
+                                    // If the order is a collection we only want to display it 30 minutes before the collection time
+                                    bool readyToPrepare = collectionTime == null;
+
+                                    if (!readyToPrepare)
+                                    {
+                                        TimeSpan? timeUntilCollection = collectionTime - DateTime.Now;
+
+                                        if(timeUntilCollection.HasValue)
+                                        {
+                                            if (timeUntilCollection.Value.TotalMinutes <= 30)
+                                                readyToPrepare = true;
+                                        }
+                                    }
 
                                     if (
                                         orderId != 0
@@ -716,6 +733,7 @@ namespace PizzaShed.Services.Data
                                         && statusName != null
                                         && grillReady != null
                                         && pizzaReady != null
+                                        && readyToPrepare
                                     )
                                     {
                                         orders.Add(new Order
@@ -734,7 +752,7 @@ namespace PizzaShed.Services.Data
                         }
                     }
                 });
-
+                 
                 // Here we filter the products to retrieve for each order depending on the station
                 foreach (Order o in orders)
                 {
@@ -839,6 +857,7 @@ namespace PizzaShed.Services.Data
         }
 
         
+
         public ObservableCollection<Order> GetDeliveryOrders()
         {
             string queryString = @"
