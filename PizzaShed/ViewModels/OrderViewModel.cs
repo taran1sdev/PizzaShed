@@ -137,9 +137,10 @@ namespace PizzaShed.ViewModels
         {
             Order orderToComplete = allOrders.ToList().First(o => o.ID == orderID);
             
-            if (orderToComplete.OrderStatus == "New")
+            if (orderToComplete.OrderStatus == "Order Ready")
             {
-                // Update "out for delivery"
+                _orderRepository.DeliverOrder(orderID);
+                UpdateView();
             } 
             else if (orderToComplete.Paid)
             {

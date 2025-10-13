@@ -838,6 +838,7 @@ namespace PizzaShed.Services.Data
             return [];
         }
 
+        
         public ObservableCollection<Order> GetDeliveryOrders()
         {
             string queryString = @"
@@ -1146,6 +1147,37 @@ namespace PizzaShed.Services.Data
             return false;
         }
 
+        public bool DeliverOrder(int orderNumber)
+        {
+            string queryString = @"
+                UPDATE Orders
+                SET order_status_id = (SELECT order_status_id FROM Order_Status WHERE status_name = 'Out For Delivery')
+                WHERE order_id = @orderNumber;";
+
+            try
+            {
+                return _databaseManager.ExecuteQuery(conn =>
+                {
+                    using (SqlCommand query = new SqlCommand(queryString, conn))
+                    {
+                        query.Parameters.AddWithValue("@orderNumber", orderNumber);
+
+                        if (query.ExecuteNonQuery() > 0)
+                        {
+                            EventLogger.LogInfo("Successfully started delivery");
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                EventLogger.LogError("Failed to start delivery: " + ex.Message);
+            }
+
+            return false;
+        }
         public bool CompleteOrderStation(int orderNumber, bool pizza)
         {
             string queryString = $@"

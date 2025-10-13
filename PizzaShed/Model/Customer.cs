@@ -128,6 +128,21 @@ namespace PizzaShed.Model
             }
         }
 
+        public string HouseTicket
+        {
+            get
+            {
+                if (Flat == null)
+                {
+                    return House;
+                } 
+                else
+                {
+                    return $"{Flat} {House}";
+                }
+            }
+        }
+
         private string _streetAddress = "";
         public string StreetAddress 
         {

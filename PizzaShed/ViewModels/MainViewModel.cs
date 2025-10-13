@@ -288,10 +288,18 @@ namespace PizzaShed.ViewModels
             CurrentViewModel.Navigate -= OnCompleteOrder;
             CurrentViewModel.NavigateBack -= OnCheckoutBack;
             
-            
-            CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, []);
-            CurrentViewModel.Navigate += OnCheckout;
-            CurrentViewModel.NavigateBack += OnCollection;
+            if (_session.UserRole == "Driver")
+            {
+                CurrentViewModel = new OrderViewModel(_session, _orderRepository, _customerRepository);
+                CurrentViewModel.Navigate += OnCheckout;
+            }
+
+            if (_session.UserRole == "Cashier")
+            {
+                CurrentViewModel = new CashierViewModel(_productRepository, _toppingRepository, _orderRepository, _session, []);
+                CurrentViewModel.Navigate += OnCheckout;
+                CurrentViewModel.NavigateBack += OnCollection;
+            }            
         }
     }
 }

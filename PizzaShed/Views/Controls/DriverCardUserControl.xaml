@@ -34,43 +34,33 @@
             </StackPanel>
 
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0" >
 
-                <ItemsControl ItemsSource="{Binding Customer}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Margin="0" >
-
-                                <TextBlock Text="{Binding Path=Name}" 
-                                           FontSize="18"                                                                                      
+                    <TextBlock Text="{Binding Path=Customer.Name}" 
+                                           FontSize="16"                                                                                      
                                            Foreground="AntiqueWhite"/>
-                                <TextBlock FontSize="18"
-                                           Foreground="AntiqueWhite"
-                                           Text="{Binding Path=PhoneNumber}" />
-                                <Separator />
 
-                                <TextBlock FontSize="18"
-                                           Foreground="AntiqueWhite">
-                                    <Run Text="{Binding Path=Flat}" />                                    
-                                    <Run Text="{Binding Path=HouseNo, StringFormat=' {0}'}" />
-                                </TextBlock>
-
-                                <TextBlock FontSize="18"
+                    <TextBlock FontSize="16"
                                            Foreground="AntiqueWhite"
-                                           Text="{Binding Path=Address}"/>
-                                
-                                <TextBlock FontSize="18"
-                                           Foreground="AntiqueWhite"
-                                           Text="{Binding Path=Postcode}" />
-                                <Separator />
+                                           Text="{Binding Customer.PhoneNumber}" />
+                    <Separator />
 
-                                <TextBlock FontSize="18"
+                    <TextBlock FontSize="16"
+                                           Foreground="AntiqueWhite">                                    
+                                    <Run Text="{Binding Customer.HouseTicket, Mode=OneWay}" />
+                        <Run Text="{Binding Customer.StreetAddress}" />
+                    </TextBlock>
+                    
+                    <TextBlock FontSize="16"
+                                           Foreground="AntiqueWhite"
+                                           Text="{Binding Path=Customer.Postcode}" />
+                    <Separator />
+
+                    <TextBlock FontSize="16"
                                            Foreground="AntiqueWhite"
                                            TextWrapping="Wrap"
-                                           Text="{Binding Path=DeliveryNotes}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                                           Text="{Binding Path=Customer.DeliveryNotes}"/>
+                </StackPanel>
 
             </ScrollViewer>
 

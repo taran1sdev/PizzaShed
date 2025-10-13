@@ -35,9 +35,12 @@ namespace PizzaShed.Services.Data
 
         public bool PrepareOrder(int orderNumber);
 
+        public bool DeliverOrder(int orderNumber);
+
         public bool CompleteOrderStation(int orderNumber, bool pizza);
 
         public bool OrderReady(int orderNumber);
+
         public bool CompleteOrder(int orderNumber);
     }
 }
