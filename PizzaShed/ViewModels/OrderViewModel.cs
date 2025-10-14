@@ -137,7 +137,7 @@ namespace PizzaShed.ViewModels
         {
             Order orderToComplete = allOrders.ToList().First(o => o.ID == orderID);
             
-            if (orderToComplete.OrderStatus == "Order Ready")
+            if (orderToComplete.OrderStatus == "Order Ready" && _session.UserRole == "Driver")
             {
                 _orderRepository.DeliverOrder(orderID);
                 UpdateView();

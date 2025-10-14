@@ -1078,9 +1078,8 @@ namespace PizzaShed.Services.Data
                 return (false, "Too late\n to order");
             } // If the order is before the shop opens also reject it 
             else if (orderReady < times.Open.Add(prepTime))
-            {
-                // Changed while testing
-                return (true, "Too early\n to order");
+            {                
+                return (false, "Too early\n to order");
             }
 
             int remainder = orderReady.Minutes % deliverySlotInterval.Minutes;

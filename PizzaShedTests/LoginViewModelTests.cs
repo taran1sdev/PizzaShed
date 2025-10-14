@@ -1,120 +1,150 @@
+﻿using Moq;
+using Moq.Protected;
 using NUnit.Framework;
-using Moq;
-using PizzaShed.Services.Data;
-using PizzaShed.Services.Security;
-using PizzaShed.ViewModels;
 using PizzaShed.Model;
+using PizzaShed.Services.Data;
+using PizzaShed.ViewModels;
+using PizzaShed.Commands;
+using PizzaShed.Services.Security;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace PizzaShedTests
 {
     [TestFixture]
-    public class LoginViewModelTest
+    public class LoginViewModelTests
     {
-        private Mock<IUserRepository> _mockUserRepository;
+        private Mock<IUserRepository> _userRepository;
+        private Mock<ISession> _session;
         private LoginViewModel _loginViewModel;
 
         [SetUp]
         public void Setup()
         {
-            // Initialize a mock user repo and login view model before running tests
-            _mockUserRepository = new Mock<IUserRepository>();            
+            _userRepository = new Mock<IUserRepository>();
+            _session = new Mock<ISession>();
+            _loginViewModel = new LoginViewModel(_userRepository.Object, _session.Object);
         }
 
+
+        // We ensure that our RelayCommand is being initialized correctly
         [Test]
-        // Ensure that all values are initialized correctly
-        public void Properties_Initialized()
+        public void Constructor_Initializes_Command()
         {
-            Assert.That(_loginViewModel.Pin, Is.EqualTo(""), "Pin should be an empty string");
-            Assert.That(_loginViewModel.ErrorMessage, Is.EqualTo(""), "ErrorMessage should be an empty string");
-            Assert.That(_loginViewModel.ButtonCommand, Is.Not.Null, "ButtonCommand should be initialized");
+            Assert.That(_loginViewModel.ButtonCommand, Is.Not.Null);
+            Assert.That(_loginViewModel.ButtonCommand, Is.InstanceOf<RelayCommand<string>>());
         }
 
+        // We ensure ButtonCommand appends digits to our Pin property when called
         [Test]
-        // Check ExecuteButtonCommand appends digit to Pin 
-        public void ExectuteButtonCommand_Appends_Digit_To_Pin()
+        public void ButtonCommand_AppendsDigit()
         {
-            _loginViewModel.Pin = "12";
-
+            _loginViewModel.ButtonCommand.Execute("1");
+            _loginViewModel.ButtonCommand.Execute("2");
             _loginViewModel.ButtonCommand.Execute("3");
 
-            Assert.That(_loginViewModel.Pin, Is.EqualTo("123"), "Digit should be appended to Pin");
+            Assert.That(_loginViewModel.Pin, Is.EqualTo("123"));
         }
 
+
+        // We ensure ButtonCommand removes a digit from the Pin property when
+        // called with backspace
         [Test]
-        // Check ExecuteButtonCommand clears Pin
-        public void ExecuteButtonCommand_Clears_Pin()
-        {
-            _loginViewModel.Pin = "12";
-
-            _loginViewModel.ButtonCommand.Execute("Clear");
-
-            Assert.That(_loginViewModel.Pin, Is.EqualTo(""), "Pin should be an empty string");
-        }
-
-        [Test]
-        // Check ExecuteButtonCommand removes last digit
-        public void ExecuteButtonCommand_Backspaces_Pin()
+        public void ButtonCommand_RemovesDigit_OnBackspace()
         {
             _loginViewModel.Pin = "123";
 
             _loginViewModel.ButtonCommand.Execute("Backspace");
+            _loginViewModel.ButtonCommand.Execute("Backspace");
 
-            Assert.That(_loginViewModel.Pin, Is.EqualTo("12"), "Pin should have one less character");
+            Assert.That(_loginViewModel.Pin, Is.EqualTo("1"));
         }
 
+        // We ensure ButtonCommand does not throw an exception
+        // when backspace is called on an empty Pin
         [Test]
-        // Check AttemptLogin gets called when pin length is 4 
-        public void Pin_AttemptsLogin_OnFourDigits_Success()
+        public void ButtonCommand_HandlesEmptyPin_OnBackspace()
         {
-            const string pinToTest = "0000";
-            string expectedPinHash = PasswordHasher.HashPin(pinToTest);
+            _loginViewModel.Pin = "";
 
-            // Set the mock to return true when called with the expected pin hash
-            _mockUserRepository.Setup(r => r.GetUserByPin(expectedPinHash)).Returns(new User(1, "test", "test"));
+            _loginViewModel.ButtonCommand.Execute("Backspace");
 
-            _loginViewModel.Pin = pinToTest;
-
-            // Make sure the method is only being called once
-            _mockUserRepository.Verify(r => r.GetUserByPin(expectedPinHash), Times.Once);
-
-            // Make sure the pin is not removed 
-            Assert.That(_loginViewModel.Pin, Is.EqualTo(pinToTest), "Pin should remain when successful");
-            // Make sure the ErrorMessage is empty
-            Assert.That(_loginViewModel.ErrorMessage, Is.EqualTo(""), "Error message should be empty on success");
+            Assert.That(_loginViewModel.Pin, Is.EqualTo(""));
         }
 
+
+        // We make sure ButtonCommand clears the Pin property when
+        // called with Clear
         [Test]
-        public void Pin_AttemptsLogin_OnFourDigits_Failure()
+        public void ButtonCommand_ClearsPin_OnClear()
         {
-            const string pinToTest = "9999";
-            string expectedPinHash = PasswordHasher.HashPin(pinToTest);
-            User? nullUser = null;
+            _loginViewModel.Pin = "123";
 
-            // Set the mock to return false when called with the expected pin hash
-            _mockUserRepository.Setup(r => r.GetUserByPin(expectedPinHash)).Returns(nullUser);
+            _loginViewModel.ButtonCommand.Execute("Clear");
 
-            _loginViewModel.Pin = pinToTest;
-
-            // Make sure the method is only being called once
-            _mockUserRepository.Verify(r => r.GetUserByPin(expectedPinHash), Times.Once);
-
-            // Make sure the pin is removed
-            Assert.That(_loginViewModel.Pin, Is.EqualTo(""), "Pin should be removed on failure");
-            // Make sure the error message is displayed
-            Assert.That(_loginViewModel.ErrorMessage, Is.Not.EqualTo(""), "Error message should be displayed on failure");
+            Assert.That(_loginViewModel.Pin, Is.EqualTo(""));
         }
 
-        [Test]
-        // Make sure the error message is removed once the user enters a new digit
-        public void ErrorMessage_Clears_OnUserInput()
-        {            
-            _loginViewModel.ErrorMessage = "Login failed...";
 
-            // Simulate user input
+        // We ensure the Pin properties setter clears any error message
+        // when new input is recieved
+        [Test]
+        public void Pin_ClearsError_OnInput()
+        {
+            _loginViewModel.ErrorMessage = "Error";
+
             _loginViewModel.ButtonCommand.Execute("1");
 
-            // Check the error message is cleared
-            Assert.That(_loginViewModel.ErrorMessage, Is.EqualTo(""), "Error message should be removed on user input");
-        }       
+            Assert.That(_loginViewModel.ErrorMessage, Is.EqualTo(""));
+        }
+
+        // We ensure the Pin property calls AttemptLogin when the Pin length reaches 4
+        [Test]
+        public void Pin_AttemptsLogin_OnLengthOfFour()
+        {            
+            string expectedPin = "1234";
+            string expectedHashedPin = PasswordHasher.HashPin(expectedPin);
+            User testUser = new User(1, "test", "test");
+
+            _userRepository.Setup(u => u.GetUserByPin(expectedHashedPin))
+                           .Returns(testUser);
+
+            _loginViewModel.Pin = expectedPin;
+
+            _userRepository.Verify(u => u.GetUserByPin(expectedHashedPin),
+                                    Times.Once(), "GetUserByPin should only be called once");
+
+            _session.Verify(s => s.Login(testUser),
+                            Times.Once(), "Login should only be called once");
+
+            Assert.That(_loginViewModel.Pin, Is.EqualTo(""), "Pin should be reset to empty value on Login");
+        }
+
+        // We ensure that the Pin is reset and and Error Message is displayed on failed login
+        [Test]
+        public void PinCleared_ErrorDisplayed_OnFailedLogin()
+        {
+            string expectedPin = "1234";
+            string expectedHashedPin = PasswordHasher.HashPin(expectedPin);
+
+            User? testUser = null;
+
+            _userRepository.Setup(u => u.GetUserByPin(expectedHashedPin))
+                           .Returns(testUser);     
+
+            _loginViewModel.Pin = expectedPin;
+
+            _userRepository.Verify(u => u.GetUserByPin(expectedHashedPin),
+                                   Times.Once(), "GetUserByPin should only be called once");
+
+            _session.Verify(s => s.Login(testUser),
+                            Times.Never(), "Login should not be called on failed login");
+
+            Assert.That(_loginViewModel.ErrorMessage, Is.Not.EqualTo(""));
+            Assert.That(_loginViewModel.Pin, Is.EqualTo(""));
+        }        
     }
 }

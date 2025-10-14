@@ -104,8 +104,11 @@ namespace PizzaShed.ViewModels
             if (user != null)
             {
                 _session.Login(user);
+            } 
+            else
+            {
+                ErrorMessage = "Login Failed...";
             }            
-            ErrorMessage = "Login Failed...";
             Pin = "";
         }
     }

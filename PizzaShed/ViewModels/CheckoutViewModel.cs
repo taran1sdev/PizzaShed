@@ -20,7 +20,7 @@ namespace PizzaShed.ViewModels
         private IOrderRepository _orderRepository;
         private readonly Order _currentOrder;
         
-        public ObservableCollection<Product> CurrentOrder => _currentOrder.OrderProducts ?? [];
+        public ObservableCollection<Product> CurrentOrder => _currentOrder.OrderProducts;
         
         public ObservableCollection<Product> OrderProducts 
         {
@@ -287,7 +287,7 @@ namespace PizzaShed.ViewModels
         {
             CardPayment = false;
 
-            if (IsDelivery || IsPhone)
+            if (IsDelivery || IsPhone && _currentOrder.OrderStatus == "New")
             {
 
                 // We add this to the payments just to trigger our navigation logic
