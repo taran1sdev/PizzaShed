@@ -22,8 +22,9 @@ namespace PizzaShed.ViewModels
         private readonly IProductRepository<Product> _productRepository;
         private readonly IProductRepository<Topping> _toppingRepository;
         private readonly IOrderRepository _orderRepository;
-        private readonly ICustomerRepository _customerRepository;
-        
+        private readonly ICustomerRepository _customerRepository;        
+
+
         private ViewModelBase _currentViewModel;
         public ViewModelBase CurrentViewModel
         {
@@ -300,6 +301,6 @@ namespace PizzaShed.ViewModels
                 CurrentViewModel.Navigate += OnCheckout;
                 CurrentViewModel.NavigateBack += OnCollection;
             }            
-        }
+        }        
     }
 }

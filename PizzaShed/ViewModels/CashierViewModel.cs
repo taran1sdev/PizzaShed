@@ -288,7 +288,7 @@ namespace PizzaShed.ViewModels
             LogoutCommand = new RelayGenericCommand(Logout);
 
             // Default category when view is rendered
-            SelectCategory("Deals");
+            SelectCategory("Deal");
         }
 
         //------        ORDER        ------//
@@ -456,7 +456,8 @@ namespace PizzaShed.ViewModels
                 if (requiredItem.ID != 0)
                 {
                     // If the user can not choose we just add to orderItems
-                    FindDefaultChoices(componentItem); // We need to set the default base / bread
+                    if (componentItem.Category == "Pizza" || componentItem.Category == "Kebab")
+                        FindDefaultChoices(componentItem); // We need to set the default base / bread
                     CurrentOrderItems.Add(componentItem);
                 }
                 else
@@ -484,7 +485,7 @@ namespace PizzaShed.ViewModels
                     // Deal is complete - no choice required
                     _activeDealParent = null;
                     SelectedOrderItem = dealParent;
-                    SelectCategory("Deals");
+                    SelectCategory("Deal");
                 }
             }
             
@@ -576,7 +577,7 @@ namespace PizzaShed.ViewModels
             _activeDealParent = null;
 
             SelectedOrderItem = finalParent;
-            SelectCategory("Deals");
+            SelectCategory("Deal");
         }
 
 
@@ -691,7 +692,7 @@ namespace PizzaShed.ViewModels
 
             switch (SelectedCategory)
             {
-                case "Deals":
+                case "Deal":
                     products.AddRange(_productRepo.GetMealDeals());
                     break;
                 case "Burger":

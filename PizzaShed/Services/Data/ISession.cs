@@ -12,8 +12,8 @@ namespace PizzaShed.Services.Data
     {
         event EventHandler? SessionChanged;
 
-        void Login(User user);
-        void Logout();
+        public void Login(User user);
+        public void Logout();
 
         public User? CurrentUser { get; }
         bool IsLoggedIn { get; }

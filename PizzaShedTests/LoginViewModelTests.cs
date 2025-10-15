@@ -140,7 +140,7 @@ namespace PizzaShedTests
             _userRepository.Verify(u => u.GetUserByPin(expectedHashedPin),
                                    Times.Once(), "GetUserByPin should only be called once");
 
-            _session.Verify(s => s.Login(testUser),
+            _session.Verify(s => s.Login(It.IsAny<User>()),
                             Times.Never(), "Login should not be called on failed login");
 
             Assert.That(_loginViewModel.ErrorMessage, Is.Not.EqualTo(""));

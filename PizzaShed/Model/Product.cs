@@ -46,9 +46,7 @@ namespace PizzaShed.Model
             Product newProduct = (Product)this.MemberwiseClone();
 
 
-            // Only deep clone non-deal items
-            if (newProduct.Category != "Deal")
-            {
+           
                 newProduct.RequiredChoices =
                 new ObservableCollection<MenuItemBase>(
                     this.RequiredChoices.Select(r => (MenuItemBase)r.Clone())
@@ -58,7 +56,7 @@ namespace PizzaShed.Model
                     new ObservableCollection<Topping>(
                         this.Toppings.Select(t => (Topping)t.Clone())
                         );
-            }
+            
             
 
             newProduct.SetupEventHandlers();

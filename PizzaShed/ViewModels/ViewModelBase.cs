@@ -36,7 +36,7 @@ namespace PizzaShed.ViewModels
         // We set it in the MainViewModel
         public event EventHandler? Navigate;
         // This function can be called within views
-        protected void OnNavigate()
+        protected virtual void OnNavigate()
         {
             Navigate?.Invoke(this, EventArgs.Empty);
         }
@@ -44,7 +44,7 @@ namespace PizzaShed.ViewModels
         // This handles navigating back 
         public event EventHandler? NavigateBack;
 
-        protected void OnNavigateBack()
+        protected virtual void OnNavigateBack()
         {
             NavigateBack?.Invoke(this, EventArgs.Empty);
         }

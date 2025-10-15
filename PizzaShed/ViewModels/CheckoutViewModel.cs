@@ -287,7 +287,7 @@ namespace PizzaShed.ViewModels
         {
             CardPayment = false;
 
-            if (IsDelivery || IsPhone && _currentOrder.OrderStatus == "New")
+            if (IsDelivery || IsPhone)
             {
 
                 // We add this to the payments just to trigger our navigation logic
