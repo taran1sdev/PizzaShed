@@ -362,19 +362,7 @@ namespace PizzaShedTests
                 _mainViewModel.CurrentViewModel,
                 Is.InstanceOf<CheckoutViewModel>(),
                 "Completing Delivery of an unpaid order should redirect to Checkout"
-            );
-
-            CheckoutViewModel checkoutViewModel = (CheckoutViewModel)
-                _mainViewModel.CurrentViewModel;
-
-            checkoutViewModel.CashCommand.Execute(null);
-            checkoutViewModel.CompleteOrderCommand.Execute(null);
-
-            Assert.That(
-                _mainViewModel.CurrentViewModel,
-                Is.InstanceOf<OrderViewModel>(),
-                "Payment should redirect back to order view"
-            );
+            );            
         }
     }
 }

@@ -229,6 +229,15 @@ namespace PizzaShed.ViewModels
                         return;
                     }
 
+                    if (_session.UserRole == "Driver")
+                    {
+                        _paymentWindow.Show();
+                        PaymentViewModel = new PaymentPresentViewModel(checkoutViewModel);
+                        checkoutViewModel.Navigate -= ViewPayment;
+                        checkoutViewModel.Navigate += OnPayment;
+                        return;
+                    }
+
                     if (checkoutViewModel.IsCollection && !checkoutViewModel.IsPhone)
                     {                        
                         _paymentWindow.Show();                        

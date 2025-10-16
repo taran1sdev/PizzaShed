@@ -141,7 +141,13 @@ namespace PizzaShed.ViewModels
             get
             {
                 if (SelectedPromotion != null)
-                    return $"-£{_currentOrder?.TotalPrice * SelectedPromotion.DiscountValue:N2}";
+                {
+                    decimal total = _currentOrder.TotalPrice;
+                    if (_currentOrder.DeliveryFee != null)
+                        total -= (decimal)_currentOrder.DeliveryFee; // We do not apply discounts to the set delivery fee
+                    return $"-£{total * SelectedPromotion.DiscountValue:N2}";
+                }
+                    
                 return "£0.00";
             }
         }
@@ -289,6 +295,12 @@ namespace PizzaShed.ViewModels
 
             if (IsDelivery || IsPhone)
             {
+                // We want to display the Payment View for the driver returning
+                if (_session.UserRole == "Driver")
+                {
+                    OnNavigate();
+                    return;
+                }
 
                 // We add this to the payments just to trigger our navigation logic
                 // But we do not update the database until an actual payment is made                                    
