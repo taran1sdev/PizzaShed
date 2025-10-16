@@ -11,7 +11,7 @@ namespace PizzaShed.ViewModels
 {
     public class PaymentPresentViewModel : ViewModelBase
     {
-        private CheckoutViewModel _checkoutViewModel;
+        private ICheckoutViewModel _checkoutViewModel;
 
 
         private string _total;
@@ -40,7 +40,7 @@ namespace PizzaShed.ViewModels
         public ICommand MakePaymentCommand { get; }
         public ICommand CancelPaymentCommand { get; }
 
-        public PaymentPresentViewModel(CheckoutViewModel checkoutViewModel)
+        public PaymentPresentViewModel(ICheckoutViewModel checkoutViewModel)
         {
             _checkoutViewModel = checkoutViewModel;
             _total = _checkoutViewModel.TotalPriceValue.Replace("£", "");
@@ -60,8 +60,12 @@ namespace PizzaShed.ViewModels
                         Total = "";
                         break;
                     case "Point":
-                        if (!Total.Contains('.') && Total.Length > 0)                        
+                        if (!Total.Contains('.') && Total.Length > 0)
+                        {
+                            if (Total.Length == 1)
+                                Total += "0";
                             Total += ".";
+                        }                                                        
                         break;
                     case "0":
                         if (Total.Contains("."))

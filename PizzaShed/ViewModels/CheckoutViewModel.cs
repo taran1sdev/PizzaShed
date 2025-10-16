@@ -14,7 +14,7 @@ using System.Windows;
 
 namespace PizzaShed.ViewModels
 {
-    public class CheckoutViewModel : ViewModelBase
+    public class CheckoutViewModel : ViewModelBase, ICheckoutViewModel
     {
         private ISession _session;
         private IOrderRepository _orderRepository;
