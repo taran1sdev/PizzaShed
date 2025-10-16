@@ -11,7 +11,7 @@ namespace PizzaShed.ViewModels
 {
     public class PaymentNotPresentViewModel : ViewModelBase
     {
-        private CheckoutViewModel _checkoutViewModel;
+        private ICheckoutViewModel _checkoutViewModel;
 
         public string Total => _checkoutViewModel.TotalPriceValue;
 
@@ -59,6 +59,11 @@ namespace PizzaShed.ViewModels
                             ErrorMessage = null;
                             SetProperty(ref _expMonth, value);
                         }
+                        else
+                        {
+                            SetProperty(ref _expMonth, null);
+                            ErrorMessage = "Invalid Expiry Month";
+                        }
                     } 
                     else if (value[0] == '0' && value[1] != '0' && char.IsDigit(value[1]))
                     {
@@ -103,7 +108,7 @@ namespace PizzaShed.ViewModels
                                 }
                                 else
                                 {
-                                    SetProperty(ref _expYear, value);                                    
+                                    SetProperty(ref _expYear, null);                                    
                                     ErrorMessage = "Card Expired";
                                 }
                             }
@@ -124,6 +129,11 @@ namespace PizzaShed.ViewModels
                         SetProperty(ref _expYear, null);
                         ErrorMessage = "Invalid Expiry Year";
                     }
+                }
+                else
+                {
+                    SetProperty(ref _expYear, null);
+                    ErrorMessage = "Invalid Expiry Year";
                 }
             }
         }
@@ -150,9 +160,9 @@ namespace PizzaShed.ViewModels
         public ICommand MakePaymentCommand { get; }
         public ICommand CancelPaymentCommand { get; }
 
-        public PaymentNotPresentViewModel(CheckoutViewModel checkoutViewModel) 
+        public PaymentNotPresentViewModel(ICheckoutViewModel checkoutViewModel) 
         { 
-            _checkoutViewModel= checkoutViewModel;
+            _checkoutViewModel = checkoutViewModel;
 
             MakePaymentCommand = new RelayGenericCommand(CheckValidDetails);
             CancelPaymentCommand = new RelayGenericCommand(_checkoutViewModel.CancelPayment);
