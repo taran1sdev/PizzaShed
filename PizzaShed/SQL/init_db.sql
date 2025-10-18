@@ -1,12 +1,25 @@
+USE master;
+GO
+
+IF DB_ID(N'PizzaShed') IS NOT NULL
+    DROP DATABASE PizzaShed;
+GO
+
 CREATE DATABASE PizzaShed;
+GO
 
 USE PizzaShed;
 
-CREATE LOGIN PizzaShedDB
-	WITH PASSWORD = 'PizzaShedDBPassword';
 
-CREATE USER PizzaShedDB FOR LOGIN PizzaShedDB;
-GO
+IF NOT EXISTS
+    (SELECT name 
+    FROM sys.database_principals
+    WHERE name = 'PizzaShedDB')
+BEGIN
+    CREATE LOGIN PizzaShedDB
+	    WITH PASSWORD = 'PizzaShedDBPassword';
+    CREATE USER PizzaShedDB FOR LOGIN PizzaShedDB;
+END
 
 DROP TABLE IF EXISTS Order_Product_Toppings;
 DROP TABLE IF EXISTS Product_Allergens;
@@ -33,7 +46,8 @@ DROP TABLE IF EXISTS Topping_Types;
 DROP TABLE IF EXISTS Opening_Times;
 DROP TABLE IF EXISTS Delivery_Fees;
 DROP TABLE IF EXISTS Payments;
-
+DROP TYPE IF EXISTS ProductListType;
+DROP TYPE IF EXISTS ToppingListType;
 
 CREATE TABLE Users (
   user_id int IDENTITY(1,1),
@@ -402,7 +416,7 @@ BEGIN
     ) AS Source 
     ON 1 = 0 
     WHEN NOT MATCHED BY TARGET THEN
-        INSERT (order_id, product_id, size_id, deal_id, deal_instance_id)
+        INSERT (order_id, product_id, second_half_id, size_id, deal_id, deal_instance_id)
         VALUES (
             @orderID, 
             Source.product_id, 
