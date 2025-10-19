@@ -403,7 +403,7 @@ namespace PizzaShedTests
 
         [Test]
         [TestCaseSource(nameof(MealDealPriceTestCases))]
-        public void DealTotal(Product deal, string expectedTotal)
+        public void DealWorkflow(Product deal, string expectedTotal)
         {
             _cashierViewModel.AddOrderItemCommand.Execute(deal);
 
