@@ -37,7 +37,7 @@ namespace PizzaShedTests.Integration
         private IProductRepository<Topping> _toppingRepository;
         private IOrderRepository _orderRepository;
 
-        // Mock dependencies no needed during testing
+        // Mock dependencies not needed during testing
         private Mock<ICustomerRepository> _customerRepository;        
 
         [SetUp]
@@ -83,19 +83,6 @@ namespace PizzaShedTests.Integration
             {
                 if (Application.Current is { }) Application.Current.Shutdown();
             });
-        }
-
-        // Helper function to find UI elements
-        private IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T t)
-                    yield return t;
-                foreach (var descendant in FindVisualChildren<T>(child))
-                    yield return descendant;
-            }
         }
 
         [Test]
