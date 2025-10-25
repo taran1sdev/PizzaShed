@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PizzaShed.Commands;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,9 @@ namespace PizzaShed.Model
     // This is a base class for all items on the menu - Products and Toppings
     public class MenuItemBase : ICloneable
     {
+        // We store this command in the object to simplify integration testing
+        public RelayCommand<MenuItemBase> AddOrderItemCommand { get; set; } = default!;
+
         public virtual object Clone()
         {
             return this.MemberwiseClone();
