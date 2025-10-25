@@ -9,7 +9,7 @@ using PizzaShed.Model;
 using PizzaShed.ViewModels;
 using System.Collections.ObjectModel;
 
-namespace PizzaShedTests
+namespace PizzaShedTests.Unit
 {
     public class OrderViewModelTests
     {

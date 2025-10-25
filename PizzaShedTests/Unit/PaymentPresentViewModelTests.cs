@@ -8,7 +8,7 @@ using Moq;
 using PizzaShed.Model;
 using PizzaShed.ViewModels;
 
-namespace PizzaShedTests
+namespace PizzaShedTests.Unit
 {
     [TestFixture]
     public class PaymentPresentViewModelTests

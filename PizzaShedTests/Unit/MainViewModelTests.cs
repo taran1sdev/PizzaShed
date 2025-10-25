@@ -19,7 +19,7 @@ using PizzaShed.Services.Data;
 using PizzaShed.ViewModels;
 using PizzaShed.Views.Windows;
 
-namespace PizzaShedTests
+namespace PizzaShedTests.Unit
 {
     [TestFixture]
     [Apartment(ApartmentState.STA)]
@@ -342,7 +342,7 @@ namespace PizzaShedTests
                 CustomerID = 1,
                 OrderProducts = _testProducts,
                 OrderType = "Delivery",
-                DeliveryFee = (decimal)2,
+                DeliveryFee = 2,
             };
 
             _orderRepository

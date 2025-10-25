@@ -1,4 +1,5 @@
 ﻿ using Microsoft.Xaml.Behaviors.Media;
+using PizzaShed.Commands;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,7 +14,7 @@ using System.Windows.Navigation;
 namespace PizzaShed.Model
 {
     public class Product : MenuItemBase, INotifyPropertyChanged
-    {
+    {                
         // We create an OnPropertyChanged method to update our view when toppings are added or removed
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
@@ -102,6 +103,7 @@ namespace PizzaShed.Model
         {
             get
             {
+                // Return the value to be shown on menu buttons
                 return Category.ToLower() switch
                 {
                     "pizza" or "burger" or "wrap" or "deal" => Name,                      
@@ -114,8 +116,7 @@ namespace PizzaShed.Model
         {
             get
             {
-                // Return the value that will be displayed on order info / recipts
-                // If applicable display the size, toppings and allergens in the product
+                // Return the value that will be displayed on kitchen tickets                
                 return Category.ToLower() switch
                 {
                     "pizza" or "kebab" => $"{Name} ({SizeName?[..1].ToUpper()})" +

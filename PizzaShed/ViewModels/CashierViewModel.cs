@@ -268,9 +268,10 @@ namespace PizzaShed.ViewModels
             _currentToppingMenu = [];
             _currentProductMenu = [];
 
-            IsDeliveryCommand = new RelayGenericCommand(Delivery);
-            // Binds to menu buttons to allow the user to add items to the current order
+            // We keep this definition in the view model for unit tests
             AddOrderItemCommand = new RelayCommand<MenuItemBase>(AddOrderItem);
+
+            IsDeliveryCommand = new RelayGenericCommand(Delivery);            
             // Binds to the void button to remove menu items
             RemoveOrderItemCommand = new RelayGenericCommand(RemoveOrderItem);
             // Binds to the HalfAndHalf button
@@ -757,10 +758,15 @@ namespace PizzaShed.ViewModels
                     break;
             }
 
+            // We add the relay command to the object
+            products.ForEach(p => p.AddOrderItemCommand = new RelayCommand<MenuItemBase>(AddOrderItem));
+
             CurrentProductMenu = new ObservableCollection<Product>(products);
 
             if (toppings.Count > 0)
             {
+                // We add the relay command to the topping object
+                toppings.ForEach(t => t.AddOrderItemCommand = new RelayCommand<MenuItemBase>(AddOrderItem));
                 CurrentToppingMenu = new ObservableCollection<Topping>(toppings);
             }
         }

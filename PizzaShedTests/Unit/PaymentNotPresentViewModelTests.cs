@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PizzaShed.ViewModels;
 
-namespace PizzaShedTests
+namespace PizzaShedTests.Unit
 {
     public class PaymentNotPresentViewModelTests
     {

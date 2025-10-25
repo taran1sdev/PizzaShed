@@ -11,7 +11,7 @@ using PizzaShed.Services.Data;
 using NuGet.Frameworks;
 using NUnit.Framework.Constraints;
 
-namespace PizzaShedTests
+namespace PizzaShedTests.Unit
 {
     [TestFixture]
     public class CheckoutViewModelTests

@@ -6,10 +6,10 @@ namespace PizzaShed.Services.Logging
 {
     // Static utility class for logging events
     public static class EventLogger 
-    {        
+    {
         // Change this to the user's ApplicationData directory in production
-        private static readonly string logPath = Path.Combine(@"C:\Users\thoma\source\repos\PizzaShed\PizzaShed\Logs",$"{DateTime.Now:yy-MM-dd}-Log.txt");        
-
+        //private static readonly string logPath = Path.Combine(@"C:\Users\thoma\source\repos\PizzaShed\PizzaShed\Logs",$"{DateTime.Now:yy-MM-dd}-Log.txt");        
+        private static readonly string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), $"PizzaShed-{DateTime.Now:MM-dd}-Log.txt");
         // Functions to create info and error log entries
         public static void LogInfo(string message)
         {

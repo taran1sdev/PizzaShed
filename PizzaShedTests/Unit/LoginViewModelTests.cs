@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PizzaShedTests
+namespace PizzaShedTests.Unit
 {
     [TestFixture]
     public class LoginViewModelTests

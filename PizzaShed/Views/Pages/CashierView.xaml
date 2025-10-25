@@ -145,14 +145,14 @@
         </ListView>
 
         <Button
-            x:Name="Deals"            
+            x:Name="Deal"            
             Grid.Row="1"
             Grid.Column="1"
             Content="Deals"
             VerticalAlignment="Top"
             HorizontalAlignment="Left"
             Command="{Binding SelectCategoryCommand}"
-            CommandParameter="Deals"
+            CommandParameter="Deal"
             
             Style="{Binding SelectedCategory,
                     Converter={StaticResource CategoryStyleConverter},
@@ -202,7 +202,7 @@
                     ConverterParameter=Burger}"/>
 
         <Button
-            x:Name="SidesDips"            
+            x:Name="Side"            
             Grid.Row="1"
             Grid.Column="1"
             Content="Sides &#xa; Dips"            
@@ -217,7 +217,7 @@
                     ConverterParameter=Side}"/>
 
         <Button
-            x:Name="Drinks"            
+            x:Name="Drink"            
             Grid.Row="1"
             Grid.Column="1"
             Content="Drinks"            
@@ -278,6 +278,7 @@
 
 
         <ItemsControl 
+            x:Name="ProductMenu"
             Grid.Row="2"
             Grid.RowSpan="2"
             Grid.ColumnSpan="2"            
@@ -292,9 +293,8 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Button Style="{StaticResource MenuButtonStyle}"
-                            Command="{Binding Path=DataContext.AddOrderItemCommand, 
-                            RelativeSource={RelativeSource Mode=FindAncestor, 
-                            AncestorType={x:Type ItemsControl}}}">
+                            Command="{Binding AddOrderItemCommand}"
+                            Tag="{Binding Path=MenuName}">
 
                         <Button.CommandParameter>
                             <Binding />
@@ -309,6 +309,7 @@
         </ItemsControl>
 
         <ItemsControl
+            x:Name="ToppingMenu"
             Grid.Row="3"
             Grid.ColumnSpan="2"
             ItemsSource="{Binding Path=CurrentToppingMenu}"
@@ -324,9 +325,8 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Button Style="{StaticResource MenuButtonStyle}"
-                            Command="{Binding Path=DataContext.AddOrderItemCommand, 
-                            RelativeSource={RelativeSource Mode=FindAncestor, 
-                            AncestorType={x:Type ItemsControl}}}">
+                            Command="{Binding AddOrderItemCommand}"
+                            Tag="{Binding Path=MenuName}">
                         
                         <Button.CommandParameter>
                             <Binding />
