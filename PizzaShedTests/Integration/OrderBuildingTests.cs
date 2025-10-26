@@ -73,16 +73,31 @@ namespace PizzaShedTests.Integration
             {
                 app = new App();
                 app.InitializeComponent();
+            } 
+            else
+            {                               
+                app.InitializeComponent();
             }
         }
 
         [OneTimeTearDown]
         public void FixtureTearDown()
         {
+            Application.Current.Shutdown();
             Application.Current?.Dispatcher.Invoke(() =>
             {
                 if (Application.Current is { }) Application.Current.Shutdown();
             });
+        }
+
+        // Helper function - waits for UI to update before proceeding
+        private void UpdateUI()
+        {
+            var frame = new DispatcherFrame();
+            Dispatcher.CurrentDispatcher.BeginInvoke(
+                DispatcherPriority.ApplicationIdle,
+                new DispatcherOperationCallback(_ => { frame.Continue = false; return null; }),
+                null);
         }
 
         [Test]
@@ -94,6 +109,8 @@ namespace PizzaShedTests.Integration
                 DataContext = _mainViewModel
             };
             window.Show();
+
+            UpdateUI();
 
             // We use our helper function from behaviours to find the CashierView in the Window
             var cashierView = window.FindDescendant<PizzaShed.Views.Pages.CashierView>();
@@ -118,6 +135,8 @@ namespace PizzaShedTests.Integration
                 DataContext = _mainViewModel
             };
             window.Show();
+
+            UpdateUI();
 
             // We use our helper function from behaviours to find the CashierView in the Window
             var cashierView = window.FindDescendant<PizzaShed.Views.Pages.CashierView>();
@@ -161,6 +180,8 @@ namespace PizzaShedTests.Integration
                 DataContext = _mainViewModel
             };
             window.Show();
+
+            UpdateUI();
 
             // We use our helper function from behaviours to find the CashierView in the Window
             var cashierView = window.FindDescendant<PizzaShed.Views.Pages.CashierView>();
@@ -235,6 +256,8 @@ namespace PizzaShedTests.Integration
 
             window.Show();
 
+            UpdateUI();
+
             var cashierView = window.FindDescendant<PizzaShed.Views.Pages.CashierView>();
             Assert.That(cashierView, Is.Not.Null);
             
@@ -288,6 +311,8 @@ namespace PizzaShedTests.Integration
             };
 
             window.Show();
+
+            UpdateUI();
 
             var cashierView = window.FindDescendant<PizzaShed.Views.Pages.CashierView>();
             Assert.That(cashierView, Is.Not.Null);
@@ -351,6 +376,8 @@ namespace PizzaShedTests.Integration
             };
             window.Show();
 
+            UpdateUI();
+
             var cashierView = window.FindDescendant<PizzaShed.Views.Pages.CashierView>();
             Assert.That(cashierView, Is.Not.Null);
 
@@ -394,6 +421,8 @@ namespace PizzaShedTests.Integration
                 DataContext = _mainViewModel
             };
             window.Show();
+
+            UpdateUI();
 
             var cashierView = window.FindDescendant<PizzaShed.Views.Pages.CashierView>();
             Assert.That(cashierView, Is.Not.Null);

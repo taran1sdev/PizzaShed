@@ -88,7 +88,7 @@ namespace PizzaShed.ViewModels
         private bool _isDriverCash;
         public bool IsDriverCash
         {
-            get => AcceptOrder || _session.UserRole == "Driver" && !IsPaid;
+            get => AcceptOrder && !IsPaid || _session.UserRole == "Driver" && !IsPaid;
             set => SetProperty(ref _isDriverCash, value);
         }
 

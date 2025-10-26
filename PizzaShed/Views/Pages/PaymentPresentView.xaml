@@ -209,7 +209,7 @@
                 ></Button>
 
             <Button
-                x:Name="SubmitButton"
+                x:Name="Submit"
                 Content="Submit"
                 Grid.Row="3"
                 Grid.Column="1"
@@ -223,7 +223,7 @@
                 />
 
             <Button
-                x:Name="CancelButton"
+                x:Name="Cancel"
                 Content="Cancel"
                 Grid.Row="3"
                 Grid.Column="0"
