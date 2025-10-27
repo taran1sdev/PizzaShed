@@ -76,16 +76,7 @@ namespace PizzaShedTests.Integration
                 app = new App();
                 app.InitializeComponent();
             }
-        }
-
-        [OneTimeTearDown]
-        public void FixtureTearDown()
-        {
-            Application.Current?.Dispatcher.Invoke(() =>
-            {
-                if (Application.Current is { }) Application.Current.Shutdown();
-            });
-        }
+        }       
 
 
         [SetUp]

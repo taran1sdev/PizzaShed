@@ -124,7 +124,9 @@ namespace PizzaShed.ViewModels
         public bool EligibleForPromotion => Promotions.Count > 0;
 
         //------    ORDER   ------//
-        public string OrderNo => $"Order #{_currentOrder?.ID:0000}";
+        public string OrderNo => $"Order #{_currentOrder.ID:0000}";
+
+        public int OrderID => _currentOrder.ID;
 
         public string DeliveryValue
         {

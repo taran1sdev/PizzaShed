@@ -78,17 +78,7 @@ namespace PizzaShedTests.Integration
             {                               
                 app.InitializeComponent();
             }
-        }
-
-        [OneTimeTearDown]
-        public void FixtureTearDown()
-        {
-            Application.Current.Shutdown();
-            Application.Current?.Dispatcher.Invoke(() =>
-            {
-                if (Application.Current is { }) Application.Current.Shutdown();
-            });
-        }
+        }       
 
         // Helper function - waits for UI to update before proceeding
         private void UpdateUI()

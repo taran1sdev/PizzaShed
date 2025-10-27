@@ -274,6 +274,8 @@ namespace PizzaShedTests.System
                 Is.Not.Null,
                 "Current View should be CheckoutView");
 
+            int orderId = _checkoutViewModel.OrderID;
+
             // Ensure the Checkout ViewModel has the correct information
             Assert.That(
                 _checkoutViewModel.AcceptOrder,
@@ -447,12 +449,12 @@ namespace PizzaShedTests.System
                 Is.True,
                 "Order ViewModel should reflect the current role (Cashier)");
             Assert.That(
-                _orderViewModel.NewOrders.Count,
-                Is.EqualTo(1),
-                "OrderViewModel should have one new order (Cashier)");
+                _orderViewModel.NewOrders.Any(o => o.ID == orderId),
+                Is.True,
+                "OrderViewModel should contain our new order (Cashier)");
             Assert.That(
-                orderView.NewOrders.Items,
-                Has.Count.EqualTo(1),
+                orderView.NewOrders.Items.OfType<Order>().Any(o => o.ID == orderId),
+                Is.True,
                 "OrderView - New orders should contain our new order (Cashier)");
 
             // Logout 
@@ -515,17 +517,17 @@ namespace PizzaShedTests.System
 
             // Ensure that the order exists in new orders
             Assert.That(
-                _orderViewModel.NewOrders.Count,
-                Is.EqualTo(1),
+                _orderViewModel.NewOrders.Any(o => o.ID == orderId),
+                Is.True,
                 "OrderViewModel - New orders should contain our new order (Pizzaiolo)");
 
             Assert.That(
-                orderView.NewOrders.Items.Count,
-                Is.EqualTo(1),
+                orderView.NewOrders.Items.OfType<Order>().Any(o => o.ID == orderId),
+                Is.True,
                 "OrderView - New orders should contain our new order (Pizzaiolo)");
 
             // Check the order status
-            Order testOrder = _orderViewModel.NewOrders.First();
+            Order testOrder = _orderViewModel.NewOrders.First(o => o.ID == orderId);
             Assert.That(
                 testOrder.OrderStatus,
                 Is.EqualTo("New"),
@@ -539,23 +541,23 @@ namespace PizzaShedTests.System
 
             // Check the UI updates as expected and order status is updated
             Assert.That(
-                _orderViewModel.NewOrders.Count,
-                Is.EqualTo(0),
-                "OrderViewModel - New orders should contain no items");
+                _orderViewModel.NewOrders.Any(o => o.ID == orderId),
+                Is.False,
+                "OrderViewModel - New orders should not contain our order");
             Assert.That(
-                _orderViewModel.ReadyOrders.Count,
-                Is.EqualTo(1),
+                _orderViewModel.ReadyOrders.Any(o => o.ID == orderId),
+                Is.True,
                 "OrderViewModel - ReadyOrders should contain the order we are preparing");
             Assert.That(
-                orderView.NewOrders.Items,
-                Has.Count.EqualTo(0),
-                "OrderView - New orders should contain no items");
+                orderView.NewOrders.Items.OfType<Order>().Any(o => o.ID == orderId),
+                Is.False,
+                "OrderView - New orders should not contain our order");
             Assert.That(
-                orderView.ReadyOrders.Items,
-                Has.Count.EqualTo(1),
+                orderView.ReadyOrders.Items.OfType<Order>().Any(o => o.ID == orderId),
+                Is.True,
                 "OrderView - ReadyOrders should contain the order we are preparing");
 
-            testOrder = _orderViewModel.ReadyOrders.First();
+            testOrder = _orderViewModel.ReadyOrders.First(o => o.ID == orderId);
 
             Assert.That(
                 testOrder.OrderStatus,
@@ -569,20 +571,20 @@ namespace PizzaShedTests.System
 
             // Check the UI updates as expected and order status is updated
             Assert.That(
-                _orderViewModel.NewOrders.Count,
-                Is.EqualTo(0),
+                _orderViewModel.NewOrders.Any(o => o.ID == orderId),
+                Is.False,
                 "OrderViewModel - New orders should contain no items after prep");
             Assert.That(
-                _orderViewModel.ReadyOrders.Count,
-                Is.EqualTo(0),
+                _orderViewModel.ReadyOrders.Any(o => o.ID == orderId),
+                Is.False,
                 "OrderViewModel - ReadyOrders should contain no items after prep");
             Assert.That(
-                orderView.NewOrders.Items,
-                Has.Count.EqualTo(0),
+                orderView.NewOrders.Items.OfType<Order>().Any(o => o.ID == orderId),
+                Is.False,
                 "OrderView - New orders should contain no items after  prep");
             Assert.That(
-                orderView.ReadyOrders.Items,
-                Has.Count.EqualTo(0),
+                orderView.ReadyOrders.Items.OfType<Order>().Any(o => o.ID == orderId),
+                Is.False,
                 "OrderView - ReadyOrders should contain no orders after  prep");
 
 
@@ -667,24 +669,24 @@ namespace PizzaShedTests.System
                 Is.True,
                 "OrderViewModel - should reflect the current role (Cashier - 2)");
             Assert.That(
-                _orderViewModel.NewOrders.Count,
-                Is.EqualTo(0),
-                "OrderViewModel - NewOrders should have no orders (Cashier - 2)");
+                _orderViewModel.NewOrders.Any(o => o.ID == orderId),
+                Is.False,
+                "OrderViewModel - NewOrders should not contain our order (Cashier - 2)");
             Assert.That(
-                orderView.NewOrders.Items,
-                Has.Count.EqualTo(0),
-                "OrderView - NewOrders should have no orders (Cashier - 2)");
+                orderView.NewOrders.Items.OfType<Order>().Any(o => o.ID == orderId),
+                Is.False    ,
+                "OrderView - NewOrders should not contain our order (Cashier - 2)");
             Assert.That(
-                _orderViewModel.ReadyOrders.Count,
-                Is.EqualTo(1),
-                "OrderViewModel - ReadtOrders should have the prepared order (Cashier - 2)");
+                _orderViewModel.ReadyOrders.Any(o => o.ID == orderId),
+                Is.True,
+                "OrderViewModel - ReadyOrders should have the prepared order (Cashier - 2)");
             Assert.That(
-                orderView.ReadyOrders.Items,
-                Has.Count.EqualTo(1),
+                orderView.ReadyOrders.Items.OfType<Order>().Any(o => o.ID == orderId),
+                Is.True,
                 "OrderView - ReadyOrders should have the prepared order (Cashier - 2)");
 
 
-            testOrder = _orderViewModel.ReadyOrders.First();
+            testOrder = _orderViewModel.ReadyOrders.First(o => o.ID == orderId);
 
             // Check the order status
             Assert.That(
@@ -699,22 +701,23 @@ namespace PizzaShedTests.System
 
             // Ensure the UI updates
             Assert.That(
-                _orderViewModel.NewOrders.Count,
-                Is.EqualTo(0),
-                "OrderViewModel - NewOrders should have no orders on completion  (Cashier - 2)");
+                _orderViewModel.NewOrders.Any(o => o.ID == orderId),
+                Is.False,
+                "OrderViewModel - NewOrders should contain no orders on completion  (Cashier - 2)");
             Assert.That(
-                orderView.NewOrders.Items,
-                Has.Count.EqualTo(0),
-                "OrderView - NewOrders should have no orders on completion  (Cashier - 2)");
+                orderView.NewOrders.Items.OfType<Order>().Any(o => o.ID == orderId),
+                Is.False,
+                "OrderView - NewOrders should not contain our order on completion  (Cashier - 2)");
             Assert.That(
-                _orderViewModel.ReadyOrders.Count,
-                Is.EqualTo(0),
-                "OrderViewModel - ReadyOrders should have no orders on completion  (Cashier - 2)");
+                _orderViewModel.ReadyOrders.Any(o => o.ID == orderId),
+                Is.False,
+                "OrderViewModel - ReadyOrders should not contain our order on completion  (Cashier - 2)");
             Assert.That(
-                orderView.ReadyOrders.Items,
-                Has.Count.EqualTo(0),
-                "OrderView - ReadyOrders should have no orders on completion (Cashier - 2)");
-
+                orderView.ReadyOrders.Items.OfType<Order>().Any(o => o.ID == orderId),
+                Is.False,
+                "OrderView - ReadyOrders should not contain our order on completion (Cashier - 2)");
+            
+            mainWindow.Hide();
         }
     }
 }
