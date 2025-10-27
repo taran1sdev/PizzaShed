@@ -74,7 +74,10 @@
             Text="{Binding NewLabel}"
             />
 
-        <ItemsControl Grid.Row="2" ItemsSource="{Binding NewOrders}">
+        <ItemsControl 
+            x:Name="NewOrders"
+            Grid.Row="2" 
+            ItemsSource="{Binding NewOrders}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Orientation="Horizontal" />
@@ -133,7 +136,10 @@
             Text="{Binding ReadyLabel}"
             />
 
-        <ItemsControl Grid.Row="4" ItemsSource="{Binding ReadyOrders}">
+        <ItemsControl 
+            x:Name="ReadyOrders"
+            Grid.Row="4" 
+            ItemsSource="{Binding ReadyOrders}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Orientation="Horizontal" />

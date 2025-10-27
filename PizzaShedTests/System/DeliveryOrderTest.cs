@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace PizzaShedTests.System
 {
-    internal class DeliveryOrderTest
+    // Delivery: Medium Doner Delight half & half with Veggie Supreme + 2 dips; Delivery ≤2 miles; Cash on delivery. 
+    [TestFixture]
+    [Apartment(ApartmentState.STA)]
+    public class DeliveryOrderTest
     {
     }
 }

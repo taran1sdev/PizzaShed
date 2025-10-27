@@ -78,6 +78,17 @@ namespace PizzaShedTests.Integration
             }
         }
 
+        // Helper function - waits for UI to update before proceeding
+        private void UpdateUI()
+        {
+            var frame = new DispatcherFrame();
+            Dispatcher.CurrentDispatcher.BeginInvoke(
+                DispatcherPriority.ApplicationIdle,
+                new DispatcherOperationCallback(_ => { frame.Continue = false; return null; }),
+                null);
+            Dispatcher.PushFrame(frame);
+        }
+
         // Might not be the best way to store test data but it creates a clear map of how the 
         // user would interact with the UI
         private static Dictionary<int, Dictionary<string, string[][]>> _testOrders = new() {
@@ -137,30 +148,19 @@ namespace PizzaShedTests.Integration
                     _testOrders[1], 1, 1, "£2.60"
                 ).SetName("OrderCreation_NavigatesToCheckout_WithCorrectData_SmallOrder_Promo_One");
                 yield return new TestCaseData(
-                    _testOrders[2], 0, 1, "£1.10"
+                    _testOrders[2], 1, 1, "£1.10"
                 ).SetName("OrderCreation_NavigatesToCheckout_WithCorrectData_SmallOrder_Promo_None");
                 yield return new TestCaseData(
-                    _testOrders[3], 0, 4, "£2.20"
+                    _testOrders[3], 1, 4, "£2.20"
                 ).SetName("OrderCreation_NavigatesToCheckout_WithCorrectData_SmallDealOrder_Promo_None");
                 yield return new TestCaseData(
-                    _testOrders[4], 0, 5, "£5.00"
+                    _testOrders[4], 1, 5, "£5.00"
                 ).SetName("OrderCreation_NavigatesToCheckout_WithCorrectData_LargeDealOrder_Promo_None");
                 yield return new TestCaseData(
                     _testOrders[5], 2, 11, "£11.37"
                 ).SetName("OrderCreation_NavigatesToCheckout_WithCorrectData_LargeMixedOrder_Promo_Both");
             }
-        }
-
-        // Helper function - waits for UI to update before proceeding
-        private void UpdateUI()
-        {
-            var frame = new DispatcherFrame();
-            Dispatcher.CurrentDispatcher.BeginInvoke(
-                DispatcherPriority.ApplicationIdle,
-                new DispatcherOperationCallback(_ => { frame.Continue = false; return null; }),
-                null);
-            Dispatcher.PushFrame(frame);
-        }
+        }        
 
         // We already know from Unit tests that Order total is calculated correctly so we can just confirm that checkout displays the same
         [TestCaseSource(nameof(OrderCreationTestCases))]
@@ -521,7 +521,7 @@ namespace PizzaShedTests.Integration
 
                 UpdateUI();
 
-                var paymentWindow = Application.Current.Windows.OfType<PaymentWindow>().First(p => p.IsVisible);
+                var paymentWindow = Application.Current.Windows.OfType<PaymentWindow>().First(w => w.IsVisible);
                 Assert.That(
                     paymentWindow,
                     Is.Not.Null,

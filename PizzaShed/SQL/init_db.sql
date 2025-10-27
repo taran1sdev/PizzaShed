@@ -471,7 +471,7 @@ VALUES (2, 2.00), (4, 3.00);
 
 INSERT INTO Promotions (promo_code, description, discount_value, min_spend)
 VALUES ('PIZZA10', '10% off when you spend £15', 0.1, 15.0),
-(NULL, 'Student Discount', 0.1, 12.0);
+(NULL, 'Student Discount', 0.1, 0.0);
 
 INSERT INTO Products (product_name, product_category)
 VALUES ('Margherita', 'Pizza'),
