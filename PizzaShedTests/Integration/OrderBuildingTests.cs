@@ -117,7 +117,10 @@ namespace PizzaShedTests.Integration
         [TestCase("Burger", "Wrap", false)]
         [TestCase("Side", "Dip", false)]
         [TestCase("Drink", null, false)]
-        public void MenuCategory_RendersObjectsCorrectly(string category, string? secondaryCategory, bool showToppings)
+        public void MenuCategory_RendersObjectsCorrectly(
+            string category, 
+            string? secondaryCategory, 
+            bool showToppings)
         {
             // We create our applications windowa
             var window = new PizzaShed.Views.Windows.MainWindow
