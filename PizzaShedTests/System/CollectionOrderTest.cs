@@ -515,6 +515,8 @@ namespace PizzaShedTests.System
                 "OrderViewModel should reflect the current role (Pizzaiolo)");
 
 
+            UpdateUI();
+
             // Ensure that the order exists in new orders
             Assert.That(
                 _orderViewModel.NewOrders.Any(o => o.ID == orderId),

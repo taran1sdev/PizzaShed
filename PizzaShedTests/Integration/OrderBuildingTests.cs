@@ -112,12 +112,12 @@ namespace PizzaShedTests.Integration
             window.Hide();
         }
 
-        [TestCase("Deal", false)]        
-        [TestCase("Kebab", true)]
-        [TestCase("Burger", false)]
-        [TestCase("Side", false)]
-        [TestCase("Drink", false)]
-        public void MenuCategory_RendersObjectsCorrectly(string category, bool showToppings)
+        [TestCase("Deal", null, false)]        
+        [TestCase("Kebab", null, true)]
+        [TestCase("Burger", "Wrap", false)]
+        [TestCase("Side", "Dip", false)]
+        [TestCase("Drink", null, false)]
+        public void MenuCategory_RendersObjectsCorrectly(string category, string? secondaryCategory, bool showToppings)
         {
             // We create our applications windowa
             var window = new PizzaShed.Views.Windows.MainWindow
@@ -146,16 +146,67 @@ namespace PizzaShedTests.Integration
             command.Execute(param);
             
             // Check the View Model Properties are set as expected
-            Assert.That(_cashierViewModel.SelectedCategory, Is.EqualTo(category), "Category button click should change category");
-            Assert.That(_cashierViewModel.DisplayToppings, Is.EqualTo(showToppings), "Toppings should only be visible for certain categories");
-            Assert.That(_cashierViewModel.CurrentProductMenu.Select(p => p.Category == category), Is.Not.Null, "Product menu should contain items from selected category");
+            Assert.That(
+                _cashierViewModel.SelectedCategory, 
+                Is.EqualTo(category), 
+                "Category button click should change category");
+            Assert.That(
+                _cashierViewModel.DisplayToppings, 
+                Is.EqualTo(showToppings), 
+                "Toppings should only be visible for certain categories");
+            if (secondaryCategory != null)
+            {
+                Assert.That(
+                    _cashierViewModel
+                        .CurrentProductMenu
+                        .All(p => 
+                            p.Category == category 
+                            || p.Category == secondaryCategory),
+                    Is.True,
+                    "Product menu should only contain items from selected category");
+            } 
+            else
+            {
+                Assert.That(
+                _cashierViewModel
+                    .CurrentProductMenu
+                        .All(p => p.Category == category),
+                Is.True,
+                "Product menu should only contain items from selected category");
+            }
 
-            // Check that the UI reacts as expected
+
+
+                // Check that the UI reacts as expected
             ItemsControl productMenu = (ItemsControl)cashierView.FindName("ProductMenu");
             ItemsControl toppingMenu = (ItemsControl)cashierView.FindName("ToppingMenu");
 
-            Assert.That(productMenu.Items, Is.Not.Null, "ProductMenu should display items");
-            Assert.That(toppingMenu.Visibility, Is.EqualTo(showToppings ? Visibility.Visible : Visibility.Collapsed), "ToppingMenu should only be visible for certain categories");
+            if (secondaryCategory != null)
+            {
+                Assert.That(
+                    productMenu
+                        .Items
+                        .OfType<Product>()
+                        .All(p =>
+                            p.Category == category
+                            || p.Category == secondaryCategory),
+                    Is.True,
+                    "UI should only display contain items from selected category");
+            }
+            else
+            {
+                Assert.That(
+                productMenu
+                    .Items
+                    .OfType<Product>()
+                    .All(p => p.Category == category),
+                Is.True,
+                "UI menu should only contain items from selected category");
+            }
+            Assert.That(
+                toppingMenu.Visibility, 
+                Is.EqualTo(showToppings ? Visibility.Visible : Visibility.Collapsed), 
+                "ToppingMenu should only be visible for certain categories");
             window.Hide();
         }
 
